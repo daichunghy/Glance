@@ -71,3 +71,11 @@ Mở thư mục `linux`, cài thư viện bằng `python3 -m pip install -r requ
 * Phiên bản Windows xử lý khung hình camera cục bộ, không lưu hoặc gửi khung hình. Tính năng nhận diện có thể sai và không xác minh danh tính.
 * Windows có tùy chọn tạm hoãn che khi có thao tác chuột hoặc bàn phím; tùy chọn này không đảm bảo tránh che nhầm.
 * Windows chưa tự phát hiện cuộc gọi hoặc tự nhả camera cho ứng dụng khác. Xem giới hạn và hướng dẫn kiểm thử trong [README Windows](windows/README.md).
+
+## 🪑 Đang phát triển: cảnh báo gù lưng & cổ rùa (Posture Guard)
+
+Trên branch `feature/posture-guard` (chưa merge, chưa phát hành, không thay đổi
+landing page): cảnh báo tư thế dùng lại pipeline camera hiện có trên cả Mac,
+Windows và Linux, logic thuần dùng chung một đặc tả — xem
+[posture/POSTURE_SPEC.md](posture/POSTURE_SPEC.md). Tính năng mặc định tắt,
+người dùng tự bật và tự căn chỉnh tư thế chuẩn.

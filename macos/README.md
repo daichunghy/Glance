@@ -42,3 +42,14 @@ Hoặc mở thư mục trong Finder:
 open /Users/macos/.gemini/antigravity/scratch/igf
 ```
 *(Lần đầu mở bằng Camera, macOS sẽ hiển thị hộp thoại xin cấp quyền Camera để nhận diện khuôn mặt).*
+
+---
+
+## 🪑 Posture Guard — cảnh báo gù lưng, cổ rùa (đang phát triển, mặc định tắt)
+
+Tính năng trên branch `feature/posture-guard`, chưa phát hành. Bật **Posture Guard**
+trong popover, ngồi thẳng rồi bấm **Calibrate Good Posture**: Glance dùng lại chính
+khung hình camera đang theo dõi mặt để nhắc khi đầu đưa ra trước (cổ rùa) hoặc
+sụp xuống (gù lưng) liên tục 10 giây. Cảnh báo chỉ hiện trong popover, không che
+màn hình, không lưu hay gửi khung hình. Đặc tả chung: `posture/POSTURE_SPEC.md`
+ở thư mục gốc repo.

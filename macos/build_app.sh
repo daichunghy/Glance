@@ -54,7 +54,7 @@ cat << 'EOF' > "$APP_BUNDLE/Contents/Info.plist"
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>Glance uses the built-in camera for real-time on-device head tracking to protect your screen privacy when you look away.</string>
+    <string>Glance uses the built-in camera for real-time on-device head tracking to protect your screen privacy when you look away, and — only if you enable Posture Guard — to remind you about turtle neck and slouching. Video is processed on this Mac and never saved or sent.</string>
     <key>NSMotionUsageDescription</key>
     <string>Glance uses AirPods headphone motion to detect when you turn your head away to automatically protect your screen privacy.</string>
 </dict>

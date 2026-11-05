@@ -224,6 +224,62 @@ struct SettingsPopoverView: View {
                     )
             )
             
+            // Section 3: Posture Guard (opt-in, never blurs the screen)
+            VStack(spacing: 0) {
+                SettingRow(
+                    icon: "figure.stand",
+                    iconColor: .teal,
+                    title: "Posture Guard"
+                ) {
+                    Toggle("", isOn: $model.postureEnabled)
+                        .toggleStyle(.switch)
+                        .controlSize(.mini)
+                        .labelsHidden()
+                }
+
+                if model.postureEnabled {
+                    Divider()
+                        .padding(.leading, 36)
+
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(postureIndicatorColor)
+                            .frame(width: 6, height: 6)
+                        Text(postureStatusText)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.primary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+
+                    Button(action: {
+                        _ = model.calibratePosture()
+                    }) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "scope")
+                                .font(.system(size: 10, weight: .semibold))
+                            Text(model.postureNeedsCalibration ? "Calibrate Good Posture" : "Recalibrate Posture")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 3)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 8)
+                }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color(NSColor.controlBackgroundColor).opacity(0.6))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color(NSColor.separatorColor).opacity(0.18), lineWidth: 0.5)
+                    )
+            )
+
             // Footer: Hotkey hint & Quit button
             HStack {
                 Text("⌥⇧P to toggle")
@@ -283,6 +339,33 @@ struct SettingsPopoverView: View {
         }
     }
     
+    private var postureIndicatorColor: Color {
+        if !model.postureWarningKinds.isEmpty { return .orange }
+        switch model.postureStatus {
+        case .good: return .green
+        case .badPending: return .yellow
+        case .warning: return .orange
+        case .noFace, .uncalibrated: return .secondary
+        }
+    }
+
+    private var postureStatusText: String {
+        if model.postureNeedsCalibration { return "Sit up straight, then calibrate" }
+        if !model.postureWarningKinds.isEmpty {
+            var names: [String] = []
+            if model.postureWarningKinds.contains(.turtleNeck) { names.append("Turtle neck") }
+            if model.postureWarningKinds.contains(.hunch) { names.append("Slouching") }
+            return names.joined(separator: " + ") + " — sit up straight"
+        }
+        switch model.postureStatus {
+        case .good: return "Posture: Good"
+        case .badPending: return "Posture: Drifting…"
+        case .warning: return "Posture: Sit up straight"
+        case .noFace: return "Posture: Paused (no face)"
+        case .uncalibrated: return "Sit up straight, then calibrate"
+        }
+    }
+
     private var statusDetailText: String {
         if !model.isEnabled { return "--" }
         if model.isVideoCallActive { return "Paused" }

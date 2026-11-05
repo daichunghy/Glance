@@ -11,6 +11,7 @@ from tkinter import ttk
 
 import cv2
 from guard import PresenceGuard, camera_is_stale
+from posture import PostureGuard
 
 
 if sys.platform != "win32":
@@ -107,8 +108,8 @@ class App:
         self.root = root
         root.title("Glance")
         root.configure(bg="#08090c")
-        root.geometry("510x590")
-        root.minsize(480, 560)
+        root.geometry("510x710")
+        root.minsize(480, 660)
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.cover = ScreenCover(root)
         self.events = queue.Queue(maxsize=1)
@@ -125,6 +126,11 @@ class App:
         self.delay = tk.IntVar(value=5)
         self.opacity = tk.IntVar(value=90)
         self.activity = tk.BooleanVar(value=True)
+        # Posture guard (gù lưng / cổ rùa): opt-in, off by default, shares the
+        # same camera frames. It never covers the screen.
+        self.posture_enabled = tk.BooleanVar(value=False)
+        self.posture_status = tk.StringVar(value="Tư thế: đang tắt.")
+        self.posture_guard = PostureGuard()
         self.make_ui()
         self.root.after(120, self.poll)
 
@@ -165,6 +171,16 @@ class App:
         tk.Checkbutton(body, text="Không che khi đang dùng chuột hoặc bàn phím", variable=self.activity,
                        bg=bg, fg=fg, selectcolor="#242d39", activebackground=bg,
                        activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=(10, 3))
+        tk.Checkbutton(body, text="Cảnh báo tư thế: gù lưng, cổ rùa (cần bật camera)", variable=self.posture_enabled,
+                       command=self.toggle_posture, bg=bg, fg=fg, selectcolor="#242d39", activebackground=bg,
+                       activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=(3, 0))
+        tk.Label(body, textvariable=self.posture_status, bg=bg, fg=muted, anchor="w",
+                 justify="left", wraplength=440, font=("Calibri", 10)).pack(fill="x")
+        self.posture_button = tk.Button(body, text="Căn chỉnh tư thế chuẩn", command=self.calibrate_posture,
+                                        bg="#242d39", fg=fg, activebackground="#334254",
+                                        activeforeground="white", relief="flat", padx=18, pady=6,
+                                        font=("Calibri", 11))
+        self.posture_button.pack(fill="x", pady=(4, 0))
         label("Mức che", 11).pack(fill="x", pady=(8, 0))
         tk.Scale(body, variable=self.opacity, from_=60, to=95, orient="horizontal", bg=bg,
                  fg=fg, highlightthickness=0, troughcolor="#242d39", activebackground=blue,
@@ -181,6 +197,43 @@ class App:
         self.manual = not self.manual
         self.manual_button.configure(text="Bỏ che thủ công" if self.manual else "Che màn hình ngay")
         self.refresh_cover()
+
+    def toggle_posture(self):
+        if self.posture_enabled.get():
+            self.posture_status.set("Tư thế: hãy ngồi thẳng, nhìn thẳng vào màn hình rồi bấm Căn chỉnh tư thế chuẩn.")
+        else:
+            self.posture_guard.reset_timers()
+            self.posture_status.set("Tư thế: đang tắt.")
+
+    def calibrate_posture(self):
+        if not self.posture_enabled.get():
+            self.posture_status.set("Tư thế: bật Cảnh báo tư thế trước khi căn chỉnh.")
+            return
+        if self.posture_guard.calibrate():
+            self.posture_status.set("Tư thế: đã ghi tư thế chuẩn. Glance sẽ nhắc nếu bạn gù lưng hoặc cổ rùa liên tục 10 giây.")
+        else:
+            self.posture_status.set("Tư thế: chưa thấy khuôn mặt. Hãy bật camera, ngồi thẳng và nhìn vào màn hình rồi thử lại.")
+
+    def apply_posture_result(self, result):
+        if not self.posture_enabled.get():
+            return
+        if result.status == "uncalibrated":
+            text = "Tư thế: chưa căn chỉnh. Ngồi thẳng rồi bấm Căn chỉnh tư thế chuẩn."
+        elif result.status == "no_face":
+            text = "Tư thế: chưa thấy khuôn mặt nên tạm dừng kiểm tra."
+        elif result.status == "warning":
+            names = []
+            if "turtle_neck" in result.kinds:
+                names.append("cổ rùa (đầu đưa ra trước)")
+            if "hunch" in result.kinds:
+                names.append("gù lưng (đầu sụp xuống)")
+            text = "Tư thế: hãy ngồi thẳng lại — đang " + " và ".join(names) + "."
+        elif result.status == "bad_pending":
+            text = "Tư thế: đang hơi sai, hãy ngồi thẳng lại."
+        else:
+            text = "Tư thế: tốt."
+        if self.posture_status.get() != text:
+            self.posture_status.set(text)
 
     def refresh_cover(self):
         try:
@@ -226,6 +279,7 @@ class App:
         self.generation += 1
         if self.stop_event:
             self.stop_event.set()
+        self.posture_guard.reset_timers()
         self.automatic_cover = False
         self.camera_started_at = None
         self.last_frame_at = None
@@ -260,6 +314,7 @@ class App:
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
             guard = PresenceGuard(delay=delay)
+            posture_guard = self.posture_guard
             failures = 0
             while not stop.is_set():
                 ok, frame = cap.read()
@@ -273,7 +328,15 @@ class App:
                 failures = 0
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 faces = detector.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4, minSize=(30, 30))
-                self.publish(generation, "face", (len(faces) > 0, time.monotonic(), guard))
+                now = time.monotonic()
+                if len(faces) > 0:
+                    x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
+                    posture = posture_guard.update(now, True,
+                                                   face_size=w / frame.shape[1],
+                                                   center_y=(y + h / 2) / frame.shape[0])
+                else:
+                    posture = posture_guard.update(now, False)
+                self.publish(generation, "face", (len(faces) > 0, now, guard, posture))
                 stop.wait(0.12)
         except Exception:
             self.publish(generation, "error", "Camera gặp lỗi. Tính năng tự động đã dừng; hãy thử bật lại.")
@@ -294,10 +357,11 @@ class App:
                     self.status.set(value)
                     self.start_button.configure(text="Bật camera")
                 elif kind == "face":
-                    present, observed_at, guard = value
+                    present, observed_at, guard, posture = value
                     self.last_frame_at = observed_at
                     guard.activity_guard = self.activity.get()
                     self.automatic_cover = guard.update(observed_at, present, idle_seconds())
+                    self.apply_posture_result(posture)
                     if present:
                         self.status.set("Camera đang hoạt động. Đã nhận diện khuôn mặt.")
                     elif self.automatic_cover:

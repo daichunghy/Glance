@@ -15,3 +15,7 @@ Nếu camera bị từ chối, mất tín hiệu hoặc không phản hồi, ch�
 Tài liệu tham khảo kỹ thuật gồm [quyền camera Windows](https://learn.microsoft.com/en-us/windows/apps/develop/camera/camera-privacy-setting), [cửa sổ trong suốt Windows](https://learn.microsoft.com/en-us/windows/win32/winmsg/window-features) và [bộ nhận diện Cascade của OpenCV](https://docs.opencv.org/4.12.0/d1/de5/classcv_1_1CascadeClassifier.html).
 
 Việc kiểm tra kết quả của lớp che dựa trên hướng dẫn [SetWindowPos](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos) và [SetWindowLongPtr](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptrw) của Microsoft. Kiểm thử giả lập lỗi API không thay thế kiểm thử giao diện trên Windows thật.
+
+## Cảnh báo tư thế: gù lưng, cổ rùa (đang phát triển, mặc định tắt)
+
+Tính năng trên branch `feature/posture-guard`, chưa phát hành. Khi bật camera, tích chọn "Cảnh báo tư thế: gù lưng, cổ rùa", ngồi thẳng rồi bấm "Căn chỉnh tư thế chuẩn". Glance dùng lại khung hình camera sẵn có (logic thuần trong `posture.py`, không thêm thư viện) để nhắc khi đầu đưa ra trước hoặc sụp xuống liên tục 10 giây. Cảnh báo chỉ hiện ở dòng trạng thái tư thế trong cửa sổ, không che màn hình, không lưu hoặc gửi khung hình. Đặc tả chung: `posture/POSTURE_SPEC.md` ở thư mục gốc repo. Chạy kiểm thử tư thế bằng `py -3 -m unittest discover -s tests`.

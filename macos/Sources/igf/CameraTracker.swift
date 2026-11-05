@@ -197,8 +197,22 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
                 
                 if let observation = faceRequest.results?.first,
                    let rawYaw = observation.yaw?.floatValue {
-                    
+
                     self.noFaceFramesCount = 0
+
+                    // Posture Guard shares this observation (no extra camera
+                    // work). Vision y is bottom-up, so flip it: the posture
+                    // adapter expects larger centerY = head dropped lower.
+                    let bbox = observation.boundingBox
+                    let posturePitch = observation.pitch.map { Double($0.floatValue) * (180.0 / .pi) }
+                    let postureNow = currentTime
+                    Task { @MainActor in
+                        AppModel.shared.processPosture(
+                            now: postureNow, facePresent: true,
+                            faceSize: Double(bbox.width),
+                            centerY: 1.0 - Double(bbox.midY),
+                            pitch: posturePitch)
+                    }
                     
                     // Convert to degrees: positive = looking right, negative = looking left
                     let degrees = -Double(rawYaw) * (180.0 / .pi)
@@ -224,6 +238,9 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
                         AppModel.shared.processFaceState(angleDegrees: self.smoothedAngle, isPresent: true)
                     }
                 } else {
+                    Task { @MainActor in
+                        AppModel.shared.processPosture(now: currentTime, facePresent: false)
+                    }
                     // If no face was seen, check if user is actively typing or clicking mouse
                     if self.isUserTypingOrUsingMouse() {
                         // User is at desk typing or moving mouse! Do NOT trigger away blur

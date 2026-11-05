@@ -76,7 +76,40 @@ final class AppModel: ObservableObject {
             }
         }
     }
-    
+
+    // Posture Guard (turtle neck / hunch) — opt-in, off by default.
+    // Shares the camera frames with privacy tracking; never blurs the
+    // screen and never affects protection when off. See POSTURE_SPEC.md.
+    @Published var postureEnabled: Bool = false {
+        didSet {
+            if !postureEnabled {
+                postureGuard.resetTimers()
+                postureStatus = .good
+                postureWarningKinds = []
+            }
+        }
+    }
+    @Published var postureStatus: PostureStatus = .good
+    @Published var postureWarningKinds: [PostureKind] = []
+    let postureGuard = PostureGuard()
+
+    var postureNeedsCalibration: Bool { postureEnabled && !postureGuard.isCalibrated }
+
+    /// Feed one camera observation into the posture guard.
+    /// `centerY` must already be normalised so larger = head dropped lower
+    /// (the Vision adapter in CameraTracker flips the y axis).
+    func processPosture(now: Double, facePresent: Bool, faceSize: Double? = nil, centerY: Double? = nil, pitch: Double? = nil) {
+        guard postureEnabled, trackingSource == .camera, !isVideoCallActive else { return }
+        let result = postureGuard.update(now: now, facePresent: facePresent, faceSize: faceSize, centerY: centerY, pitch: pitch)
+        postureStatus = result.status
+        postureWarningKinds = result.warning ? result.kinds : []
+    }
+
+    @discardableResult
+    func calibratePosture() -> Bool {
+        postureGuard.calibrate()
+    }
+
     // Smart Context Detection (Video calls, Meetings, Fullscreen Presentation)
     @Published var isVideoCallActive: Bool = false {
         didSet {
