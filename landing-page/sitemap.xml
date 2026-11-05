@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://glance-privacy.vercel.app/</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://glance-privacy.vercel.app/assets/product/macbook-front.webp</image:loc>
+      <image:title>Ứng dụng bảo vệ màn hình chống nhìn trộm Glance trên MacBook Pro</image:title>
+      <image:caption>Glance tự động làm mờ màn hình khi quay đầu hoặc rời bàn làm việc</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://glance-privacy.vercel.app/assets/product/glance-icon.png</image:loc>
+      <image:title>Glance Screen Privacy App Icon</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://glance-privacy.vercel.app/assets/product/airpods-still.webp</image:loc>
+      <image:title>Theo dõi chuyển động đầu bằng cảm biến tai nghe AirPods</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://glance-privacy.vercel.app/assets/product/place-cafe.webp</image:loc>
+      <image:title>Bảo vệ màn hình MacBook khi làm việc trong quán cà phê</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://glance-privacy.vercel.app/ung-ho.html</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090c">
+  <title>Glance cho Mac | Làm việc riêng tư hơn</title>
+  <meta name="description" content="Glance tự làm mờ một phần màn hình khi bạn quay đầu, giúp người ngồi cạnh khó đọc nội dung đang mở. Dùng thử 7 ngày trên Mac.">
+  <link rel="icon" href="assets/product/glance-icon.webp" type="image/webp">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+  <script src="checkout.js" defer></script>
+</head>
+<body>
+  <header class="product-nav">
+    <div class="nav-inner">
+      <a class="brand" href="#overview"><img src="assets/product/glance-icon.webp" width="25" height="25" alt="">Glance</a>
+      <nav aria-label="Glance">
+        <a href="#tracking">Cách hoạt động</a>
+        <a href="#airpods">AirPods</a>
+      </nav>
+      <a class="button small" href="#download">Tải cho Mac</a>
+    </div>
+  </header>
+
+  <main id="overview">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="product-name">Glance cho Mac</p>
+        <h1>Yên tâm mở máy<br>ở nơi đông người</h1>
+        <p class="intro">Khi bạn quay đầu, Glance làm mờ phần màn hình ở phía đối diện để người ngồi cạnh khó đọc nội dung đang mở.</p>
+        <div class="actions">
+          <a class="button" href="#download">Tải cho Mac</a>
+          <a class="text-link" href="#tracking">Xem cách hoạt động <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <div class="hero-art" id="hero-art">
+        <div class="device device-hero" data-device data-state="right" role="img" aria-label="Một phần tài liệu trên màn hình MacBook được làm mờ"></div>
+      </div>
+    </section>
+
+    <section class="tracking dark" id="tracking" aria-labelledby="tracking-title">
+      <div class="wrap section-intro">
+        <h2 id="tracking-title">Phần bạn đang nhìn<br>vẫn rõ</h2>
+        <p>Glance lấy hướng nhìn thẳng làm mốc. Khi bạn quay đầu đủ xa, ứng dụng làm mờ phần màn hình ở phía đối diện.</p>
+      </div>
+      <div class="sequence" id="sequence">
+        <div class="sequence-pin">
+          <div class="sequence-copy">
+            <span class="angle" id="angle" aria-hidden="true">0°</span>
+            <p id="scene-label">Khi bạn nhìn thẳng, cả màn hình đều rõ.</p>
+          </div>
+          <div class="device device-sequence" data-device data-state="center" aria-hidden="true"></div>
+          <div class="timeline" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+      <div class="wrap behavior">
+        <p>Bạn có thể chọn ngưỡng 14°, 20° hoặc 28° để Glance bắt đầu làm mờ sớm hay muộn hơn khi bạn quay đầu.</p>
+        <p>Nếu bật tính năng che màn hình khi rời bàn, Glance dùng camera để biết khi nào bạn đã ra khỏi khung hình.</p>
+      </div>
+    </section>
+
+    <section class="pods" id="airpods" aria-labelledby="pods-title">
+      <div class="wrap section-intro">
+        <h2 id="pods-title">Dùng AirPods<br>thay cho camera</h2>
+        <p>Nếu AirPods có cảm biến chuyển động tương thích, Glance có thể theo dõi hướng quay đầu mà không cần bật camera.</p>
+      </div>
+      <div class="pods-track" id="pods-track">
+        <div class="pods-pin">
+          <div class="pods-stage" id="pods-stage">
+            <img class="pods-still" src="assets/product/airpods-still.webp" width="900" height="600" alt="" loading="lazy">
+            <canvas id="pods-canvas" aria-hidden="true"></canvas>
+            <span class="pods-figure" aria-hidden="true"><span id="pods-angle">0°</span><small>Góc quay đầu</small></span>
+          </div>
+        </div>
+      </div>
+      <div class="wrap behavior">
+        <p>Chọn AirPods trong Glance rồi nhìn thẳng vào màn hình để đặt góc ban đầu. Từ đó, ứng dụng đọc chuyển động của đầu qua tai nghe.</p>
+        <p>Để màn hình tự mờ khi bạn rời chỗ, hãy chọn chế độ camera. AirPods chỉ giúp Glance biết bạn đang quay đầu về hướng nào.</p>
+      </div>
+    </section>
+
+    <section class="native dark" id="privacy">
+      <div class="wrap native-inner">
+        <div>
+          <h2>Nằm gọn trên<br>thanh menu</h2>
+          <p>Mở Glance từ thanh menu để đổi giữa camera và AirPods, chỉnh độ nhạy hoặc chọn vùng cần làm mờ.</p>
+        </div>
+        <figure class="native-art" aria-label="Các tùy chọn của Glance trên thanh menu">
+          <div class="native-bar" aria-hidden="true"><img src="assets/product/glance-icon.webp" alt="" width="17" height="17"><span>▰</span><span>9:41</span></div>
+          <div class="popover-art" aria-hidden="true">
+            <div class="popover-title"><img src="assets/product/glance-icon.webp" alt="" width="32" height="32"><b>Glance</b><span class="toggle-art"></span></div>
+            <div class="setting"><span>Nhận diện bằng</span><span class="segment"><b>Camera</b><span>AirPods</span></span></div>
+            <div class="setting"><span>Độ nhạy</span><span class="segment"><span>Thấp</span><b>Vừa</b><span>Cao</span></span></div>
+            <div class="setting"><span>Làm mờ</span><span class="segment"><b>Một bên</b><span>Toàn màn hình</span></span></div>
+          </div>
+        </figure>
+      </div>
+      <div class="wrap behavior">
+        <p>Để giảm tải cho máy, Glance chỉ phân tích một phần khung hình từ camera và dùng hiệu ứng làm mờ có sẵn của macOS.</p>
+        <p>Glance xử lý hình ảnh từ camera ngay trên Mac. Ứng dụng không gửi những hình ảnh này lên máy chủ.</p>
+      </div>
+    </section>
+
+    <section class="download" id="download" aria-labelledby="download-title">
+      <div class="wrap">
+        <img class="download-icon" src="assets/product/glance-icon.webp" alt="" width="82" height="82" loading="lazy">
+        <h2 id="download-title">Glance cho Mac</h2>
+        <p class="intro">Bạn có thể dùng thử 7 ngày. Bản quyền trọn đời có giá 20.000đ.</p>
+        <div class="actions">
+          <a class="button" href="assets/product/Glance-macOS-1.0.0.zip" download>Tải cho Mac</a>
+          <button class="button secondary" type="button" data-checkout>Mua bản quyền</button>
+        </div>
+        <p class="requirements">Phiên bản 1.0.0 · macOS 14 trở lên · Apple silicon</p>
+      </div>
+    </section>
+
+    <section class="questions wrap" aria-label="Câu hỏi thường gặp">
+      <details>
+        <summary>Dùng Glance khi không có AirPods</summary>
+        <p>Camera trên Mac đủ để Glance theo dõi hướng quay đầu và làm mờ màn hình khi bạn rời bàn.</p>
+      </details>
+      <details>
+        <summary>Khi đang gõ phím hoặc gọi video</summary>
+        <p>Nếu camera tạm thời không thấy bạn, Glance kiểm tra xem bạn còn dùng bàn phím hoặc chuột không trước khi làm mờ cả màn hình. Ứng dụng cũng tạm dừng làm mờ khi camera bị gián đoạn hoặc khi bạn mở một số ứng dụng gọi video như Zoom và FaceTime.</p>
+      </details>
+      <details>
+        <summary>Cách nhận mã kích hoạt</summary>
+        <p>Trang sẽ hiện mã kích hoạt khi PayOS xác nhận thanh toán. Bạn chỉ cần sao chép mã và nhập vào Glance.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer><div class="wrap footer-inner"><span>Glance</span><a href="#overview">Về đầu trang ↑</a></div></footer>
+
+  <dialog class="checkout" id="checkout" aria-labelledby="checkout-title">
+    <form method="dialog"><button class="close" aria-label="Đóng" type="submit">×</button></form>
+    <h2 id="checkout-title">Bản quyền Glance</h2>
+    <p class="checkout-price">Thanh toán một lần 20.000đ</p>
+    <form id="checkout-form">
+      <label for="buyer-email">Email (tùy chọn)</label>
+      <input id="buyer-email" type="email" autocomplete="email" maxlength="254">
+      <button class="button" type="submit" id="create-order">Tạo mã VietQR</button>
+    </form>
+    <div id="checkout-order" hidden>
+      <img id="checkout-qr" width="192" height="192" alt="Mã VietQR cho đơn hàng Glance" hidden>
+      <div class="actions">
+        <a class="button" id="payos-link" target="_blank" rel="noopener noreferrer" hidden>Mở PayOS</a>
+        <button class="button secondary" type="button" id="check-order">Kiểm tra thanh toán</button>
+      </div>
+    </div>
+    <p id="payment-status" role="status"></p>
+    <div id="license-result" hidden>
+      <code id="license-key"></code>
+      <button class="button secondary small" type="button" id="copy-license">Sao chép</button>
+    </div>
+  </dialog>
+
+  <template id="device-template">
+    <div class="display-case">
+      <div class="display" aria-hidden="true">
+        <div class="desktop">
+          <div class="desktop-menu"><strong>Finder</strong><span>Tệp</span><span>Sửa</span><span>Hiển thị</span><span class="desktop-time"><img src="assets/product/glance-icon.webp" width="14" height="14" alt="">9:41</span></div>
+          <div class="notch"></div>
+          <div class="work-window">
+            <div class="window-bar"><i></i><i></i><i></i><span>Ghi chú</span></div>
+            <div class="work-body">
+              <div class="work-sidebar"><b>Thư mục</b><span>Ghi chú</span><span>Công việc</span><span>Cá nhân</span></div>
+              <div class="work-doc"><span>Thứ tư, 4 tháng 11</span><strong>Kế hoạch dự án</strong><p>Những việc cần chốt trước buổi họp tuần này.</p><ul><li>Rà lại phạm vi và lịch bàn giao</li><li>Đối chiếu ngân sách với kế hoạch</li><li>Gửi tài liệu cho nhóm dự án</li></ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="privacy-layer privacy-layer-left"></div><div class="privacy-layer privacy-layer-right"></div><div class="privacy-layer privacy-layer-away"></div>
+      </div>
+    </div>
+    <div class="device-base" aria-hidden="true"><i></i></div>
+  </template>
+</body>
+</html>

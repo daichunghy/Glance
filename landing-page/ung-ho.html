@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090c">
+  <title>Ủng hộ Glance — Ứng dụng bảo vệ màn hình cho Mac</title>
+  <meta name="description" content="Glance miễn phí cho tất cả mọi người. Ủng hộ dự án để phát triển thêm các tính năng bảo vệ quyền riêng tư màn hình cho Mac và Windows.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://glance-privacy.vercel.app/ung-ho.html">
+  <link rel="icon" href="assets/product/glance-icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/product/glance-icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://glance-privacy.vercel.app/ung-ho.html">
+  <meta property="og:title" content="Ủng hộ Glance — Ứng dụng bảo vệ màn hình cho Mac">
+  <meta property="og:description" content="Glance miễn phí cho mọi người. Nếu ứng dụng hữu ích với bạn, bạn có thể ủng hộ dự án qua PayOS.">
+  <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/glance-icon.png">
+
+  <link rel="stylesheet" href="donation.css?v=2">
+  <script src="donation.js?v=2" defer></script>
+</head>
+<body>
+  <header class="nav"><a class="brand" href="./"><img src="assets/product/glance-icon.png" width="26" height="26" alt="">Glance</a><a class="back" href="./#download">Quay lại</a></header>
+  <main class="main">
+    <div class="download-notice" id="download-notice" hidden><span id="download-message">Đang bắt đầu tải Glance.</span> <a id="manual-download" download>Tải lại</a></div>
+    <div class="layout">
+      <div class="message">
+        <img src="assets/product/glance-icon.png" width="68" height="68" alt="" class="icon">
+        <h1>Ủng hộ Glance</h1>
+        <p>Glance miễn phí cho mọi người. Nếu ứng dụng hữu ích với bạn, bạn có thể ủng hộ dự án.</p>
+      </div>
+      <form class="support-card" id="support-form">
+        <p class="support-type">Ủng hộ một lần</p>
+        <fieldset class="amounts" aria-label="Chọn mức ủng hộ">
+          <label><input type="radio" name="preset" value="10000"><span>10.000đ</span></label>
+          <label><input type="radio" name="preset" value="20000" checked><span>20.000đ</span></label>
+          <label><input type="radio" name="preset" value="50000"><span>50.000đ</span></label>
+          <label><input type="radio" name="preset" value="100000"><span>100.000đ</span></label>
+        </fieldset>
+        <label class="custom-label" for="support-amount">Hoặc nhập số tiền khác</label>
+        <div class="custom-input"><input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1" value="20000" required><span>đồng</span></div>
+        <button class="support-submit" type="submit" disabled>Ủng hộ qua PayOS</button>
+        <p class="support-status" role="status" aria-live="polite">Đang kiểm tra kết nối…</p>
+        <a class="skip" href="./#download">Về trang Glance</a>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

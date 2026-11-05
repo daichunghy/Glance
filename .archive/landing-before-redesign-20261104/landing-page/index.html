@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glance — Smart Screen Privacy for Mac | Màn hình Liquid Retina XDR • 20.000đ</title>
+  <meta name="description" content="Glance — Ứng dụng bảo vệ riêng tư màn hình cho Mac. Tự động mờ góc nhìn trộm khi quay mặt và mờ 100% khi rời bàn. 100% On-Device Apple Silicon. Chỉ 20.000đ trọn đời.">
+  <link rel="icon" href="assets/tryglance/apple-icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/logos/glance-logo-squircle-transparent.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header / Navigation Bar -->
+  <header class="navbar-wrapper">
+    <nav class="navbar" aria-label="Menu chính">
+      <div class="nav-left">
+        <a href="#" class="brand-logo">
+          <img src="assets/logos/glance-logo-squircle-transparent.png" alt="Glance Logo" class="brand-app-icon" width="26" height="26">
+          <span class="brand-text">Glance</span>
+          <span class="brand-badge">Liquid Retina XDR</span>
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <a href="#xdr-display" class="nav-link"><span>Màn hình XDR</span></a>
+        <a href="#pro-spotlight" class="nav-link"><span>Đam mê</span></a>
+        <a href="#simulator" class="nav-link"><span>Thử nghiệm</span></a>
+        <a href="#design" class="nav-link"><span>Tính năng</span></a>
+        <a href="#pricing" class="nav-link active"><span>Giá 20k</span></a>
+        <a href="#video-prompts" class="nav-link"><span>Prompt AI</span></a>
+      </div>
+
+      <div class="nav-right">
+        <button class="nav-buy-btn" id="navBuyBtn" type="button">
+          <span>Mua 20k</span>
+        </button>
+        <a href="#download" class="nav-download-btn">Tải về</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ========================================================
+       HERO SECTION: Apple Pro Liquid Retina XDR Showcase
+       ======================================================== -->
+  <section class="hero-section">
+    <div class="container hero-content">
+      <div class="hero-pill-badge reveal">
+        <span class="badge-dot"></span>
+        <span>BẢO VỆ RIÊNG TƯ MAC • 20.000Đ TRỌN ĐỜI</span>
+      </div>
+
+      <h1 class="hero-headline reveal reveal-delay-1">
+        <span class="headline-line"><span class="text-muted">Màn hình</span> Liquid Retina XDR.</span>
+        <span class="headline-line"><span class="text-muted">Riêng tư chỉ thuộc về</span> <span class="gradient-blue-text">bạn.</span></span>
+      </h1>
+
+      <p class="hero-subtitle reveal reveal-delay-2">
+        Tự động mờ góc nhìn trộm khi quay mặt và khóa mờ 100% khi rời bàn. 
+        Hoàn toàn On-Device trên Apple Silicon Neural Engine.
+      </p>
+
+      <div class="hero-actions reveal reveal-delay-3">
+        <button class="btn btn-primary btn-large open-checkout-trigger" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Sở hữu ngay • 20.000đ</span>
+        </button>
+        <a href="#simulator" class="btn btn-secondary btn-large">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Thử nghiệm mờ</span>
+        </a>
+      </div>
+
+      <!-- Hero Hardware Showcase -->
+      <div class="hero-display-showcase reveal reveal-delay-4">
+        <div class="hero-display-img-wrap">
+          <img src="assets/apple-pro-xdr-display.jpg" alt="MacBook Pro màn hình Liquid Retina XDR" class="hero-display-img">
+        </div>
+
+        <div class="hero-floating-badges">
+          <div class="hero-metric-badge">
+            <div class="metric-num highlight">1.000.000:1</div>
+            <div class="metric-label">Tỷ lệ tương phản riêng tư</div>
+          </div>
+          <div class="hero-metric-badge">
+            <div class="metric-num">1.600 nit</div>
+            <div class="metric-label">Độ sáng đỉnh vùng làm việc</div>
+          </div>
+          <div class="hero-metric-badge">
+            <div class="metric-num highlight">0 ms</div>
+            <div class="metric-label">Độ trễ Apple Silicon</div>
+          </div>
+          <div class="hero-metric-badge">
+            <div class="metric-num highlight">20.000 đ</div>
+            <div class="metric-label">Bản quyền trọn đời</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: LIQUID RETINA XDR & PROLED DISPLAY ARCHITECTURE
+       Directly inspired by apple.com/vn/macbook-pro/proled-xdr-display/
+       ======================================================== -->
+  <section class="section-xdr-display" id="xdr-display">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-kicker">Công nghệ hiển thị</span>
+        <h2 class="section-headline">
+          <span class="headline-line">Sáng nhất. Đen sâu nhất.</span>
+          <span class="headline-line"><span class="gradient-blue-text">Riêng tư tuyệt đối.</span></span>
+        </h2>
+        <p class="section-desc">
+          Lấy cảm hứng từ công nghệ điều khiển hàng ngàn bóng đèn Mini-LED trên màn hình Liquid Retina XDR.
+        </p>
+      </div>
+
+      <div class="xdr-cards-grid">
+        <div class="xdr-card reveal reveal-delay-1">
+          <div class="xdr-card-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </div>
+          <h3 class="xdr-card-title">Local Privacy Dimming</h3>
+          <p class="xdr-card-desc">
+            Làm mờ thông minh theo phân vùng, giữ 100% độ sáng và độ nét của khu vực bạn đang nhìn.
+          </p>
+          <div class="xdr-card-tag">Precision Dimming</div>
+        </div>
+
+        <div class="xdr-card reveal reveal-delay-2">
+          <div class="xdr-card-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </div>
+          <h3 class="xdr-card-title">1.000.000:1 &amp; 1.600 nit</h3>
+          <p class="xdr-card-desc">
+            Vùng làm việc sáng 1.600 nit trong trẻo, góc nhìn trộm phủ mờ 0 nit hoàn toàn riêng tư.
+          </p>
+          <div class="xdr-card-tag">Extreme Contrast</div>
+        </div>
+
+        <div class="xdr-card reveal reveal-delay-3">
+          <div class="xdr-card-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3 class="xdr-card-title">120Hz ProMotion</h3>
+          <p class="xdr-card-desc">
+            Lớp phủ kính Acrylic chuyển đổi tức thì 0.05 giây theo cử động mắt, không độ trễ.
+          </p>
+          <div class="xdr-card-tag">Adaptive Refresh</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: "Rồi cháy hết với đam mê." (Apple Pro Showcase)
+       Exact replica of apple-pro-reference.png layout
+       ======================================================== -->
+  <section class="section-pro-spotlight" id="pro-spotlight">
+    <div class="container">
+      <div class="pro-spotlight-header reveal">
+        <h2 class="pro-main-title">
+          <span class="headline-line">Rồi cháy hết <span class="text-muted">với</span></span>
+          <span class="headline-line"><span class="gradient-blue-text">đam mê.</span></span>
+        </h2>
+        <p class="pro-main-desc">
+          Làm việc tự tin tại quán cà phê hay văn phòng mở. 
+          Glance bảo vệ liền mạch trên màn hình Liquid Retina XDR và màn hình ngoài kết nối qua Thunderbolt 5.
+        </p>
+      </div>
+
+      <div class="pro-beam-wrapper reveal reveal-delay-1">
+        <img src="assets/apple-pro-beam.jpg" alt="MacBook Pro với dải ánh sáng xanh chuẩn Apple Pro" class="pro-beam-img">
+      </div>
+
+      <div class="pro-specs-grid reveal reveal-delay-2">
+        <div class="spec-item">
+          <div class="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="spec-label">
+            <strong>Mờ định hướng</strong>
+            Quay bên nào, mờ bên đối diện
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="spec-label">
+            <strong>Mờ 100% khi rời bàn</strong>
+            Khóa màn hình tức thì khi vắng mặt
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="spec-label">
+            <strong>100% On-Device</strong>
+            Apple Neural Engine, 0 byte gửi mạng
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+          </div>
+          <div class="spec-label">
+            <strong>Typing Guard</strong>
+            Không gián đoạn khi đang gõ phím
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          </div>
+          <div class="spec-label">
+            <strong>AirPods Motion</strong>
+            Theo dõi góc đầu không cần camera
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="spec-label">
+            <strong>Tiết kiệm năng lượng</strong>
+            RAM &lt; 25MB, CPU ~0.5%
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: INTERACTIVE XDR PRIVACY SIMULATOR
+       ======================================================== -->
+  <section class="section-simulator" id="simulator">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-kicker">Mô phỏng trực tiếp</span>
+        <h2 class="section-headline">Cảm nhận độ mượt tức thì.</h2>
+      </div>
+
+      <div class="simulator-container reveal reveal-delay-1">
+        <div class="macbook-privacy-frame" id="simFrame">
+          <div class="macbook-bezel-top">
+            <div class="privacy-pill-indicator" id="simPillIndicator">
+              <span class="indicator-dot"></span>
+              <span class="indicator-text" id="simStatusText">Glance: Nhìn trực diện • Sắc nét 100%</span>
+            </div>
+          </div>
+
+          <div class="macbook-display-surface">
+            <div class="mockup-desktop-content">
+              <div class="mock-window">
+                <div class="window-dots">
+                  <span class="w-dot"></span><span class="w-dot"></span><span class="w-dot"></span>
+                </div>
+                <div class="mock-code-line w-80 blue"></div>
+                <div class="mock-code-line w-60"></div>
+                <div class="mock-code-line w-90 cyan"></div>
+                <div class="mock-code-line w-45"></div>
+              </div>
+
+              <div class="mock-window">
+                <div class="window-dots">
+                  <span class="w-dot"></span><span class="w-dot"></span><span class="w-dot"></span>
+                </div>
+                <div class="mock-code-line w-90"></div>
+                <div class="mock-code-line w-80 cyan"></div>
+                <div class="mock-code-line w-45 blue"></div>
+                <div class="mock-code-line w-60"></div>
+              </div>
+            </div>
+
+            <!-- Overlays -->
+            <div class="blur-layer-left">
+              <div class="blur-badge-msg"><span>Mờ bên trái • Chống nhìn trộm</span></div>
+            </div>
+            <div class="blur-layer-right">
+              <div class="blur-badge-msg"><span>Mờ bên phải • Chống nhìn trộm</span></div>
+            </div>
+            <div class="blur-layer-full">
+              <div class="blur-badge-msg"><span>Glance Presence Guard</span></div>
+              <div class="blur-full-title">Màn hình mờ 100%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="privacy-controls-row">
+          <button class="privacy-btn active" id="btnLookCenter" type="button"><span>👁️ Trực diện</span></button>
+          <button class="privacy-btn" id="btnLookLeft" type="button"><span>👈 Nhìn trái (Mờ phải)</span></button>
+          <button class="privacy-btn" id="btnLookRight" type="button"><span>👉 Nhìn phải (Mờ trái)</span></button>
+          <button class="privacy-btn" id="btnStepAway" type="button"><span>🚶 Rời bàn (Mờ 100%)</span></button>
+          <button class="privacy-btn" id="btnToggleSource" type="button">
+            <span id="sourceLabel">🎧 AirPods Pro</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: DEDICATED 20K PRICING SECTION ("Mình bán 20k đó")
+       ======================================================== -->
+  <section class="section-pricing" id="pricing">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-kicker">Mở bán độc quyền tại Việt Nam</span>
+        <h2 class="section-headline">
+          <span class="headline-line"><span class="text-muted">Bảo vệ trọn đời.</span> Chỉ <span class="gradient-blue-text">20.000đ.</span></span>
+        </h2>
+        <p class="section-desc">Bằng một ly trà đá. An tâm làm việc suốt đời.</p>
+      </div>
+
+      <div class="pricing-card-wrapper reveal reveal-delay-1">
+        <div class="pricing-card-pro">
+          <div class="pricing-ribbon">TIẾT KIỆM 92% • TRỌN ĐỜI</div>
+
+          <div class="pricing-header">
+            <h3 class="pricing-title">Glance Lifetime Pro</h3>
+            <div class="pricing-original">Giá gốc: <del>250.000đ</del></div>
+            <div class="pricing-amount-row">
+              <span class="price-currency">20.000</span>
+              <span class="price-symbol">đ</span>
+              <span class="price-period">/ trọn đời</span>
+            </div>
+            <p class="pricing-subtitle">Thanh toán 1 lần • Không thuê bao tháng • Nhận key tức thì</p>
+          </div>
+
+          <div class="pricing-features-list">
+            <div class="p-feat-item">
+              <span class="p-feat-icon">✓</span>
+              <span>Bản quyền vĩnh viễn cho 1 máy Mac</span>
+            </div>
+            <div class="p-feat-item">
+              <span class="p-feat-icon">✓</span>
+              <span>Mờ định hướng khi quay đầu (Side Blur)</span>
+            </div>
+            <div class="p-feat-item">
+              <span class="p-feat-icon">✓</span>
+              <span>Mờ 100% khi rời bàn (Presence Guard)</span>
+            </div>
+            <div class="p-feat-item">
+              <span class="p-feat-icon">✓</span>
+              <span>Theo dõi qua AirPods Pro / AirPods Max</span>
+            </div>
+            <div class="p-feat-item">
+              <span class="p-feat-icon">✓</span>
+              <span>Typing Guard chống gián đoạn gõ phím</span>
+            </div>
+            <div class="p-feat-item">
+              <span class="p-feat-icon">✓</span>
+              <span>Cập nhật miễn phí trọn đời (macOS Sequoia)</span>
+            </div>
+          </div>
+
+          <div class="pricing-actions">
+            <button class="btn-buy-large open-checkout-trigger" type="button">
+              <span>Mua Bản Quyền — 20.000đ</span>
+            </button>
+            <a href="#download" class="btn btn-secondary btn-large">
+              <span>Dùng thử 7 ngày</span>
+            </a>
+          </div>
+
+          <div class="pricing-trust-row">
+            <div class="trust-item"><span>⚡ Nhận key sau 5 giây</span></div>
+            <div class="trust-item"><span>💳 Quét VietQR / MoMo 20k</span></div>
+            <div class="trust-item"><span>🔒 Kích hoạt tức thì trong app</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: BENTO GRID (Apple Design Features)
+       ======================================================== -->
+  <section class="section-design" id="design">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-kicker">Thiết kế thuần Mac</span>
+        <h2 class="section-headline">
+          <span class="headline-line"><span class="text-muted">Thông minh.</span> Nhẹ nhàng.</span>
+        </h2>
+      </div>
+
+      <div class="bento-grid">
+        <div class="bento-card card-large reveal reveal-delay-1">
+          <div class="card-icon-bubble">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          </div>
+          <h3 class="card-title">AirPods Motion &amp; Camera Vision</h3>
+          <p class="card-text">
+            Theo dõi góc nhìn bằng camera hoặc con quay hồi chuyển 6 trục trên AirPods Pro. Tiết kiệm pin tối đa.
+          </p>
+          <div class="card-tag">CoreMotion + Vision</div>
+        </div>
+
+        <div class="bento-card card-small reveal reveal-delay-2">
+          <div class="card-icon-bubble">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3 class="card-title">Typing Guard</h3>
+          <p class="card-text">
+            Tự động tạm dừng mờ khi bạn đang tích cực gõ code hoặc di chuột.
+          </p>
+          <div class="card-tag">Zero Disruption</div>
+        </div>
+
+        <div class="bento-card card-medium reveal reveal-delay-3">
+          <div class="card-icon-bubble">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+          <h3 class="card-title">Menu Bar Popover</h3>
+          <p class="card-text">
+            Gọn gàng trên thanh Menu Bar. Tùy chỉnh độ nhạy và mức mờ chỉ với 1 cú nhấp.
+          </p>
+          <div class="card-tag">Native macOS</div>
+        </div>
+
+        <div class="bento-card card-medium reveal reveal-delay-4">
+          <div class="card-icon-bubble">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </div>
+          <h3 class="card-title">Tương thích Video Call</h3>
+          <p class="card-text">
+            Tự động nhường camera cho Zoom, Teams hay FaceTime mà không cần tắt app.
+          </p>
+          <div class="card-tag">Meeting Friendly</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: Video Prompts Pack for AI Video Generation
+       ======================================================== -->
+  <section class="section-video-prompts" id="video-prompts">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-kicker">Prompt Video AI</span>
+        <h2 class="section-headline">Tạo video quảng cáo chuẩn Apple.</h2>
+        <p class="section-desc">Prompt tiếng Anh chuyên nghiệp sẵn sàng cho Runway Gen-3, Kling AI hoặc Sora.</p>
+      </div>
+
+      <div class="prompts-grid">
+        <div class="prompt-card reveal reveal-delay-1">
+          <div class="prompt-header">
+            <div class="prompt-badge">Video 1: Side Blur Demo</div>
+            <button class="btn-copy" data-target="prompt1" type="button"><span>Sao chép</span></button>
+          </div>
+          <h4 class="prompt-title">Người dùng quay đầu &amp; Nửa màn hình mờ đục</h4>
+          <div class="prompt-box" id="prompt1">Cinematic Apple product shot, 4k 60fps. Space Black MacBook Pro on dark desk. Developer looks at screen. As their head turns left, the right half of Liquid Retina XDR smoothly transitions into frosted glass blur, protecting code. Left half remains razor-sharp. Subtle sapphire blue notch indicator pulses. Atmospheric rim lighting, shallow depth of field.</div>
+        </div>
+
+        <div class="prompt-card reveal reveal-delay-2">
+          <div class="prompt-header">
+            <div class="prompt-badge">Video 2: Presence Auto-Blur</div>
+            <button class="btn-copy" data-target="prompt2" type="button"><span>Sao chép</span></button>
+          </div>
+          <h4 class="prompt-title">Rời bàn làm việc &amp; Toàn màn hình mờ 100%</h4>
+          <div class="prompt-box" id="prompt2">Cinematic lifestyle shot, dark coffee shop setting. A user stands up and walks away leaving an open Space Black MacBook Pro. Within one second, the entire Liquid Retina XDR screen blurs 100% into frosted glass with a glowing sapphire lock: 'Glance • Presence Protected'. Stranger walks past unable to see content. Apple keynote aesthetic.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: FAQ
+       ======================================================== -->
+  <section class="section-faq">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-kicker">Hỏi đáp nhanh</span>
+        <h2 class="section-headline">Câu hỏi thường gặp</h2>
+      </div>
+
+      <div class="faq-accordion reveal">
+        <details class="faq-item" open>
+          <summary class="faq-question">
+            <span>20.000đ là trọn đời hay thuê bao?</span>
+            <span class="faq-arrow">▼</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Trọn đời.</strong> Thanh toán một lần duy nhất 20.000đ, sử dụng vĩnh viễn và nhận mọi bản cập nhật tương lai.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Thanh toán và nhận mã kích hoạt thế nào?</span>
+            <span class="faq-arrow">▼</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Quét mã VietQR hoặc MoMo 20.000đ, hệ thống tự động hiển thị License Key trên màn hình sau 5 giây để bạn dán vào app.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Camera có lưu hình ảnh của tôi không?</span>
+            <span class="faq-arrow">▼</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Tuyệt đối không.</strong> Xử lý 100% On-Device qua RAM và hủy tức thì, không lưu ảnh và 0 byte gửi qua mạng.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Đang gõ phím máy có bị mờ nhầm không?</span>
+            <span class="faq-arrow">▼</span>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Không.</strong> Thuật toán Typing Guard tự động tạm dừng mờ khi bạn đang chủ động gõ phím hoặc di chuột.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECTION: Download & Call to Action
+       ======================================================== -->
+  <section class="section-download" id="download">
+    <div class="container">
+      <div class="download-card reveal">
+        <div class="download-badge">SẴN SÀNG TRẢI NGHIỆM</div>
+        <h2 class="download-title">
+          Bảo vệ riêng tư màn hình Mac.<br>
+          <span class="gradient-blue-text">Chỉ 20.000đ hôm nay.</span>
+        </h2>
+        <p class="download-subtitle">
+          Tải bản native cho Mac. Dùng thử 7 ngày miễn phí hoặc kích hoạt trọn đời tức thì.
+        </p>
+
+        <div class="download-buttons">
+          <button class="btn btn-primary btn-large open-checkout-trigger" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Mua Trọn Đời — 20.000đ</span>
+          </button>
+          <a href="/Users/macos/Desktop/Glance/macos/Glance.app" class="btn btn-secondary btn-large" id="mainDownloadBtn">
+            <img src="assets/tryglance/appleicon.svg" alt="" width="16" height="19">
+            <span>Tải về Glance (.app)</span>
+          </a>
+        </div>
+
+        <div class="terminal-install-box">
+          <span class="terminal-prompt">$</span>
+          <code>open /Users/macos/Desktop/Glance/macos/Glance.app</code>
+          <button class="terminal-copy-btn" id="copyAppPathBtn" title="Sao chép" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+
+        <div class="system-reqs">
+          <span>macOS Sonoma &amp; Sequoia</span>
+          <span>•</span>
+          <span>Apple Silicon M1 - M4 &amp; Intel</span>
+          <span>•</span>
+          <span>Windows 11 &amp; Linux</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       INTERACTIVE VIETQR CHECKOUT MODAL (20K Instant Activation)
+       ======================================================== -->
+  <div class="checkout-modal-backdrop" id="checkoutModalBackdrop" aria-hidden="true">
+    <div class="checkout-modal-card">
+      <button class="modal-close-btn" id="modalCloseBtn" type="button" title="Đóng">✕</button>
+
+      <!-- Step 1: Payment with VietQR via PayOS -->
+      <div id="modalStepPayment">
+        <div class="modal-header">
+          <div class="modal-pill">CỔNG THANH TOÁN PAYOS • 20.000Đ</div>
+          <h3 class="modal-title">Thanh toán Bản quyền Glance</h3>
+          <p class="modal-subtitle">Quét VietQR bằng app Ngân hàng hoặc MoMo để nhận key tức thì</p>
+        </div>
+
+        <div class="vietqr-box">
+          <div class="vietqr-header-bar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="vietqr-logo-text">VietQR</span>
+              <span class="payos-badge">payOS</span>
+            </div>
+            <span class="vietqr-bank-name" id="bankNameDisplay">MB BANK</span>
+          </div>
+
+          <div class="vietqr-image-frame" id="qrContainer" style="position: relative;">
+            <img id="vietqrImage" src="https://img.vietqr.io/image/970422-VQRQANHZY3760-compact2.png?amount=20000&addInfo=Glance%2020k%20Pro&accountName=DAI%20CHUNG%20HY" alt="VietQR PayOS" style="width: 100%; height: 100%; object-fit: contain; border-radius: 6px;">
+          </div>
+
+          <div class="vietqr-amount-badge">20.000 VNĐ</div>
+        </div>
+
+        <!-- Live Payment Polling Status -->
+        <div class="payos-live-status" id="payosLiveStatus">
+          <span class="status-pulse-dot"></span>
+          <span class="status-text" id="payosStatusText">Đang chờ quét mã VietQR... Tự động mở khóa ngay khi chuyển tiền</span>
+        </div>
+
+        <div class="bank-info-details">
+          <div class="bank-row">
+            <span class="label">Ngân hàng:</span>
+            <span class="val" id="bankNameText">MB Bank (Quân Đội)</span>
+          </div>
+          <div class="bank-row">
+            <span class="label">Số tài khoản:</span>
+            <span class="val val-copy" id="copyStkBtn" title="Sao chép">
+              <code id="accountNumberText">VQRQANHZY3760</code> 📋
+            </span>
+          </div>
+          <div class="bank-row">
+            <span class="label">Chủ TK:</span>
+            <span class="val" id="accountNameText">DAI CHUNG HY</span>
+          </div>
+          <div class="bank-row">
+            <span class="label">Số tiền:</span>
+            <span class="val" style="color: #27c93f;">20.000 VNĐ</span>
+          </div>
+          <div class="bank-row">
+            <span class="label">Nội dung CK:</span>
+            <span class="val val-copy" id="copyContentBtn" title="Sao chép">
+              <code id="transferCodeText">Glance 20k Pro</code> 📋
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-input-group">
+          <label class="modal-input-label" for="userEmailInput">Email nhận mã kích hoạt (tuỳ chọn):</label>
+          <input type="email" id="userEmailInput" class="modal-input" placeholder="email@domain.com">
+        </div>
+
+        <div class="modal-actions-row">
+          <button class="modal-confirm-btn" id="confirmPaymentBtn" type="button">
+            <span>Kiểm tra trạng thái thanh toán</span>
+          </button>
+          <a href="#" target="_blank" class="modal-secondary-btn" id="openPayosCheckoutBtn" style="display: none;">
+            <span>Mở trang thanh toán PayOS ↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 2: Instant Success & Key Generator -->
+      <div class="license-success-box" id="modalStepSuccess">
+        <div class="success-check-icon">✓</div>
+        <h3 class="modal-title">Thanh toán thành công qua PayOS!</h3>
+        <p class="modal-subtitle">Mã bản quyền trọn đời của bạn:</p>
+
+        <div class="license-key-display">
+          <span class="license-key-text" id="generatedLicenseKey">GLANCE-2026-XDR9-A8F2-B7C1</span>
+          <button class="license-copy-action" id="copyLicenseKeyBtn" type="button">Sao chép</button>
+        </div>
+
+        <div class="license-instructions">
+          <div class="inst-step"><span>1</span> Mở <code>Glance.app</code> trên máy tính Mac</div>
+          <div class="inst-step"><span>2</span> Click icon Glance trên Menu Bar &gt; <strong>Kích hoạt bản quyền</strong></div>
+          <div class="inst-step"><span>3</span> Dán mã kích hoạt trên vào và bấm <strong>Xác nhận</strong> để mở khóa trọn đời</div>
+        </div>
+
+        <button class="modal-confirm-btn" id="finishModalBtn" type="button">
+          <span>Hoàn tất & Đóng</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand-logo">
+            <img src="assets/logos/glance-logo-squircle-transparent.png" alt="Glance Logo" class="brand-app-icon" width="24" height="24">
+            <span class="brand-text">Glance</span>
+          </div>
+          <p class="footer-motto">
+            Bảo vệ riêng tư màn hình Mac Liquid Retina XDR. Chỉ 20.000đ trọn đời.
+          </p>
+        </div>
+
+        <div class="footer-nav-col">
+          <div class="footer-nav-title">Tính năng</div>
+          <a href="#xdr-display">Màn hình XDR</a>
+          <a href="#pro-spotlight">Đam mê</a>
+          <a href="#simulator">Mô phỏng</a>
+          <a href="#pricing">Giá 20k</a>
+        </div>
+
+        <div class="footer-nav-col">
+          <div class="footer-nav-title">Tài nguyên</div>
+          <a href="#video-prompts">Prompt Video AI</a>
+          <a href="#download">Khởi chạy app</a>
+          <a href="https://github.com" target="_blank">GitHub</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="copyright">
+          © 2026 Glance. Thiết kế chuẩn Apple Pro &amp; phông chữ Calibri tiếng Việt.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

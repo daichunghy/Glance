@@ -1,0 +1,14 @@
+{
+  "name": "glance-payos-server",
+  "version": "1.0.0",
+  "description": "Glance PayOS Payment Gateway & Licensing Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@payos/node": "^1.0.8",
+    "dotenv": "^16.4.5"
+  }
+}

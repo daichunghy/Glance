@@ -1,0 +1,32 @@
+# Environment & secrets
+.env*
+**/.env*
+
+# Deployment & Vercel
+.vercel
+**/.vercel
+
+# macOS system files
+.DS_Store
+**/.DS_Store
+
+# Swift build cache (crucial - over 1GB)
+.build/
+**/.build/
+*.build/
+
+# Python cache & virtual environments
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# IDE / Editor configs
+.idea/
+.vscode/
+*.swp
+*.swo

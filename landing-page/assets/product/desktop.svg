@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 820" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <linearGradient id="bg" x2=".88" y2="1"><stop stop-color="#040c23"/><stop offset=".62" stop-color="#103b85"/><stop offset="1" stop-color="#1e7ad9"/></linearGradient>
+  <linearGradient id="fold" x1=".03" y1=".83" x2=".92" y2=".22"><stop stop-color="#02071c"/><stop offset=".44" stop-color="#123d86"/><stop offset=".71" stop-color="#58aefb"/><stop offset=".83" stop-color="#9ed5ff"/><stop offset=".94" stop-color="#286bb6"/><stop offset="1" stop-color="#122b62"/></linearGradient>
+  <linearGradient id="blue" x1=".07" y1=".83" x2=".83" y2=".05"><stop stop-color="#000719"/><stop offset=".56" stop-color="#0d4aa9"/><stop offset=".86" stop-color="#8dcbff"/><stop offset="1" stop-color="#0c367d"/></linearGradient>
+  <linearGradient id="edge" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#090c1e"/><stop offset=".51" stop-color="#184f99"/><stop offset=".83" stop-color="#aad9ff"/><stop offset="1" stop-color="#1e55a2"/></linearGradient>
+</defs>
+<path fill="url(#bg)" d="M0 0h1320v820H0z"/>
+<path fill="url(#fold)" d="M-165 828C60 571 152 373 395 340c199-27 301 91 483 32 170-55 273-208 478-393l65 209C1188 451 1106 615 860 686c-240 68-390-68-573-10-140 45-192 142-228 233Z"/>
+<path fill="url(#blue)" d="M-38 832c153-186 260-237 420-220 202 21 312 102 537-21 180-98 297-291 451-433l38 184c-171 200-254 357-471 458-96 45-204 65-378 46-199-22-337-28-492 95Z"/>
+<path fill="url(#edge)" d="M218 842c202-126 315 25 608-37 235-50 423-324 526-450l37 180c-87 137-220 288-363 361H218Z"/>
+</svg>

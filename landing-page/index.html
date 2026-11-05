@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090c">
+  <title>Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình &amp; Bảo Vệ Riêng Tư Cho Mac</title>
+  <meta name="description" content="Glance là ứng dụng bảo vệ màn hình miễn phí cho macOS. Tự động làm mờ màn hình khi quay đầu hoặc rời bàn làm việc bằng Camera và AirPods. 100% On-device, an toàn tuyệt đối.">
+  <meta name="keywords" content="ứng dụng chống nhìn trộm màn hình macbook, app che màn hình mac, glance screen privacy, mac screen privacy app, làm mờ màn hình khi rời bàn, bảo vệ riêng tư macbook, airpods head tracking privacy, glance mac">
+  <meta name="author" content="Dai Chung Hy">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="google-site-verification" content="b75L1h9clzyzzBzq-bzgeMKUe51kHpMaMYA1DC8Uk7k">
+  <link rel="canonical" href="https://glance-privacy.vercel.app/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://glance-privacy.vercel.app/">
+  <meta property="og:title" content="Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình &amp; Bảo Vệ Riêng Tư Cho Mac">
+  <meta property="og:description" content="Tự động làm mờ màn hình khi quay đầu hoặc rời bàn bằng Camera Vision và cảm biến AirPods. Miễn phí cho macOS Apple Silicon.">
+  <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/macbook-front.webp">
+  <meta property="og:locale" content="vi_VN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://glance-privacy.vercel.app/">
+  <meta name="twitter:title" content="Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình &amp; Bảo Vệ Riêng Tư Cho Mac">
+  <meta name="twitter:description" content="Tự động làm mờ màn hình khi quay đầu hoặc rời bàn bằng Camera Vision và cảm biến AirPods. Miễn phí cho macOS Apple Silicon.">
+  <meta name="twitter:image" content="https://glance-privacy.vercel.app/assets/product/macbook-front.webp">
+
+  <!-- Favicon & Icons -->
+  <link rel="icon" href="assets/product/glance-icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/product/glance-icon.png">
+
+  <!-- Preload hero asset for Core Web Vitals (LCP) -->
+  <link rel="preload" as="image" href="assets/product/macbook-front.webp" type="image/webp" fetchpriority="high">
+
+  <!-- Stylesheet & Scripts -->
+  <link rel="stylesheet" href="styles.css?v=1.15.0">
+  <script src="script.js?v=1.15.0" defer></script>
+  <script src="download-support.js?v=2" defer></script>
+
+  <!-- Structured Data: SoftwareApplication, FAQPage, Organization, WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://glance-privacy.vercel.app/#website",
+        "url": "https://glance-privacy.vercel.app/",
+        "name": "Glance — Screen Privacy App for Mac",
+        "description": "Ứng dụng chống nhìn trộm và tự động làm mờ màn hình khi quay đầu cho macOS",
+        "inLanguage": "vi"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://glance-privacy.vercel.app/#software",
+        "name": "Glance",
+        "alternateName": "Glance Screen Privacy",
+        "operatingSystem": "macOS 14.0+, Windows",
+        "applicationCategory": "SecurityApplication",
+        "applicationSubCategory": "Screen Privacy Utility",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "VND",
+          "availability": "https://schema.org/InStock"
+        },
+        "description": "Glance là ứng dụng bảo vệ quyền riêng tư màn hình cho Mac. Tự động nhận diện hướng quay đầu qua Camera Vision hoặc cảm biến chuyển động AirPods để làm mờ màn hình, chống nhìn trộm khi làm việc tại quán cafe, văn phòng hoặc nơi công cộng. Xử lý 100% on-device không lưu hình ảnh.",
+        "downloadUrl": "https://glance-privacy.vercel.app/assets/product/Glance-macOS-1.0.0.zip",
+        "softwareVersion": "1.0.0",
+        "fileSize": "2.8MB",
+        "image": "https://glance-privacy.vercel.app/assets/product/glance-icon.png",
+        "screenshot": "https://glance-privacy.vercel.app/assets/product/macbook-front.webp",
+        "author": {
+          "@type": "Person",
+          "name": "Dai Chung Hy",
+          "email": "daichunghy@gmail.com"
+        },
+        "featureList": [
+          "Tự động làm mờ một bên hoặc toàn màn hình khi quay đầu",
+          "Tự động che màn hình khi rời bàn làm việc",
+          "Hỗ trợ Camera Mac qua Apple Vision framework",
+          "Hỗ trợ theo dõi chuyển động đầu bằng tai nghe AirPods",
+          "Bảo mật tuyệt đối: 100% xử lý trên thiết bị (On-device), không gửi dữ liệu ra ngoài",
+          "Tự động tạm dừng làm mờ khi gọi video (FaceTime, Zoom, Teams)"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://glance-privacy.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Dùng Glance khi không có AirPods có được không?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Có. Camera tích hợp trên máy Mac thông qua Apple Vision Framework là hoàn toàn đủ để Glance nhận diện góc quay đầu và tự động làm mờ màn hình hoặc che màn hình khi bạn rời bàn làm việc."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Glance khác gì so với miếng dán chống nhìn trộm màn hình?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Miếng dán vật lý làm tối màn hình, giảm độ sắc nét Retina, đổi màu và có nguy cơ cấn vỡ màn hình MacBook khi gập máy. Glance là giải pháp phần mềm thông minh: màn hình luôn sáng rõ 100% chuẩn Retina khi bạn nhìn thẳng, và chỉ tự động làm mờ khi bạn quay đầu đi hoặc đứng dậy rời đi. Ứng dụng hoàn toàn miễn phí."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Dữ liệu hình ảnh từ camera có được gửi lên máy chủ không?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Hoàn toàn không. Glance hoạt động 100% trên thiết bị của bạn (On-device) thông qua Apple Vision Framework. Ứng dụng chỉ tính toán góc quay đầu tương đối, không ghi hình, không nhận diện danh tính và tuyệt đối không gửi bất kỳ hình ảnh nào ra mạng Internet."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Khi đang gõ phím hoặc gọi video thì màn hình có bị mờ không?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Glance thông minh tự động nhận diện khi bạn đang thao tác bàn phím hoặc chuột để giữ màn hình luôn rõ ràng. Khi bạn tham gia các cuộc gọi video như FaceTime, Zoom hay Microsoft Teams, Glance cũng tự động tạm ngừng làm mờ để không làm gián đoạn công việc."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Glance hỗ trợ những hệ điều hành nào?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Glance tối ưu tốt nhất cho macOS 14 (Sonoma) trở lên trên các dòng máy Mac dùng chip Apple Silicon (M1, M2, M3, M4). Ngoài ra, Glance có phiên bản thử nghiệm hỗ trợ Windows 10/11 chạy qua môi trường Python."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Tải và sử dụng Glance có mất phí không?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Glance hoàn toàn miễn phí cho tất cả người dùng, không có quảng cáo và không yêu cầu đăng ký tài khoản. Nếu thấy ứng dụng hữu ích, bạn có thể tự nguyện ủng hộ dự án qua PayOS trên trang web."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="product-nav">
+    <div class="nav-inner">
+      <a class="brand" href="#overview"><img src="assets/product/glance-icon.png" width="25" height="25" alt="Logo Glance">Glance</a>
+      <nav aria-label="Glance">
+        <a href="#tracking">Cách hoạt động</a>
+        <a href="#explore">Tính năng</a>
+        <a href="#privacy">Riêng tư</a>
+        <a href="#comparison">So sánh</a>
+        <a href="#faq">Hỏi đáp</a>
+      </nav>
+      <a class="button small" href="#download" data-smart-download>Tải về</a>
+    </div>
+  </header>
+
+  <main id="overview">
+    <section class="hero" id="hero">
+      <div class="hero-copy">
+        <p class="product-name">Glance — Ứng dụng bảo vệ màn hình cho Mac &amp; Windows</p>
+        <h1>Làm việc riêng tư</h1>
+        <p class="intro">Tự động làm mờ màn hình khi bạn quay đầu hoặc rời bàn. Bảo vệ thông tin nhạy cảm ở quán cafe, văn phòng mở và nơi công cộng.</p>
+        <div class="actions">
+          <a class="button" href="#download" data-smart-download>Tải về miễn phí</a>
+          <a class="text-link" href="#highlights">Tìm hiểu Glance <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <div class="hero-art" id="hero-art">
+        <div class="hero-photo-wrap">
+          <img class="hero-photo" src="assets/product/macbook-front.webp" alt="Ứng dụng bảo vệ màn hình chống nhìn trộm Glance trên MacBook Pro" width="1400" height="739" fetchpriority="high">
+          <img class="hero-photo hero-photo-blur" src="assets/product/macbook-front.webp" alt="" width="1400" height="739" aria-hidden="true">
+        </div>
+      </div>
+    </section>
+
+
+    <section class="highlights" id="highlights" aria-labelledby="highlights-title">
+      <div class="wrap">
+        <h2 id="highlights-title">Cách hoạt động</h2>
+        <div class="bento">
+          <article class="tile tile-modes">
+            <div class="tile-copy"><h3>Chế độ làm mờ</h3></div>
+            <div class="mode-preview" aria-hidden="true">
+              <div><div class="mini-display mini-side"><i></i><i></i><i></i></div><span>Một bên</span></div>
+              <div><div class="mini-display mini-full"><i></i><i></i><i></i></div><span>Toàn màn hình</span></div>
+            </div>
+          </article>
+          <article class="tile tile-away">
+            <div class="tile-away-screen" aria-hidden="true">
+              <div class="mini-menubar"><span>Ghi chú</span><span>9:41</span></div>
+              <div class="away-document"><strong>Kế hoạch dự án</strong><i></i><i></i><i></i></div>
+              <div class="away-glass"></div>
+            </div>
+            <div class="tile-copy"><h3>Che màn hình khi rời bàn</h3></div>
+          </article>
+          <article class="tile tile-symbols" aria-label="Các cách sử dụng Glance">
+            <div class="symbol-item">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="15" width="46" height="34" rx="8"/><circle cx="32" cy="32" r="9"/><circle cx="32" cy="32" r="3"/></svg>
+              <span>Camera</span>
+            </div>
+            <div class="symbol-item">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 18c-4 0-7 3-7 7v9c0 4 3 6 6 6h3v12c0 3 2 5 5 5s5-2 5-5V28c0-6-5-10-12-10Zm30 0c4 0 7 3 7 7v9c0 4-3 6-6 6h-3v12c0 3-2 5-5 5s-5-2-5-5V28c0-6 5-10 12-10Z"/><path d="M15 29h6m22 0h6"/></svg>
+              <span>AirPods</span>
+            </div>
+            <div class="symbol-item">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="7" y="12" width="50" height="36" rx="6"/><path d="M32 12v36M18 55h28"/></svg>
+              <span>Làm mờ<br>màn hình</span>
+            </div>
+          </article>
+          <article class="tile tile-menu">
+            <div class="tile-copy"><h3>Thanh menu</h3></div>
+            <div class="menu-preview" aria-hidden="true">
+              <div class="native-bar"><img src="assets/product/glance-icon.png" alt="" width="17" height="17"><span>9:41</span></div>
+              <div class="popover-art">
+                <div class="popover-title"><img src="assets/product/glance-icon.png" alt="" width="30" height="30"><b>Glance</b><span class="toggle-art"></span></div>
+                <div class="setting"><span>Nhận diện bằng</span><span class="segment"><b>Camera</b><span>AirPods</span></span></div>
+                <div class="setting"><span>Độ nhạy</span><span class="segment"><span>Thấp</span><b>Vừa</b><span>Cao</span></span></div>
+                <div class="setting"><span>Làm mờ</span><span class="segment"><b>Một bên</b><span>Toàn màn hình</span></span></div>
+              </div>
+            </div>
+          </article>
+          <article class="tile tile-sensitivity">
+            <div class="tile-copy"><h3>Linh hoạt độ nhạy của cảm biến camera</h3></div>
+            <div class="sensitivity-visual" aria-hidden="true">
+              <div class="sensitivity-camera"><span></span></div>
+              <div class="degree-scale"><span>14°</span><strong>20°</strong><span>28°</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="tracking dark" id="tracking" aria-labelledby="tracking-title">
+      <div class="wrap section-intro"><h2 id="tracking-title">Camera trên Mac</h2></div>
+      <div class="sequence" id="sequence">
+        <div class="sequence-pin">
+          <div class="sequence-copy">
+            <span class="angle" id="angle" aria-hidden="true">0°</span>
+            <p id="scene-label">Khi bạn nhìn thẳng, cả màn hình đều rõ.</p>
+          </div>
+          <div class="sequence-frame"><div class="device device-sequence" data-device data-state="center" aria-hidden="true"></div></div>
+          <div class="timeline" aria-hidden="true"><i></i></div>
+        </div>
+      </div>
+      <div class="wrap camera-capabilities" aria-label="Tính năng khi dùng camera">
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 7H9a3 3 0 0 0-3 3v5m28-8h5a3 3 0 0 1 3 3v5M6 33v5a3 3 0 0 0 3 3h5m28-8v5a3 3 0 0 1-3 3h-5M16 19v3m16-3v3m-8-3-1 6h2m-9 5c4 4 12 4 16 0"/></svg><span>Căn hướng nhìn</span></article>
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 36a16 16 0 0 1 32 0M24 36l9-12M11 36h26"/><circle cx="24" cy="36" r="2"/></svg><span>Độ nhạy<br>14° · 20° · 28°</span></article>
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="10" width="38" height="27" rx="5"/><path d="M24 10v27M18 42h12"/></svg><span>Một bên hoặc<br>toàn màn hình</span></article>
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 11h7a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H15a4 4 0 0 1-4-4v-5M6 21h23m-7-7 7 7-7 7"/></svg><span>Khi rời bàn</span></article>
+      </div>
+    </section>
+
+    <section class="pods" id="airpods" aria-labelledby="pods-title">
+      <div class="pods-track" id="pods-track">
+        <div class="pods-pin">
+          <div class="wrap section-intro pods-intro"><h2 id="pods-title">Cảm biến hoạt động qua Camera và Airpods</h2></div>
+          <div class="pods-stage" id="pods-stage">
+            <img class="pods-still" src="assets/product/airpods-still.webp" width="900" height="600" alt="" loading="lazy">
+            <canvas id="pods-canvas" aria-hidden="true"></canvas>
+            <div class="pods-figure"><span id="pods-angle">0°</span><small>Góc quay đầu</small></div>
+            <div class="pods-motion" aria-hidden="true">
+              <div class="motion-chip-wrap"><div class="motion-orbit motion-orbit-a"></div><div class="motion-orbit motion-orbit-b"></div><div class="motion-chip"><span></span></div></div>
+              <div class="motion-name">Cảm biến chuyển động</div>
+              <div class="motion-flow"><span>AirPods</span><svg viewBox="0 0 40 12"><path d="M1 6h33m-5-5 5 5-5 5"/></svg><span>Góc quay đầu</span><svg viewBox="0 0 40 12"><path d="M1 6h33m-5-5 5 5-5 5"/></svg><span>Màn hình</span></div>
+              <div class="motion-screen"><div class="motion-screen-top"><i></i><i></i><i></i></div><div class="motion-screen-content"><b></b><span></span><span></span><span></span></div><div class="motion-screen-veil"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wrap pods-capabilities">
+        <div><strong>Chuyển động đầu</strong><span>AirPods tương thích</span></div>
+        <div><strong>Góc quay</strong><span>So với hướng đã căn giữa</span></div>
+        <div><strong>Làm mờ màn hình</strong><span>Một bên hoặc toàn màn hình</span></div>
+      </div>
+    </section>
+
+
+    <section class="explore dark" id="explore" aria-labelledby="explore-title">
+      <div class="wrap explore-heading"><h2 id="explore-title">Tìm hiểu Glance</h2></div>
+      <div class="tour" id="tour" data-topic="side">
+        <div class="tour-choices" role="group" aria-label="Chọn tính năng để xem">
+          <button type="button" data-topic="side" aria-pressed="true"><span class="tour-mark" aria-hidden="true"></span>Vùng làm mờ</button>
+          <button type="button" data-topic="sensitivity" aria-pressed="false"><span class="tour-mark" aria-hidden="true"></span>Độ nhạy</button>
+          <button type="button" data-topic="away" aria-pressed="false"><span class="tour-mark" aria-hidden="true"></span>Khi rời bàn</button>
+          <button type="button" data-topic="call" aria-pressed="false"><span class="tour-mark" aria-hidden="true"></span>Cuộc gọi video</button>
+          <button type="button" data-topic="align" aria-pressed="false"><span class="tour-mark" aria-hidden="true"></span>Căn hướng nhìn</button>
+          <button type="button" data-topic="input" aria-pressed="false"><span class="tour-mark" aria-hidden="true"></span>Bàn phím và chuột</button>
+        </div>
+        <div class="tour-visual">
+          <div class="device device-tour" data-device data-state="right" aria-hidden="true"></div>
+
+          <div class="feature-art art-sensitivity" aria-hidden="true">
+            <div class="gauge-scene">
+              <svg viewBox="0 0 460 320" role="presentation">
+                <defs><linearGradient id="gauge-blue" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#1b61c2"/><stop offset="1" stop-color="#83c8ff"/></linearGradient></defs>
+                <path class="gauge-track" d="M74 255 A156 156 0 0 1 386 255"/>
+                <path class="gauge-sweep" d="M74 255 A156 156 0 0 1 386 255"/>
+                <path class="gauge-tick" d="M91 220l15 4 M148 126l10 12 M230 98v16 M312 126l-10 12 M369 220l-15 4"/>
+              </svg>
+              <div class="gauge-value"><strong>24°</strong><span>Góc quay đầu</span></div>
+              <div class="gauge-status"><i></i><span id="gauge-status">Màn hình mờ</span></div>
+            </div>
+          </div>
+
+          <div class="feature-art art-away" aria-hidden="true">
+            <div class="away-scene">
+              <div class="away-window">
+                <div class="away-window-bar"><i></i><i></i><i></i></div>
+                <div class="away-window-content"><b></b><span></span><span></span><span></span></div>
+                <div class="away-window-cover"></div>
+              </div>
+              <svg class="away-person" viewBox="0 0 100 120" role="presentation"><circle cx="50" cy="25" r="17"/><path d="M18 109V94c0-23 13-38 32-38s32 15 32 38v15Z"/></svg>
+            </div>
+          </div>
+
+          <div class="feature-art art-call" aria-hidden="true">
+            <div class="call-story"><div class="call-screen"><img src="assets/product/facetime-call-apple.png" alt="" loading="lazy"><div class="call-screen-veil"></div></div><div class="story-status"><i></i><span>Glance tạm ngừng làm mờ</span></div></div>
+          </div>
+          <div class="feature-art art-align" aria-hidden="true">
+            <div class="align-story"><div class="align-reticle"><div class="align-person"><svg viewBox="0 0 160 180"><circle cx="80" cy="58" r="33"/><path d="M25 165c2-40 23-61 55-61s53 21 55 61"/></svg></div><span class="align-cross"></span></div><div class="align-panel"><span>Nhìn thẳng vào màn hình</span><strong>Calibrate Center</strong><span class="align-check">✓ &nbsp; Hướng nhìn thẳng · 0°</span></div></div>
+          </div>
+          <div class="feature-art art-input" aria-hidden="true">
+            <div class="input-story"><div class="input-window"><div class="input-window-bar"><i></i><i></i><i></i><span>Ghi chú</span></div><div class="input-window-body"><strong>Kế hoạch dự án</strong><p>Những việc cần hoàn thành<span class="typing-cursor">|</span></p><div class="input-lines"><i></i><i></i><i></i></div></div></div><div class="input-feedback"><div class="input-keyboard"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>Đang thao tác</span><b> Màn hình vẫn rõ</b></div></div>
+          </div>
+          <div class="tour-chip" id="tour-chip" aria-hidden="true" hidden><i></i><span></span></div>
+          <div class="tour-options" id="tour-modes" role="group" aria-label="So sánh vùng làm mờ">
+            <button type="button" data-preview="right" aria-pressed="true">Một bên</button>
+            <button type="button" data-preview="away" aria-pressed="false">Toàn màn hình</button>
+          </div>
+          <div class="tour-options" id="tour-thresholds" role="group" aria-label="Thử ngưỡng làm mờ ở góc 24 độ" hidden>
+            <button type="button" data-threshold="14" aria-pressed="false">14°</button>
+            <button type="button" data-threshold="20" aria-pressed="true">20°</button>
+            <button type="button" data-threshold="28" aria-pressed="false">28°</button>
+          </div>
+
+        </div>
+        <div class="tour-copy" id="tour-copy" aria-live="polite">
+          <strong>Chế độ làm mờ</strong>
+          <p>Chế độ một bên giữ phần bạn đang nhìn rõ nét. Bạn cũng có thể chọn làm mờ toàn màn hình khi quay đầu.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="scenarios dark" aria-label="Glance hoạt động như thế nào">
+      <div class="wrap scenario-grid">
+        <article class="scenario-card">
+          <div class="scenario-image scenario-facing"><div class="scenario-person" aria-hidden="true"><svg viewBox="0 0 80 80"><circle cx="40" cy="24" r="14"/><path d="M12 72c1-21 11-31 28-31s27 10 28 31"/></svg></div><div class="device scenario-device" data-device data-state="right" aria-hidden="true"></div></div>
+          <p>Ứng dụng tự động làm mờ màn hình khi bạn quay mặt đi.</p>
+        </article>
+        <article class="scenario-card">
+          <div class="scenario-image scenario-control"><div class="scenario-settings" aria-hidden="true"><div class="scenario-settings-title"><img src="assets/product/glance-icon.png" alt="" width="30" height="30"><strong>Glance</strong><i></i></div><div><span>Nhận diện bằng</span><b>Camera</b></div><div><span>Kiểu làm mờ</span><b>Một bên</b></div><div><span>Độ nhạy</span><b>20°</b></div></div></div>
+          <p><strong>Theo cách của bạn.</strong> Chọn camera hoặc AirPods, rồi chọn vùng làm mờ.</p>
+        </article>
+        <article class="scenario-card">
+          <div class="scenario-image scenario-away"><div class="scenario-depart" aria-hidden="true"><svg viewBox="0 0 80 80"><circle cx="40" cy="24" r="14"/><path d="M12 72c1-21 11-31 28-31s27 10 28 31"/></svg></div><div class="device scenario-device" data-device data-state="away" aria-hidden="true"></div></div>
+          <p><strong>Rời bàn.</strong> Màn hình được làm mờ khi camera không còn thấy bạn và bạn ngừng thao tác.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="privacy dark" id="privacy" aria-labelledby="privacy-title">
+      <div class="privacy-run" id="privacy-run">
+        <div class="privacy-pin">
+          <div class="wrap privacy-heading"><h2 id="privacy-title"><span>Quyền riêng tư</span><span>ngay trên máy Mac</span></h2></div>
+          <ul class="privacy-rail" id="privacy-rail" aria-label="Các tính năng về quyền riêng tư và hiệu năng" tabindex="0">
+
+          <li class="privacy-card">
+            <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="24" height="17" rx="3"/><path d="M2 26h28M12 26h8"/></svg>
+            <h3>Xử lý ngay trên Mac</h3>
+            <p>Glance không gửi hình ảnh từ camera lên máy chủ.</p>
+            <button type="button" class="card-more" aria-label="Xem chi tiết về xử lý ngay trên mac"><span aria-hidden="true">+</span></button>
+            <template>Glance dùng Vision trên Mac để đọc góc quay đầu từ các khung hình camera. Quá trình nhận diện và làm mờ không cần gửi hình ảnh hay nội dung màn hình lên máy chủ.</template>
+          </li>
+          <li class="privacy-card">
+            <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H7a3 3 0 0 0-3 3v4m17-7h4a3 3 0 0 1 3 3v4M4 21v4a3 3 0 0 0 3 3h4m17-7v4a3 3 0 0 1-3 3h-4M11 12v3m10-3v3m-5-2-1 5h2m-7 3c2.9 3.1 9.1 3.1 12 0"/></svg>
+            <h3>Không cần đăng ký khuôn mặt</h3>
+            <p>Camera dùng hình ảnh để ước lượng hướng quay đầu.</p>
+            <button type="button" class="card-more" aria-label="Xem chi tiết về không cần đăng ký khuôn mặt"><span aria-hidden="true">+</span></button>
+            <template>Bạn không cần tạo hồ sơ nhận diện khuôn mặt. Glance đọc góc đầu tương đối so với hướng nhìn thẳng mà bạn đã căn. Ứng dụng không dùng camera để xác định danh tính của bạn.</template>
+          </li>
+          <li class="privacy-card">
+            <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18v-2a11 11 0 0 1 22 0v2"/><rect x="4" y="16" width="7" height="11" rx="3"/><rect x="21" y="16" width="7" height="11" rx="3"/></svg>
+            <h3>Dùng AirPods thay cho camera</h3>
+            <p>AirPods tương thích cung cấp dữ liệu chuyển động.</p>
+            <button type="button" class="card-more" aria-label="Xem chi tiết về cách dùng AirPods"><span aria-hidden="true">+</span></button>
+            <template>Khi chọn AirPods, Glance dùng cảm biến chuyển động của tai nghe để theo dõi góc quay đầu và không dùng camera để nhận diện. Nếu muốn Glance che màn hình khi bạn rời chỗ, hãy chọn chế độ camera.</template>
+          </li>
+          <li class="privacy-card">
+            <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8" width="17" height="16" rx="4"/><path d="m20.5 13 7-4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1l-7-4"/></svg>
+            <h3>Khi gọi video</h3>
+            <p>Glance tạm ngừng làm mờ khi nhận ra một số ứng dụng gọi video.</p>
+            <button type="button" class="card-more" aria-label="Xem chi tiết về cuộc gọi video"><span aria-hidden="true">+</span></button>
+            <template>Glance nhận biết khi Zoom, FaceTime, Teams và một số ứng dụng tương thích đang ở phía trước. Ứng dụng cũng tạm ngừng làm mờ nếu phiên camera bị gián đoạn. Khả năng nhận biết tùy vào ứng dụng và cách bạn gọi video.</template>
+          </li>
+          <li class="privacy-card">
+            <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m18 3-12 15h9l-1 11 12-15h-9l1-11Z"/></svg>
+            <h3>Hiệu ứng làm mờ của macOS</h3>
+            <p>Camera dùng cấu hình độ phân giải thấp.</p>
+            <button type="button" class="card-more" aria-label="Xem chi tiết về hiệu ứng macOS"><span aria-hidden="true">+</span></button>
+            <template>Ở chế độ camera, Glance giới hạn tần suất phân tích và bỏ qua các khung hình đến trễ. Phần làm mờ dùng hiệu ứng của macOS. Bạn truy cập các thiết lập từ thanh menu.</template>
+          </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="context places-section" id="context-frame" aria-label="Nơi sử dụng Glance">
+      <div class="wrap places-heading"><h2>Làm việc ở mọi nơi.</h2></div>
+      <div class="places-rail" tabindex="0" role="region" aria-label="Các địa điểm sử dụng Glance. Cuộn ngang để xem thêm.">
+        <figure class="place-card"><img src="assets/product/place-cafe.webp" width="1920" height="1080" alt="Làm việc trên máy tính trong quán cà phê với Glance" loading="lazy"><figcaption>Quán cà phê</figcaption></figure>
+        <figure class="place-card"><img src="assets/product/place-office.webp" width="1920" height="1080" alt="Làm việc trên máy tính tại văn phòng mở với Glance" loading="lazy"><figcaption>Văn phòng</figcaption></figure>
+        <figure class="place-card"><img src="assets/product/place-classroom.webp" width="1920" height="1080" alt="Sử dụng máy tính trong lớp học" loading="lazy"><figcaption>Lớp học</figcaption></figure>
+        <figure class="place-card"><img src="assets/product/place-library2.webp" width="1920" height="1080" alt="Học tập với máy tính trong thư viện" loading="lazy"><figcaption>Thư viện</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="comparison dark" id="comparison" aria-labelledby="comparison-title">
+      <div class="wrap">
+        <div class="section-intro"><h2 id="comparison-title">Glance và Miếng dán chống nhìn trộm</h2></div>
+        <p class="comparison-lead">Giải pháp phần mềm thông minh thay thế miếng dán lọc sáng vật lý truyền thống.</p>
+        <div class="comparison-grid">
+          <div class="comparison-card comp-physical">
+            <span class="comp-badge">Miếng dán vật lý</span>
+            <h3>Miếng dán chống nhìn trộm</h3>
+            <ul>
+              <li class="comp-neg">Làm giảm độ sáng và độ tương phản màn hình Retina</li>
+              <li class="comp-neg">Nguy cơ cấn vỡ màn hình MacBook khi gập máy</li>
+              <li class="comp-neg">Bất tiện: Phải tháo ra lắp vào thường xuyên</li>
+              <li class="comp-neg">Tốn chi phí mua sắm phụ kiện (400.000đ – 1.000.000đ)</li>
+            </ul>
+          </div>
+          <div class="comparison-card comp-glance">
+            <span class="comp-badge highlight">Phần mềm Glance</span>
+            <h3>Glance Screen Privacy</h3>
+            <ul>
+              <li class="comp-pos">Giữ nguyên 100% độ sáng và màu sắc Retina khi nhìn thẳng</li>
+              <li class="comp-pos">Tự động làm mờ tức thì chỉ khi bạn quay đầu hoặc rời máy</li>
+              <li class="comp-pos">Không chạm vào phần cứng, an toàn tuyệt đối cho màn hình</li>
+              <li class="comp-pos">Hoàn toàn miễn phí, cài đặt và sử dụng chỉ trong 1 phút</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="download" id="download" aria-labelledby="download-title">
+      <div class="wrap">
+        <img class="download-icon" src="assets/product/glance-icon.png" alt="Biểu tượng ứng dụng Glance Screen Privacy" width="82" height="82" loading="lazy">
+        <h2 id="download-title">Tải Glance</h2>
+        <p class="requirements">Glance miễn phí. Bạn không cần thanh toán để sử dụng.</p>
+        <div class="download-options">
+          <a class="button download-mac" href="assets/product/Glance-macOS-1.0.0.zip" download>Tải cho Mac Apple silicon</a>
+          <a class="button download-windows" href="assets/product/Glance-Windows.zip" download>Tải cho Windows</a>
+        </div>
+        <p class="requirements" id="download-requirements">Mac · macOS 14 trở lên · Apple silicon</p>
+        <div class="install-guides" aria-label="Hướng dẫn cài đặt">
+          <details class="install-card" open>
+            <summary>Cài đặt trên Mac</summary>
+            <div class="install-visual mac-install-visual" aria-hidden="true"><div class="install-file"><img src="assets/product/glance-icon.png" alt="Biểu tượng Glance.app"><span>Glance.app</span></div><svg viewBox="0 0 60 20"><path d="M2 10h50m-7-7 7 7-7 7"/></svg><div class="install-folder"><div><span>⌘</span></div><span>Ứng dụng</span></div></div>
+            <ol>
+              <li>Mở tệp <strong>Glance-macOS-1.0.0.zip</strong> trong thư mục Tải về.</li>
+              <li>Kéo <strong>Glance.app</strong> vào thư mục <strong>Ứng dụng</strong> và mở ứng dụng.</li>
+              <li>Nếu macOS báo không thể xác minh, đóng cảnh báo. Vào <strong>Cài đặt hệ thống → Quyền riêng tư &amp; Bảo mật</strong> và chọn <strong>Vẫn mở</strong> bên cạnh thông báo về Glance.</li>
+              <li>Xác nhận bằng mật khẩu hoặc Touch ID nếu được yêu cầu. Mở Glance và cho phép truy cập camera nếu bạn dùng chế độ camera.</li>
+            </ol>
+            <a class="apple-guide-visual" href="https://support.apple.com/vi-vn/102445" target="_blank" rel="noopener noreferrer"><img src="assets/product/macos-open-anyway-apple.png" alt="Cài đặt Quyền riêng tư và Bảo mật trên macOS, với nút Vẫn mở. Hình của Apple." loading="lazy"><span>Xem hướng dẫn từ Apple ↗</span></a>
+            <a class="apple-guide-visual" href="https://support.apple.com/vi-vn/guide/mac-help/mchlf6d108da/mac" target="_blank" rel="noopener noreferrer"><img src="assets/product/macos-camera-apple.png" alt="Cài đặt quyền truy cập camera trên macOS. Hình của Apple." loading="lazy"><span>Xem cách cấp quyền camera ↗</span></a>
+            <p class="install-note">Bản Mac chưa được Apple xác minh. Chỉ tiếp tục khi bạn tin tưởng nguồn tải và tệp không bị thay đổi. Nếu macOS báo ứng dụng bị hỏng hoặc có phần mềm độc hại, đừng mở tệp.</p>
+          </details>
+          <details class="install-card windows-install-card" open>
+            <summary>Cài đặt trên Windows</summary>
+            <div class="install-visual windows-install-visual" aria-hidden="true"><div class="windows-screen"><div class="windows-logo"><i></i><i></i><i></i><i></i></div></div><div class="windows-foot"></div><div class="windows-file-row"><span>Glance-Windows.zip</span><span>→</span><strong>start_windows.bat</strong></div></div>
+            <ol>
+              <li>Cài <a href="https://www.python.org/downloads/windows/" target="_blank" rel="noopener noreferrer">Python 3.11 hoặc 3.12</a> và Python Launcher cho Windows.</li>
+              <li>Tải <strong>Glance-Windows.zip</strong>. Nhấp chuột phải vào tệp, chọn <strong>Trích xuất tất cả</strong>.</li>
+              <li>Mở thư mục vừa giải nén và chạy <strong>start_windows.bat</strong>. Lần đầu cần kết nối mạng để cài thư viện.</li>
+              <li>Trong Glance, chọn <strong>Bật camera</strong> và cho phép ứng dụng trên máy tính truy cập camera trong Windows.</li>
+            </ol>
+            <div class="windows-app-guide" aria-hidden="true"><div class="windows-app-title">Glance <span>— &nbsp; □ &nbsp; ×</span></div><div class="windows-app-body"><strong>Glance</strong><span>Camera</span><div class="windows-guide-actions"><b>Bật camera</b><b>Che màn hình ngay</b></div></div></div>
+            <p class="install-note">Gói Windows chạy từ mã nguồn, cần Python. Bản này chưa được kiểm thử trên máy Windows thực tế và chưa có tệp .exe. Tính năng hiện có dùng camera để phát hiện khi bạn rời máy.</p>
+            <a href="https://support.microsoft.com/vi-vn/windows/hardware/camera/camera-doesn-t-work-in-windows" target="_blank" rel="noopener noreferrer">Xem hướng dẫn quyền camera của Microsoft ↗</a>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="questions wrap" aria-label="Câu hỏi thường gặp" id="faq">
+      <h2>Câu hỏi thường gặp</h2>
+      <details>
+        <summary>Dùng Glance khi không có AirPods có được không?</summary>
+        <p>Có. Camera tích hợp trên máy Mac thông qua Apple Vision Framework là hoàn toàn đủ để Glance nhận diện góc quay đầu và tự động làm mờ màn hình hoặc che màn hình khi bạn rời bàn làm việc.</p>
+      </details>
+      <details>
+        <summary>Glance khác gì so với miếng dán chống nhìn trộm màn hình?</summary>
+        <p>Miếng dán vật lý làm tối màn hình, giảm độ sắc nét Retina, đổi màu và có nguy cơ cấn vỡ màn hình MacBook khi gập máy. Glance là giải pháp phần mềm thông minh: màn hình luôn sáng rõ 100% chuẩn Retina khi bạn nhìn thẳng, và chỉ tự động làm mờ khi bạn quay đầu đi hoặc đứng dậy rời đi. Ứng dụng hoàn toàn miễn phí.</p>
+      </details>
+      <details>
+        <summary>Dữ liệu hình ảnh từ camera có được gửi lên máy chủ không?</summary>
+        <p>Hoàn toàn không. Glance hoạt động 100% trên thiết bị của bạn (On-device) thông qua Apple Vision Framework. Ứng dụng chỉ tính toán góc quay đầu tương đối, không ghi hình, không nhận diện danh tính và tuyệt đối không gửi bất kỳ hình ảnh nào ra mạng Internet.</p>
+      </details>
+      <details>
+        <summary>Khi đang gõ phím hoặc gọi video thì màn hình có bị mờ không?</summary>
+        <p>Glance thông minh tự động nhận diện khi bạn đang thao tác bàn phím hoặc chuột để giữ màn hình luôn rõ ràng. Khi bạn tham gia các cuộc gọi video như FaceTime, Zoom hay Microsoft Teams, Glance cũng tự động tạm ngừng làm mờ để không làm gián đoạn công việc.</p>
+      </details>
+      <details>
+        <summary>Glance hỗ trợ những hệ điều hành nào?</summary>
+        <p>Glance tối ưu tốt nhất cho macOS 14 (Sonoma) trở lên trên các dòng máy Mac dùng chip Apple Silicon (M1, M2, M3, M4). Ngoài ra, Glance có phiên bản thử nghiệm hỗ trợ Windows 10/11 chạy qua môi trường Python.</p>
+      </details>
+      <details>
+        <summary>Tải và sử dụng Glance có mất phí không?</summary>
+        <p>Glance hoàn toàn miễn phí cho tất cả người dùng, không có quảng cáo và không yêu cầu đăng ký tài khoản. Nếu thấy ứng dụng hữu ích, bạn có thể tự nguyện ủng hộ dự án qua PayOS trên trang web.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <strong>Glance</strong> — Ứng dụng bảo vệ màn hình &amp; chống nhìn trộm
+      </div>
+      <div class="footer-contact">
+        <a href="ung-ho.html">Ủng hộ dự án</a>
+        <a href="mailto:daichunghy@gmail.com">daichunghy@gmail.com</a>
+        <a href="tel:0942149926">0942 149 926</a>
+        <a href="#overview">Về đầu trang ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="feature-detail" id="feature-detail" aria-labelledby="feature-detail-title">
+    <form method="dialog"><button class="close" aria-label="Đóng" type="submit">×</button></form>
+    <h2 id="feature-detail-title"></h2>
+    <p id="feature-detail-copy"></p>
+  </dialog>
+
+  <template id="device-template">
+    <div class="display-case">
+      <div class="display" aria-hidden="true">
+        <div class="desktop">
+          <div class="desktop-menu"><strong>Finder</strong><span>Tệp</span><span>Sửa</span><span>Hiển thị</span><span class="desktop-time"><img src="assets/product/glance-icon.png" width="14" height="14" alt="">9:41</span></div>
+          <div class="notch"></div>
+          <div class="work-window">
+            <div class="window-bar"><i></i><i></i><i></i><span>Ghi chú</span></div>
+            <div class="work-body">
+              <div class="work-sidebar"><b>Thư mục</b><span>Ghi chú</span><span>Công việc</span><span>Cá nhân</span></div>
+              <div class="work-doc"><span>Thứ tư, 4 tháng 11</span><strong>Kế hoạch dự án</strong><p>Những việc cần chốt trước buổi họp tuần này.</p><ul><li>Rà lại phạm vi và lịch bàn giao</li><li>Đối chiếu ngân sách với kế hoạch</li><li>Gửi tài liệu cho nhóm dự án</li></ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="privacy-layer privacy-layer-left"></div><div class="privacy-layer privacy-layer-right"></div><div class="privacy-layer privacy-layer-away"></div>
+      </div>
+    </div>
+    <div class="device-base" aria-hidden="true"><i></i></div>
+  </template>
+</body>
+</html>

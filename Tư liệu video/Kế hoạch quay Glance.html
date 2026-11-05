@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kế hoạch quay Glance</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:clamp(22px,6vw,72px);font:11pt/1.55 Calibri,"Segoe UI",sans-serif;background:#f4f6fa;color:#17191e}
+main{max-width:1000px;margin:auto}
+h1{margin:0 0 14px;font-size:25pt;line-height:1.1}
+p,figure{margin:0}
+a{color:#075bb3}
+.lead{max-width:68ch;color:#454b55}
+.reference{margin-block:26px;background:white;padding:18px;border-radius:14px}
+.reference img{width:100%;height:auto;display:block;border-radius:9px;background:#08090c}
+figcaption{margin-top:10px;color:#4b515e}
+.shot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;background:#fff;padding:16px;border-radius:14px;margin:12px 0;align-items:center}
+.shot img{display:block;width:100%;height:auto;border-radius:9px}
+.shot b{font-size:12pt}
+.shot p{margin-top:5px}
+.end{margin-top:26px;max-width:76ch}
+@media(max-width:640px){.shot{grid-template-columns:1fr}.shot img{max-height:285px;object-fit:contain;background:#111215}}
+</style>
+</head>
+<body><main>
+<h1>Kế hoạch quay Glance</h1>
+<p class="lead">Video khoảng 16 giây, tỷ lệ 16:9. Dùng nền đen, ánh xanh dương và một góc máy cố định ở các cảnh làm mờ để người xem nhận ra phần nào trên cùng một màn hình đang thay đổi.</p>
+<figure class="reference"><img src="Tham%20chiếu%20khung%20máy%20Apple.webp" alt="Khung MacBook Pro của Apple, nhìn thẳng với ánh sáng tập trung vào màn hình"><figcaption>Tham khảo cách Apple đặt MacBook giữa nền đen và giữ viền máy vừa đủ sáng. <a href="https://www.apple.com/vn/macbook-pro/proled-xdr-display/">Xem trang MacBook Pro</a>. <a href="https://www.tryglance.app/#design">Xem cách TryGlance trình diễn trạng thái ứng dụng</a>.</figcaption></figure>
+<div class="shot"><img src="02%20Nhìn%20thẳng.png" alt="Màn hình MacBook rõ nét khi nhìn thẳng"><div><b>0 đến 3 giây · Mở máy</b><p>Quay chính diện một chiếc MacBook đang mở tài liệu công việc. Cho người xem đủ thời gian thấy nội dung ban đầu rõ trên toàn màn hình.</p></div></div>
+<div class="shot"><img src="03%20Quay%2024%20độ.png" alt="Ở góc quay 24 độ, một phần tài liệu được phủ mờ"><div><b>3 đến 7 giây · Quay đầu</b><p>Giữ nguyên góc máy. Người dùng quay đầu sang phải quá ngưỡng mặc định 20°. Làm mờ dần nửa trái và giữ phần còn lại rõ nét. Nếu dùng số 24° trên video, đối chiếu với góc Glance hiển thị khi quay.</p></div></div>
+<div class="shot"><img src="04%20Rời%20bàn.png" alt="Toàn bộ màn hình chuyển sang lớp phủ mờ xám"><div><b>7 đến 11 giây · Rời bàn</b><p>Người dùng nhìn thẳng lại để màn hình rõ rồi đứng dậy khỏi khung hình. Khi lớp phủ xuất hiện, giữ khung máy thêm một nhịp để thấy toàn màn hình chuyển sang mờ xám.</p></div></div>
+<div class="shot"><img src="05%20AirPods.png" alt="Hai tai nghe AirPods và hộp sạc trong cảnh sản phẩm"><div><b>11 đến 14 giây · AirPods</b><p>Quay cận tai nghe rồi cắt sang cảnh người dùng đeo AirPods và quay đầu. Đặt hai cảnh ở hai chế độ riêng vì AirPods đo góc quay, còn camera xử lý tình huống rời bàn.</p></div></div>
+<div class="shot"><img src="06%20Thanh%20menu.png" alt="Các tùy chọn Glance trên thanh menu"><div><b>14 đến 16 giây · Thanh menu</b><p>Chụp cận ứng dụng Glance đang mở trên thanh menu. Dừng ở các tùy chọn nguồn nhận diện và độ nhạy, rồi kết bằng tên Glance.</p></div></div>
+<p class="end">Ưu tiên quay màn hình thật bằng camera ngoài nếu bản ghi màn hình không thu được lớp mờ của macOS. Gửi từng cảnh riêng ở 1080p, 30 hình/giây, giữ dư khoảng nửa giây ở hai đầu mỗi đoạn. Dùng tài liệu tự tạo, không đưa dữ liệu công việc thật vào khung hình.</p>
+</main></body></html>
