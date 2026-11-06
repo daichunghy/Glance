@@ -6,6 +6,7 @@
 - Tài khoản CLI đã xác nhận: `daichunghy`
 - Project ID: `prj_SEDntybf0gN7moygS4IZXFn9HqPZ`
 - Production deployment ngày 05/11/2026: `dpl_9PRgr5cKpGYWnaiz5AzsCNgP7KnC`
+- Production deployment ngày 06/11/2026: Tối ưu SEO On-page, cấu trúc tiêu đề H1, Schema JSON-LD đa thực thể (WebSite, BreadcrumbList, SoftwareApplication, FAQPage), bổ sung `site.webmanifest`, `llms.txt`, cập nhật `sitemap.xml` và `robots.txt` cho toàn bộ bot Google, Bing, AI.
 - Nguồn website: `landing-page/`. Triển khai các tệp giao diện, `api/donation`, `lib/donation.js` và tài nguyên cần thiết; không triển khai toàn bộ thư mục dự án hoặc tệp môi trường.
 - Địa chỉ `.vercel.app` do Vercel cấp. Team đang dùng gói Hobby, giới hạn cho mục đích cá nhân, phi thương mại theo chính sách Vercel.
 - Các biến `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `BASE_URL`, `GLANCE_DONATIONS_ENABLED` được cấu hình trên Vercel cho Production. Không lưu giá trị khóa trong mã nguồn.
