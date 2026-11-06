@@ -3,6 +3,8 @@ Glance for Linux
 Privacy & Anti-Peeping Screen Guard for Ubuntu, Fedora, Arch, Debian
 """
 
+import json
+import os
 import sys
 import time
 import threading
@@ -92,6 +94,7 @@ class GlanceLinuxController(QObject):
         self._last_posture_text = None
         self.share_until = None
         self._last_dark_notice = 0.0
+        self._load_posture_profile()
 
         self.signals.update_protection.connect(self.apply_protection)
 
@@ -111,17 +114,43 @@ class GlanceLinuxController(QObject):
             self.posture_guard.reset_timers()
             self._emit_posture_text("Tư thế: đang tắt")
 
+    # -- posture profile persistence (~/.glance/posture.json) --------------
+    @staticmethod
+    def _profile_path():
+        folder = os.path.join(os.path.expanduser("~"), ".glance")
+        os.makedirs(folder, exist_ok=True)
+        return os.path.join(folder, "posture.json")
+
+    def _load_posture_profile(self):
+        try:
+            with open(self._profile_path(), encoding="utf-8") as fh:
+                self.posture_guard.import_profile(json.load(fh))
+        except (OSError, ValueError):
+            pass
+
+    def _save_posture_profile(self):
+        profile = self.posture_guard.export_profile()
+        if profile is None:
+            return
+        try:
+            with open(self._profile_path(), "w", encoding="utf-8") as fh:
+                json.dump(profile, fh)
+        except OSError:
+            pass
+
     def calibrate_posture(self):
         if not self.posture_enabled:
             self._emit_posture_text("Tư thế: bật Cảnh báo tư thế trước khi căn chỉnh")
             return
         if self.posture_guard.calibrate():
-            self._emit_posture_text("Tư thế: đã ghi tư thế chuẩn")
+            self._save_posture_profile()
+            self._emit_posture_text("Tư thế: đã ghi tư thế chuẩn (đã lưu, mở lại không cần căn chỉnh)")
         else:
             self._emit_posture_text("Tư thế: chưa thấy khuôn mặt, hãy nhìn vào camera rồi thử lại")
 
     def dismiss_posture(self):
         self.posture_guard.dismiss_as_not_bad(time.monotonic())
+        self._save_posture_profile()
         self._emit_posture_text("Tư thế: đã ghi nhận — Glance bớt nhạy hơn một chút")
 
     def snooze_posture(self):
@@ -153,6 +182,10 @@ class GlanceLinuxController(QObject):
             if "hunch" in result.kinds:
                 names.append("gù lưng")
             text = "Tư thế: hãy ngồi thẳng lại — đang " + " và ".join(names)
+            if result.suggest_break:
+                text += " — nhắc nhiều rồi, thử đứng dậy giãn người 1 phút"
+            elif result.just_triggered and self.posture_guard.total_warnings <= 3:
+                text += " (mấy lần đầu chưa chuẩn là bình thường — chọn 'Không phải tư thế xấu' để Glance học theo bạn)"
             self._emit_posture_text(text)
             if result.just_triggered:
                 self.signals.posture_warning.emit(text)
@@ -204,6 +237,8 @@ class GlanceLinuxController(QObject):
                 raise RuntimeError("Không tải được bộ nhận diện.")
             no_face_count = 0
             read_failures = 0
+            last_state = None
+            frame_wait = 0.12
 
             while self.running:
                 # Protection off = camera truly released (LED off), not
@@ -274,7 +309,15 @@ class GlanceLinuxController(QObject):
                     if no_face_count >= 6:
                         self.process_face(None, is_present=False)
 
-                time.sleep(0.12)
+                # Battery-aware sampling: stretch toward ~3 FPS while the
+                # scene is stable, snap back to ~8 FPS on any change.
+                state = (len(faces) > 0, self.is_looking_away)
+                if state == last_state:
+                    frame_wait = min(0.30, frame_wait * 1.5)
+                else:
+                    frame_wait = 0.12
+                    last_state = state
+                time.sleep(frame_wait)
 
         except (RuntimeError, cv2.error) as exc:
             self.signals.camera_error.emit(str(exc))

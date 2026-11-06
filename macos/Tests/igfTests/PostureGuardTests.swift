@@ -112,3 +112,14 @@ private func feed(_ g: PostureGuard, now: Double, size: Double = baseSize, y: Do
     _ = feed(g, now: 70, size: baseSize * 1.30, y: baseY)
     #expect(!g.update(now: 71, facePresent: true, faceSize: baseSize * 1.30, centerY: baseY, pitch: basePitch).warning)
 }
+
+@Test func postureProfileRoundtrip() {
+    let g = calibratedGuard(hold: 1)
+    let data = g.exportProfile()
+    #expect(data != nil)
+    let fresh = PostureGuard(holdSeconds: 1)
+    #expect(fresh.importProfile(data!))
+    #expect(fresh.isCalibrated)
+    #expect(abs((fresh.baselineSize ?? 0) - baseSize) < 0.0001)
+    #expect(!fresh.importProfile(["size": 5.0, "centerY": 0.4]))
+}

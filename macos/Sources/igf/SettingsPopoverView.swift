@@ -383,7 +383,8 @@ struct SettingsPopoverView: View {
             var names: [String] = []
             if model.postureWarningKinds.contains(.turtleNeck) { names.append("Turtle neck") }
             if model.postureWarningKinds.contains(.hunch) { names.append("Slouching") }
-            return names.joined(separator: " + ") + " — sit up straight"
+            let base = names.joined(separator: " + ") + " — sit up straight"
+            return model.postureSuggestBreak ? base + ". Lots of reminders — try standing up for a minute" : base
         }
         switch model.postureStatus {
         case .good: return "Posture: Good"

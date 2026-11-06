@@ -1,6 +1,7 @@
 """Glance for Windows. Camera frames are processed locally and never saved."""
 import ctypes
 from ctypes import wintypes
+import json
 import os
 import queue
 import sys
@@ -56,6 +57,36 @@ def idle_seconds():
     if not user32.GetLastInputInfo(ctypes.byref(info)):
         return 0  # Do not assume inactivity if the OS cannot provide it.
     return ((kernel32.GetTickCount() - info.dwTime) & 0xffffffff) / 1000
+
+
+class _Rect(ctypes.Structure):
+    _fields_ = [("left", ctypes.c_long), ("top", ctypes.c_long),
+                ("right", ctypes.c_long), ("bottom", ctypes.c_long)]
+
+
+def foreground_is_fullscreen():
+    """True when another app fills the screen (slideshow, video, game).
+
+    During presentations and fullscreen media the privacy cover must not
+    pop up; the desktop shell itself does not count as fullscreen.
+    """
+    try:
+        hwnd = user32.GetForegroundWindow()
+        if not hwnd:
+            return False
+        class_name = ctypes.create_unicode_buffer(64)
+        user32.GetClassNameW(hwnd, class_name, 64)
+        if class_name.value in ("Progman", "WorkerW", "Shell_TrayWnd"):
+            return False
+        rect = _Rect()
+        if not user32.GetWindowRect(hwnd, ctypes.byref(rect)):
+            return False
+        width = user32.GetSystemMetrics(0)
+        height = user32.GetSystemMetrics(1)
+        return (rect.left <= 0 and rect.top <= 0
+                and rect.right >= width and rect.bottom >= height)
+    except (OSError, AttributeError):
+        return False
 
 
 class ScreenCover:
@@ -132,6 +163,10 @@ class App:
         self.posture_status = tk.StringVar(value="Tư thế: đang tắt.")
         self.posture_guard = PostureGuard()
         self.share_until = None
+        self.presentation_mode = False
+        # Saved posture calibrations, one per camera, under ~/.glance/
+        self._profiles = self._load_profiles()
+        self._apply_profile_for_camera(self.camera.get())
         self.make_ui()
         self.root.after(120, self.poll)
 
@@ -214,17 +249,52 @@ class App:
 
     def toggle_posture(self):
         if self.posture_enabled.get():
-            self.posture_status.set("Tư thế: hãy ngồi thẳng, nhìn thẳng vào màn hình rồi bấm Căn chỉnh tư thế chuẩn.")
+            if self.posture_guard.is_calibrated:
+                self.posture_status.set("Tư thế: đã có căn chỉnh lưu sẵn cho camera này — đang theo dõi.")
+            else:
+                self.posture_status.set("Tư thế: hãy ngồi thẳng, nhìn thẳng vào màn hình rồi bấm Căn chỉnh tư thế chuẩn.")
         else:
             self.posture_guard.reset_timers()
             self.posture_status.set("Tư thế: đang tắt.")
+
+    # -- posture profile persistence --------------------------------------
+    @staticmethod
+    def _profiles_path():
+        folder = os.path.join(os.path.expanduser("~"), ".glance")
+        os.makedirs(folder, exist_ok=True)
+        return os.path.join(folder, "posture_profiles.json")
+
+    def _load_profiles(self):
+        try:
+            with open(self._profiles_path(), encoding="utf-8") as fh:
+                data = json.load(fh)
+            return data if isinstance(data, dict) else {}
+        except (OSError, ValueError):
+            return {}
+
+    def _apply_profile_for_camera(self, index):
+        saved = self._profiles.get("cameras", {}).get(str(index))
+        if saved:
+            self.posture_guard.import_profile(saved)
+
+    def _save_profile_for_camera(self):
+        profile = self.posture_guard.export_profile()
+        if profile is None:
+            return
+        self._profiles.setdefault("cameras", {})[str(self.camera.get())] = profile
+        try:
+            with open(self._profiles_path(), "w", encoding="utf-8") as fh:
+                json.dump(self._profiles, fh)
+        except OSError:
+            pass
 
     def calibrate_posture(self):
         if not self.posture_enabled.get():
             self.posture_status.set("Tư thế: bật Cảnh báo tư thế trước khi căn chỉnh.")
             return
         if self.posture_guard.calibrate():
-            self.posture_status.set("Tư thế: đã ghi tư thế chuẩn. Glance sẽ nhắc nếu bạn gù lưng hoặc cổ rùa liên tục 10 giây.")
+            self._save_profile_for_camera()
+            self.posture_status.set("Tư thế: đã ghi tư thế chuẩn (đã lưu cho camera này, lần sau mở app không cần căn chỉnh lại). Glance sẽ nhắc nếu bạn gù lưng hoặc cổ rùa liên tục 10 giây.")
         else:
             self.posture_status.set("Tư thế: chưa thấy khuôn mặt. Hãy bật camera, ngồi thẳng và nhìn vào màn hình rồi thử lại.")
 
@@ -242,6 +312,10 @@ class App:
             if "hunch" in result.kinds:
                 names.append("gù lưng (đầu sụp xuống)")
             text = "Tư thế: hãy ngồi thẳng lại — đang " + " và ".join(names) + "."
+            if result.suggest_break:
+                text += " Nhắc nhiều rồi — thử đứng dậy giãn người 1 phút."
+            elif result.just_triggered and self.posture_guard.total_warnings <= 3:
+                text += " (Mấy lần đầu nhắc chưa chuẩn là bình thường — bấm 'Không phải tư thế xấu' để Glance học theo bạn.)"
         elif result.status == "bad_pending":
             text = "Tư thế: đang hơi sai, hãy ngồi thẳng lại."
         elif result.status == "snoozed":
@@ -260,6 +334,7 @@ class App:
 
     def dismiss_posture(self):
         self.posture_guard.dismiss_as_not_bad(time.monotonic())
+        self._save_profile_for_camera()
         self.posture_status.set("Tư thế: đã ghi nhận. Glance sẽ bớt nhạy hơn một chút; nhắc lại nếu cần.")
 
     def snooze_posture(self):
@@ -272,8 +347,12 @@ class App:
 
     def refresh_cover(self):
         sharing = self._share_active()
+        fullscreen_fn = globals().get("foreground_is_fullscreen")
+        presenting = bool(fullscreen_fn and fullscreen_fn())
+        self.presentation_mode = presenting
         try:
-            self.cover.update(not sharing and (self.manual or self.automatic_cover), self.opacity.get())
+            self.cover.update(not sharing and not presenting
+                              and (self.manual or self.automatic_cover), self.opacity.get())
         except OSError:
             self.generation += 1
             if self.stop_event:
@@ -285,7 +364,7 @@ class App:
             self.start_button.configure(text="Bật camera")
             self.manual_button.configure(text="Che màn hình ngay")
             self.status.set("Không thể che màn hình. Tính năng tự động đã dừng; hãy thử lại.")
-        active = not sharing and (self.manual or self.automatic_cover)
+        active = not sharing and not presenting and (self.manual or self.automatic_cover)
         if active != self.controls_topmost:
             self.root.attributes("-topmost", active)
             self.controls_topmost = active
@@ -301,6 +380,7 @@ class App:
             return
         self.generation += 1
         generation = self.generation
+        self._apply_profile_for_camera(self.camera.get())
         self.stop_event = threading.Event()
         self.camera_started_at = time.monotonic()
         self.last_frame_at = None
@@ -361,6 +441,8 @@ class App:
             guard = PresenceGuard(delay=delay)
             posture_guard = self.posture_guard
             failures = 0
+            last_state = None
+            wait_seconds = 0.12
             while not stop.is_set():
                 ok, frame = cap.read()
                 if not ok or frame is None:
@@ -388,7 +470,16 @@ class App:
                 else:
                     posture = posture_guard.update(now, False)
                 self.publish(generation, "face", (len(faces) > 0, now, guard, posture))
-                stop.wait(0.12)
+                # Battery-aware sampling: while nothing changes (present +
+                # good posture, or steadily absent) stretch the interval
+                # from ~8 FPS toward ~3 FPS; any change snaps it back.
+                state = (len(faces) > 0, posture.status)
+                if state == last_state:
+                    wait_seconds = min(0.30, wait_seconds * 1.5)
+                else:
+                    wait_seconds = 0.12
+                    last_state = state
+                stop.wait(wait_seconds)
         except Exception:
             self.publish(generation, "error", "Camera gặp lỗi. Tính năng tự động đã dừng; hãy thử bật lại.")
         finally:

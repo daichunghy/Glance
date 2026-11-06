@@ -112,6 +112,7 @@ final class AppModel: ObservableObject {
     }
     @Published var postureStatus: PostureStatus = .good
     @Published var postureWarningKinds: [PostureKind] = []
+    @Published var postureSuggestBreak: Bool = false
     let postureGuard = PostureGuard()
 
     var postureNeedsCalibration: Bool { postureEnabled && !postureGuard.isCalibrated }
@@ -124,15 +125,49 @@ final class AppModel: ObservableObject {
         let result = postureGuard.update(now: now, facePresent: facePresent, faceSize: faceSize, centerY: centerY, pitch: pitch)
         postureStatus = result.status
         postureWarningKinds = result.warning ? result.kinds : []
+        postureSuggestBreak = result.warning && result.suggestBreak
+        if !result.warning { postureSuggestBreak = false }
     }
 
     @discardableResult
     func calibratePosture() -> Bool {
-        postureGuard.calibrate()
+        let ok = postureGuard.calibrate()
+        if ok { savePostureProfile() }
+        return ok
+    }
+
+    // Calibration persists across relaunches (UserDefaults, numbers only).
+    private func savePostureProfile() {
+        guard let profile = postureGuard.exportProfile() else { return }
+        let defaults = UserDefaults.standard
+        defaults.set(profile["size"] ?? nil, forKey: "postureProfileSize")
+        defaults.set(profile["centerY"] ?? nil, forKey: "postureProfileCenterY")
+        defaults.set(profile["loosen"] ?? nil, forKey: "postureProfileLoosen")
+        if let pitch = profile["pitch"] ?? nil {
+            defaults.set(pitch, forKey: "postureProfilePitch")
+            defaults.set(true, forKey: "postureProfileHasPitch")
+        } else {
+            defaults.set(false, forKey: "postureProfileHasPitch")
+        }
+    }
+
+    private func loadPostureProfile() {
+        let defaults = UserDefaults.standard
+        guard defaults.object(forKey: "postureProfileSize") != nil else { return }
+        var data: [String: Double?] = [
+            "size": defaults.double(forKey: "postureProfileSize"),
+            "centerY": defaults.double(forKey: "postureProfileCenterY"),
+            "loosen": defaults.double(forKey: "postureProfileLoosen"),
+        ]
+        if defaults.bool(forKey: "postureProfileHasPitch") {
+            data["pitch"] = defaults.double(forKey: "postureProfilePitch")
+        }
+        postureGuard.importProfile(data)
     }
 
     func dismissPostureAsNotBad() {
         postureGuard.dismissAsNotBad(now: ProcessInfo.processInfo.systemUptime)
+        savePostureProfile()
         postureStatus = .good
         postureWarningKinds = []
     }
@@ -168,7 +203,9 @@ final class AppModel: ObservableObject {
     @Published var isFaceDetected: Bool = false
     @Published var isAirPodsConnected: Bool = false
     
-    private init() {}
+    private init() {
+        loadPostureProfile()
+    }
     
     func clearProtection() {
         isLookingAway = false

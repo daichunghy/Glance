@@ -32,6 +32,7 @@ struct PostureResult: Equatable {
     let justTriggered: Bool
     let forward: Double
     let drop: Double
+    var suggestBreak: Bool = false
 }
 
 final class PostureGuard {
@@ -63,6 +64,32 @@ final class PostureGuard {
     private var warningTimes: [Double] = []
     private(set) var loosenFactor: Double = 1.0
     private var snoozedUntil: Double?
+    private(set) var totalWarnings: Int = 0
+
+    // MARK: - Persistence (calibration survives relaunch)
+
+    func exportProfile() -> [String: Double?]? {
+        guard let baselineSize, let baselineCenterY else { return nil }
+        return ["size": baselineSize, "centerY": baselineCenterY,
+                "pitch": baselinePitch, "loosen": loosenFactor]
+    }
+
+    @discardableResult
+    func importProfile(_ data: [String: Double?]) -> Bool {
+        guard let size = data["size"] ?? nil, let centerY = data["centerY"] ?? nil,
+              size > 0.02, size < 0.95, centerY >= 0, centerY <= 1 else { return false }
+        baselineSize = size
+        baselineCenterY = centerY
+        baselinePitch = data["pitch"] ?? nil
+        if let loosen = data["loosen"] ?? nil {
+            loosenFactor = min(1.5, max(1.0, loosen))
+        }
+        smoothSize = size
+        smoothCenterY = centerY
+        smoothPitch = baselinePitch
+        resetTimers()
+        return true
+    }
 
     init(holdSeconds: Double = 10, cooldownSeconds: Double = 60, releaseSeconds: Double = 3) {
         self.holdSeconds = holdSeconds
@@ -120,6 +147,7 @@ final class PostureGuard {
         warningTimes = []
         loosenFactor = 1.0
         snoozedUntil = nil
+        totalWarnings = 0
         resetTimers()
     }
 
@@ -180,8 +208,10 @@ final class PostureGuard {
                     warningActive = true
                     warningKinds = kinds
                     warningTimes.append(now)
+                    totalWarnings += 1
                     cooldownUntil = now + adaptiveCooldown(now: now)
-                    return PostureResult(status: .warning, kinds: kinds, warning: true, justTriggered: true, forward: forward, drop: drop)
+                    let recent = warningTimes.filter { now - $0 < 3600 }.count
+                    return PostureResult(status: .warning, kinds: kinds, warning: true, justTriggered: true, forward: forward, drop: drop, suggestBreak: recent >= 3)
                 }
                 return PostureResult(status: .badPending, kinds: kinds, warning: false, justTriggered: false, forward: forward, drop: drop)
             }
