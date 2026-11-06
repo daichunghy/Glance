@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#08090c">
-  <title>Cảm ơn & Tiếp sức cho Glance — Smart Screen Privacy</title>
-  <meta name="description" content="Glance hoàn toàn miễn phí cho tất cả mọi người. Nếu ứng dụng mang lại sự an tâm cho bạn, bạn có thể gửi tặng một ly cà phê tiếp sức cho tác giả.">
+  <title>Cho xin tiền cà phê ☕ — Glance</title>
+  <meta name="description" content="Glance miễn phí 100%. Nếu app giúp ích cho bạn, mời mình ly cà phê lấy sức code tiếp nha!">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://glance-privacy.vercel.app/ung-ho.html">
   <link rel="icon" href="assets/product/glance-icon.png" type="image/png">
@@ -14,15 +14,14 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://glance-privacy.vercel.app/ung-ho.html">
-  <meta property="og:title" content="Cảm ơn & Tiếp sức cho Glance">
-  <meta property="og:description" content="Glance hoàn toàn miễn phí. Mọi sự ủng hộ và đồng hành đều là nguồn động viên vô giá đối với dự án.">
+  <meta property="og:title" content="Cho xin tiền cà phê ☕ — Glance">
+  <meta property="og:description" content="Glance miễn phí 100%. Mời tác giả ly cà phê để lấy sức code tiếp nha!">
   <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/glance-icon.png">
 
-  <link rel="stylesheet" href="donation.css?v=3">
-  <script src="donation.js?v=3" defer></script>
+  <link rel="stylesheet" href="donation.css?v=4">
+  <script src="donation.js?v=4" defer></script>
 </head>
 <body>
-  <!-- Ambient background light -->
   <div class="bg-glow" aria-hidden="true"></div>
 
   <header class="nav">
@@ -41,90 +40,63 @@
       <a id="manual-download" download class="retry-link">Bấm tải lại nếu chưa bắt đầu</a>
     </div>
 
-    <div class="layout">
-      <!-- Left column: Heartfelt Message & Sincerity -->
-      <section class="story-section">
-        <div class="badge"><span class="heart-icon">💙</span> Lời tri ân từ tác giả</div>
-        <h1>Tiếp sức cho dự án Glance</h1>
-        <p class="lead">
-          Glance được tạo ra để mang lại sự an tâm và riêng tư tuyệt đối cho bạn khi làm việc nơi công cộng. Ứng dụng <strong>hoàn toàn miễn phí</strong> và cam kết 100% On-device, không bao giờ thu thập dữ liệu cá nhân.
-        </p>
-        <p class="sub-lead">
-          Nếu Glance giúp ích cho bạn trong công việc hàng ngày, một ly cà phê hay một lời động viên đều là món quà vô giá giúp mình có thêm động lực duy trì server và phát triển thêm nhiều tính năng mới.
-        </p>
-
-        <div class="commitments">
-          <div class="commit-item">
-            <span class="commit-icon">🔒</span>
-            <div>
-              <strong>100% On-Device & Miễn phí</strong>
-              <p>Mọi người đều có quyền được bảo vệ riêng tư màn hình.</p>
-            </div>
-          </div>
-          <div class="commit-item">
-            <span class="commit-icon">🌱</span>
-            <div>
-              <strong>Duy trì bền bỉ</strong>
-              <p>Mỗi đóng góp giúp trang trải chi phí tên miền, máy chủ và thiết bị thử nghiệm.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Right column: Interactive Support Card (Glassmorphism) -->
+    <div class="layout single-focus">
+      <!-- Simple & Funny Buy Me A Coffee Box -->
       <section class="card-section">
         <form class="support-card" id="support-form">
-          <div class="card-header">
-            <h2>Gửi gắm lời cảm ơn</h2>
-            <p class="card-subtitle">Chọn một mức tiếp sức bạn cảm thấy thoải mái nhất:</p>
+          <div class="card-header text-center">
+            <span class="coffee-badge">☕ Buy Me A Coffee</span>
+            <h1>Cho xin tiền cà phê</h1>
+            <p class="card-subtitle">
+              Glance hoàn toàn miễn phí. Nếu app giúp bạn yên tâm ngồi quán cafe mà không sợ đứa bên cạnh soi màn hình, mời mình một ly cà phê lấy sức code tiếp nha! ☕💙
+            </p>
           </div>
 
-          <fieldset class="amounts-grid" aria-label="Chọn mức tiếp sức">
+          <fieldset class="amounts-grid" aria-label="Chọn mức mời cà phê">
             <label class="amount-option">
-              <input type="radio" name="preset" value="10000" data-note="Một chút ngọt ngào tiếp thêm niềm vui cho tác giả. Cảm ơn bạn!">
+              <input type="radio" name="preset" value="10000" data-note="Một ly trà đá mát lạnh. Cảm ơn bạn!">
               <div class="option-content">
                 <span class="option-icon">🍵</span>
-                <span class="option-name">Trà đá sẻ chia</span>
+                <span class="option-name">Ly trà đá</span>
                 <span class="option-val">10.000đ</span>
               </div>
             </label>
 
             <label class="amount-option is-popular">
-              <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê sáng giúp coder tỉnh táo hoàn thiện Glance tốt hơn mỗi ngày. Rất biết ơn bạn!">
+              <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê sáng giúp coder tỉnh táo hoàn thiện Glance. Cảm ơn bạn nhiều!">
               <div class="option-content">
-                <span class="pop-tag">Phổ biến</span>
+                <span class="pop-tag">Chuẩn bài</span>
                 <span class="option-icon">☕</span>
-                <span class="option-name">Ly cà phê sáng</span>
+                <span class="option-name">Ly cà phê đen</span>
                 <span class="option-val">20.000đ</span>
               </div>
             </label>
 
             <label class="amount-option">
-              <input type="radio" name="preset" value="50000" data-note="Món quà tiếp sức quý giá giúp duy trì hệ thống và dự án dài lâu. Trân trọng vô cùng!">
+              <input type="radio" name="preset" value="50000" data-note="Cà phê sữa đá kèm bánh mì nạp năng lượng cả ngày. Tuyệt vời!">
               <div class="option-content">
                 <span class="option-icon">🥐</span>
-                <span class="option-name">Bữa sáng coder</span>
+                <span class="option-name">Cà phê + Bánh mì</span>
                 <span class="option-val">50.000đ</span>
               </div>
             </label>
 
             <label class="amount-option">
-              <input type="radio" name="preset" value="100000" data-note="Sự đồng hành to lớn giúp Glance tiếp tục ra mắt các tính năng bảo mật mới. Cảm ơn bạn rất nhiều!">
+              <input type="radio" name="preset" value="100000" data-note="Bao trọn tiền cà phê cả tuần. Rất biết ơn bạn đã đồng hành!">
               <div class="option-content">
                 <span class="option-icon">🚀</span>
-                <span class="option-name">Đồng hành tri kỷ</span>
+                <span class="option-name">Bao cà phê tuần</span>
                 <span class="option-val">100.000đ</span>
               </div>
             </label>
           </fieldset>
 
-          <!-- Dynamic appreciation message based on selected amount -->
           <div class="note-box" id="preset-note">
-            Một ly cà phê sáng giúp coder tỉnh táo hoàn thiện Glance tốt hơn mỗi ngày. Rất biết ơn bạn!
+            Một ly cà phê sáng giúp coder tỉnh táo hoàn thiện Glance. Cảm ơn bạn nhiều! ☕
           </div>
 
           <div class="custom-field">
-            <label for="support-amount">Hoặc nhập số tiền bạn muốn:</label>
+            <label for="support-amount">Hoặc mời số tiền khác:</label>
             <div class="custom-input-wrapper">
               <input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1000" value="20000" required>
               <span class="currency-tag">VNĐ</span>
@@ -132,17 +104,14 @@
           </div>
 
           <button class="support-submit-btn" type="submit" id="submit-btn">
-            <span class="btn-text">Gửi lời cảm ơn qua PayOS</span>
-            <span class="btn-icon">→</span>
+            <span class="btn-text">Mời cà phê qua PayOS</span>
+            <span class="btn-icon">☕</span>
           </button>
 
           <p class="support-status" id="support-status" role="status" aria-live="polite"></p>
 
           <div class="card-footer">
-            <p class="grateful-note">
-              Dù bạn có tiếp sức hay không, việc bạn tải và sử dụng Glance đã là niềm vinh hạnh rất lớn.
-            </p>
-            <a class="skip-btn" href="./#download">Bỏ qua và dùng Glance miễn phí →</a>
+            <a class="skip-btn" href="./#download">Thôi hôm nay uống nước lọc (Dùng miễn phí) →</a>
           </div>
         </form>
       </section>

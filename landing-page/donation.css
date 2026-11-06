@@ -467,3 +467,41 @@ a { color: inherit; text-decoration: none; }
     font-size: 2.5rem;
   }
 }
+
+/* Single focus centered layout */
+.layout.single-focus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.layout.single-focus .card-section {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.coffee-badge {
+  display: inline-block;
+  background: rgba(255, 179, 0, 0.15);
+  color: #ffc048;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  margin-bottom: 12px;
+}
+
+.card-header h1 {
+  font-size: clamp(2rem, 3.5vw, 2.6rem);
+  line-height: 1.15;
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--white);
+}
