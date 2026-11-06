@@ -1,4 +1,103 @@
 (() => {
+  /* ==========================================================================
+     1. BACKGROUND VIDEO MOUSE-SCRUBBING ENGINE
+     ========================================================================== */
+  const video = document.getElementById('scrub-video');
+  if (video) {
+    let prevX = null;
+    let targetTime = 0;
+    let isSeeking = false;
+    const SENSITIVITY = 0.85;
+
+    // Wait until video metadata is loaded to calculate duration accurately
+    video.addEventListener('loadedmetadata', () => {
+      targetTime = video.duration * 0.35;
+      video.currentTime = targetTime;
+    });
+
+    // Horizontal mouse scrubbing
+    window.addEventListener('mousemove', (e) => {
+      if (prevX === null) {
+        prevX = e.clientX;
+        return;
+      }
+      const delta = e.clientX - prevX;
+      prevX = e.clientX;
+
+      if (!video.duration) return;
+
+      const timeOffset = (delta / window.innerWidth) * SENSITIVITY * video.duration;
+      targetTime = Math.max(0, Math.min(video.duration, targetTime + timeOffset));
+
+      if (!isSeeking) {
+        isSeeking = true;
+        video.currentTime = targetTime;
+      }
+    });
+
+    // Seeked queueing to prevent seek-flooding
+    video.addEventListener('seeked', () => {
+      if (Math.abs(video.currentTime - targetTime) > 0.04) {
+        video.currentTime = targetTime;
+      } else {
+        isSeeking = false;
+      }
+    });
+
+    // Touch support for mobile scrubbing
+    let touchStartX = null;
+    window.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (touchStartX === null || !video.duration || e.touches.length === 0) return;
+      const currentX = e.touches[0].clientX;
+      const delta = currentX - touchStartX;
+      touchStartX = currentX;
+
+      const timeOffset = (delta / window.innerWidth) * SENSITIVITY * video.duration;
+      targetTime = Math.max(0, Math.min(video.duration, targetTime + timeOffset));
+
+      if (!isSeeking) {
+        isSeeking = true;
+        video.currentTime = targetTime;
+      }
+    }, { passive: true });
+  }
+
+  /* ==========================================================================
+     2. TYPEWRITER EFFECT WITH BLINKING CURSOR
+     ========================================================================== */
+  const typewriterEl = document.getElementById('typewriter-text');
+  if (typewriterEl) {
+    const fullText = "Glance hoàn toàn miễn phí. Nếu app hay và thú vị, bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙";
+    const speed = 32;
+    const startDelay = 500;
+
+    setTimeout(() => {
+      let index = 0;
+      typewriterEl.textContent = '';
+
+      const cursor = document.createElement('span');
+      cursor.className = 'blinking-cursor';
+      typewriterEl.after(cursor);
+
+      const interval = setInterval(() => {
+        if (index < fullText.length) {
+          typewriterEl.textContent += fullText.charAt(index);
+          index++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => cursor.remove(), 2500); // Remove cursor after done
+        }
+      }, speed);
+    }, startDelay);
+  }
+
+  /* ==========================================================================
+     3. DOWNLOAD & PAYOS INTERACTION LOGIC
+     ========================================================================== */
   const files = {
     mac: 'assets/product/Glance-macOS-1.0.0.zip',
     windows: 'assets/product/Glance-Windows.zip'
@@ -7,7 +106,6 @@
   const file = Object.hasOwn(files, params.get('file')) ? params.get('file') : null;
   const manual = document.getElementById('manual-download');
 
-  // Trigger download if requested
   if (file && manual) {
     manual.href = files[file];
     const notice = document.getElementById('download-notice');
@@ -29,32 +127,41 @@
   const btnText = button.querySelector('.btn-text');
   const noteBox = document.getElementById('preset-note');
   const presets = [...form.querySelectorAll('input[name="preset"]')];
+  const pillLabels = [...form.querySelectorAll('.pill-btn')];
 
-  // Update dynamic note and custom input when clicking presets
-  presets.forEach(preset => {
+  // Update note & custom input when clicking presets
+  presets.forEach((preset, idx) => {
     preset.addEventListener('change', () => {
       if (preset.checked) {
         amount.value = preset.value;
+        pillLabels.forEach(p => p.classList.remove('is-active'));
+        pillLabels[idx]?.classList.add('is-active');
+
         const note = preset.dataset.note;
         if (note && noteBox) noteBox.textContent = note;
       }
     });
   });
 
-  // When user types custom amount, update presets check state
+  // When user types custom amount, sync preset pills
   amount.addEventListener('input', () => {
     let matched = false;
-    presets.forEach(preset => {
+    presets.forEach((preset, idx) => {
       if (preset.value === amount.value) {
         preset.checked = true;
+        pillLabels.forEach(p => p.classList.remove('is-active'));
+        pillLabels[idx]?.classList.add('is-active');
         matched = true;
         if (noteBox && preset.dataset.note) noteBox.textContent = preset.dataset.note;
       } else {
         preset.checked = false;
       }
     });
-    if (!matched && noteBox) {
-      noteBox.textContent = 'Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙';
+    if (!matched) {
+      pillLabels.forEach(p => p.classList.remove('is-active'));
+      if (noteBox) {
+        noteBox.textContent = 'Mọi sự tiếp sức từ bạn đều là nguồn động viên vô giá đối với Glance. Cảm ơn bạn rất nhiều! 💙';
+      }
     }
   });
 
@@ -84,7 +191,6 @@
     status.textContent = '';
 
     try {
-      // If config was checked and false, inform user gently
       if (isConfigured === false) {
         throw new Error('CONFIG_DISABLED');
       }
@@ -103,7 +209,6 @@
         throw new Error('INVALID_CHECKOUT_URL');
       }
 
-      // Redirect immediately to PayOS checkout
       location.assign(checkout.href);
     } catch (err) {
       if (err.message === 'CONFIG_DISABLED') {
@@ -114,7 +219,7 @@
         status.textContent = 'Chưa thể kết nối PayOS lúc này. Bạn vui lòng thử lại sau giây lát nhé!';
       }
       button.disabled = false;
-      if (btnText) btnText.textContent = 'Gửi lời cảm ơn qua PayOS';
+      if (btnText) btnText.textContent = 'Ủng hộ qua PayOS ☕';
     }
   });
 })();

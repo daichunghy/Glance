@@ -18,103 +18,112 @@
   <meta property="og:description" content="Glance hoàn toàn miễn phí. Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙">
   <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/glance-icon.png">
 
-  <link rel="stylesheet" href="donation.css?v=5">
-  <script src="donation.js?v=5" defer></script>
-</head>
-<body>
-  <div class="bg-glow" aria-hidden="true"></div>
+  <!-- Reference Fonts -->
+  <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/5ac3fe7c6abd2f62067f266d89671492?family=HelveticaNowDisplay-Medium">
+  <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg">
 
-  <header class="nav">
-    <a class="brand" href="./">
-      <img src="assets/product/glance-icon.png" width="28" height="28" alt="Glance Icon">
-      <span>Glance</span>
+  <link rel="stylesheet" href="donation.css?v=6">
+</head>
+<body class="mainframe-layout">
+
+  <!-- INTERACTIVE BACKGROUND VIDEO (Flipped to Left, Color-graded to Glance Obsidian Blue) -->
+  <div class="video-container" aria-hidden="true">
+    <video
+      id="scrub-video"
+      class="bg-video"
+      muted
+      playsinline
+      preload="auto"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_041744_63efcd78-bf7d-4039-99e2-2461e8a61903.mp4"
+    ></video>
+    <!-- Color grading & gradient overlay: fades to dark on right side for text legibility -->
+    <div class="video-overlay"></div>
+  </div>
+
+  <!-- FIXED NAVBAR -->
+  <header class="navbar">
+    <a class="nav-brand" href="./">
+      <img src="assets/product/glance-icon.png" width="28" height="28" alt="Glance">
+      <span class="brand-text">Glance®</span>
+      <span class="brand-asterisk">✳︎</span>
     </a>
-    <a class="back-link" href="./#download">← Về trang chủ</a>
+    <div class="nav-right">
+      <a class="nav-link" href="./#download">Về trang Glance</a>
+    </div>
   </header>
 
-  <main class="main">
+  <!-- MAIN HERO: CONTENT ON THE RIGHT -->
+  <main class="hero-wrapper">
     <!-- Notice for ongoing automatic download -->
-    <div class="download-banner" id="download-notice" hidden>
+    <div class="download-notice" id="download-notice" hidden>
       <span class="pulse-dot"></span>
       <span id="download-message">Bản cài đặt Glance đang được tải xuống...</span>
-      <a id="manual-download" download class="retry-link">Bấm tải lại nếu chưa bắt đầu</a>
+      <a id="manual-download" download class="retry-link">Tải lại</a>
     </div>
 
-    <div class="layout single-focus">
-      <section class="card-section">
-        <form class="support-card" id="support-form">
-          <div class="card-header text-center">
-            <span class="coffee-badge">☕ Tiếp sức dự án</span>
-            <h1>Anh/Chị dùng hay ủng hộ em ly cà phê</h1>
-            <p class="card-subtitle">
-              Glance hoàn toàn miễn phí. Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙
-            </p>
+    <div class="hero-content">
+      <!-- 1. Blurred intro label -->
+      <div class="blurred-intro" aria-hidden="true">
+        Anh/Chị dùng Glance thấy hay,<br>
+        Ủng hộ em ly cà phê tiếp sức nhé ☕
+      </div>
+
+      <!-- 2. Typewriter Text -->
+      <div class="typewriter-container">
+        <p class="typewriter-text" id="typewriter-text"></p>
+      </div>
+
+      <!-- 3. Interactive Action / Donation Pills Form -->
+      <form class="support-form" id="support-form">
+        <div class="pills-container" id="pills-container">
+          <label class="pill-btn">
+            <input type="radio" name="preset" value="10000" data-note="Một ly trà đá sẻ chia. Cảm ơn bạn!">
+            <span class="pill-content">🍵 10.000đ</span>
+          </label>
+
+          <label class="pill-btn is-active">
+            <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê sáng tiếp sức coder. Rất biết ơn bạn!">
+            <span class="pill-content">☕ 20.000đ (Ly cà phê)</span>
+          </label>
+
+          <label class="pill-btn">
+            <input type="radio" name="preset" value="50000" data-note="Cà phê + Bánh mì nạp năng lượng cả ngày. Tuyệt vời!">
+            <span class="pill-content">🥐 50.000đ</span>
+          </label>
+
+          <label class="pill-btn">
+            <input type="radio" name="preset" value="100000" data-note="Sự đồng hành quý báu giúp Glance phát triển dài lâu. Trân trọng!">
+            <span class="pill-content">🚀 100.000đ</span>
+          </label>
+        </div>
+
+        <!-- Dynamic Note Box -->
+        <p class="dynamic-note" id="preset-note">
+          Một ly cà phê sáng tiếp sức coder. Rất biết ơn bạn! ☕💙
+        </p>
+
+        <!-- Custom Amount + CTA in Sleek Row -->
+        <div class="action-row">
+          <div class="custom-amount-pill">
+            <input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1000" value="20000" required placeholder="Số khác">
+            <span class="unit">VNĐ</span>
           </div>
 
-          <fieldset class="amounts-grid" aria-label="Chọn mức ủng hộ">
-            <label class="amount-option">
-              <input type="radio" name="preset" value="10000" data-note="Một chút ngọt ngào tiếp thêm niềm vui. Cảm ơn bạn!">
-              <div class="option-content">
-                <span class="option-icon">🍵</span>
-                <span class="option-name">Ly trà đá</span>
-                <span class="option-val">10.000đ</span>
-              </div>
-            </label>
-
-            <label class="amount-option is-popular">
-              <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê tiếp sức coder. Rất biết ơn bạn đã đồng hành!">
-              <div class="option-content">
-                <span class="pop-tag">Mặc định</span>
-                <span class="option-icon">☕</span>
-                <span class="option-name">Ly cà phê sáng</span>
-                <span class="option-val">20.000đ</span>
-              </div>
-            </label>
-
-            <label class="amount-option">
-              <input type="radio" name="preset" value="50000" data-note="Bữa sáng nạp năng lượng duy trì dự án. Cảm ơn bạn rất nhiều!">
-              <div class="option-content">
-                <span class="option-icon">🥐</span>
-                <span class="option-name">Cà phê + Bánh mì</span>
-                <span class="option-val">50.000đ</span>
-              </div>
-            </label>
-
-            <label class="amount-option">
-              <input type="radio" name="preset" value="100000" data-note="Món quà đồng hành quý giá để tiếp tục phát triển Glance. Trân trọng vô cùng!">
-              <div class="option-content">
-                <span class="option-icon">🚀</span>
-                <span class="option-name">Tiếp sức dài lâu</span>
-                <span class="option-val">100.000đ</span>
-              </div>
-            </label>
-          </fieldset>
-
-          <div class="note-box" id="preset-note">
-            Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙
-          </div>
-
-          <div class="custom-field">
-            <label for="support-amount">Hoặc nhập số tiền tùy tâm:</label>
-            <div class="custom-input-wrapper">
-              <input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1000" value="20000" required>
-              <span class="currency-tag">VNĐ</span>
-            </div>
-          </div>
-
-          <button class="support-submit-btn" type="submit" id="submit-btn">
-            <span class="btn-text">Ủng hộ qua PayOS</span>
-            <span class="btn-icon">☕</span>
+          <button class="submit-pill-btn" type="submit" id="submit-btn">
+            <span class="btn-text">Ủng hộ qua PayOS ☕</span>
           </button>
+        </div>
 
-          <p class="support-status" id="support-status" role="status" aria-live="polite"></p>
+        <p class="status-msg" id="support-status" role="status" aria-live="polite"></p>
 
-          <div class="card-footer">
-            <a class="skip-btn" href="./#download">Dùng Glance miễn phí →</a>
-          </div>
-        </form>
-      </section>
+        <!-- Skip Link -->
+        <div class="footer-links">
+          <a class="skip-link" href="./#download">Dùng Glance miễn phí →</a>
+        </div>
+      </form>
     </div>
   </main>
+
+  <script src="donation.js?v=6" defer></script>
 </body>
 </html>
