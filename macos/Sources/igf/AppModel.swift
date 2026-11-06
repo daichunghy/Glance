@@ -48,8 +48,29 @@ final class AppModel: ObservableObject {
         didSet {
             if !isEnabled {
                 clearProtection()
+                // Off means the camera really stops (LED off) — the toggle
+                // is also the kill switch (Option+Shift+P).
+                CameraTracker.shared.stopTracking()
+                MotionTracker.shared.stopTracking()
+                isTrackingActive = false
+            } else if oldValue == false {
+                handleTrackingSourceChange()
             }
         }
+    }
+
+    // Share mode: deliberately show the screen to someone next to you for
+    // 2 minutes without switching Glance off; protection resumes by itself.
+    @Published var shareUntil: Date?
+
+    var isSharing: Bool {
+        guard let shareUntil else { return false }
+        return Date() < shareUntil
+    }
+
+    func startShareMode() {
+        shareUntil = Date().addingTimeInterval(120)
+        clearProtection()
     }
     @Published var trackingSource: TrackingSource = .camera {
         didSet {
@@ -110,6 +131,18 @@ final class AppModel: ObservableObject {
         postureGuard.calibrate()
     }
 
+    func dismissPostureAsNotBad() {
+        postureGuard.dismissAsNotBad(now: ProcessInfo.processInfo.systemUptime)
+        postureStatus = .good
+        postureWarningKinds = []
+    }
+
+    func snoozePosture() {
+        postureGuard.snooze(now: ProcessInfo.processInfo.systemUptime)
+        postureStatus = .snoozed
+        postureWarningKinds = []
+    }
+
     // Smart Context Detection (Video calls, Meetings, Fullscreen Presentation)
     @Published var isVideoCallActive: Bool = false {
         didSet {
@@ -155,8 +188,8 @@ final class AppModel: ObservableObject {
     
     // Robust state machine with dual-direction switching, hysteresis and meeting guard
     func processFaceState(angleDegrees: Double?, isPresent: Bool) {
-        // Guard against blurring during video calls, settings tweaking or when disabled
-        guard isEnabled, !isVideoCallActive, !isPopoverOpen else {
+        // Guard against blurring during video calls, settings tweaking, share mode or when disabled
+        guard isEnabled, !isVideoCallActive, !isPopoverOpen, !isSharing else {
             if isLookingAway || activeSide != .none {
                 clearProtection()
             }

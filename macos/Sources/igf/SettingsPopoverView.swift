@@ -269,6 +269,21 @@ struct SettingsPopoverView: View {
                     .controlSize(.small)
                     .padding(.horizontal, 10)
                     .padding(.bottom, 8)
+
+                    if !model.postureWarningKinds.isEmpty {
+                        HStack(spacing: 6) {
+                            Button("Not bad posture") {
+                                model.dismissPostureAsNotBad()
+                            }
+                            Button("Snooze 30 min") {
+                                model.snoozePosture()
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .padding(.horizontal, 10)
+                        .padding(.bottom, 8)
+                    }
                 }
             }
             .background(
@@ -280,12 +295,25 @@ struct SettingsPopoverView: View {
                     )
             )
 
+            Button(action: { model.startShareMode() }) {
+                HStack(spacing: 5) {
+                    Image(systemName: "person.2.wave.2")
+                        .font(.system(size: 10, weight: .semibold))
+                    Text(model.isSharing ? "Sharing screen (2 min)…" : "Show Screen for 2 Minutes")
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 3)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
             // Footer: Hotkey hint & Quit button
             HStack {
-                Text("⌥⇧P to toggle")
+                Text("⌥⇧P toggle · ⌥⇧S share 2 min")
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundColor(.secondary.opacity(0.8))
-                
+
                 Spacer()
                 
                 Button(action: {
@@ -345,7 +373,7 @@ struct SettingsPopoverView: View {
         case .good: return .green
         case .badPending: return .yellow
         case .warning: return .orange
-        case .noFace, .uncalibrated: return .secondary
+        case .noFace, .uncalibrated, .snoozed: return .secondary
         }
     }
 
@@ -363,6 +391,7 @@ struct SettingsPopoverView: View {
         case .warning: return "Posture: Sit up straight"
         case .noFace: return "Posture: Paused (no face)"
         case .uncalibrated: return "Sit up straight, then calibrate"
+        case .snoozed: return "Posture: Snoozed 30 min"
         }
     }
 

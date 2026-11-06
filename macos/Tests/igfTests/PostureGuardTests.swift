@@ -92,3 +92,23 @@ private func feed(_ g: PostureGuard, now: Double, size: Double = baseSize, y: Do
     #expect(again.warning)
     #expect(again.justTriggered)
 }
+
+@Test func postureSnoozeSilencesThenRecovers() {
+    let g = calibratedGuard(hold: 1)
+    g.snooze(now: 0, seconds: 1800)
+    let muted = g.update(now: 10, facePresent: true, faceSize: baseSize * 1.4, centerY: baseY + 0.06, pitch: basePitch)
+    #expect(muted.status == .snoozed)
+    #expect(!muted.warning)
+    _ = feed(g, now: 1801, size: baseSize * 1.4, y: baseY + 0.06)
+    #expect(g.update(now: 1802, facePresent: true, faceSize: baseSize * 1.4, centerY: baseY + 0.06, pitch: basePitch).warning)
+}
+
+@Test func postureDismissAsNotBadLoosensThresholds() {
+    let g = calibratedGuard(hold: 1)
+    _ = feed(g, now: 0, size: baseSize * 1.4, y: baseY + 0.06)
+    #expect(g.update(now: 1, facePresent: true, faceSize: baseSize * 1.4, centerY: baseY + 0.06, pitch: basePitch).warning)
+    let factor = g.dismissAsNotBad(now: 2)
+    #expect(abs(factor - 1.10) < 0.0001)
+    _ = feed(g, now: 70, size: baseSize * 1.30, y: baseY)
+    #expect(!g.update(now: 71, facePresent: true, faceSize: baseSize * 1.30, centerY: baseY, pitch: basePitch).warning)
+}

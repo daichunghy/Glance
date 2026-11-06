@@ -65,10 +65,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupGlobalHotkey() {
         // Global monitor for Option + Shift + P (KeyCode 35 = 'P')
         globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { event in
-            if event.modifierFlags.contains([.option, .shift]) && event.keyCode == 35 {
+            guard event.modifierFlags.contains([.option, .shift]) else { return }
+            if event.keyCode == 35 {
                 Task { @MainActor in
                     AppModel.shared.isEnabled.toggle()
                     print("[Glance] Toggled protection via hotkey: \(AppModel.shared.isEnabled)")
+                }
+            } else if event.keyCode == 1 {
+                // Option + Shift + S: share the screen for 2 minutes
+                Task { @MainActor in
+                    AppModel.shared.startShareMode()
+                    print("[Glance] Share mode on for 2 minutes")
                 }
             }
         }

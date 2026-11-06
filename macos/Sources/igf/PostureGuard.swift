@@ -22,6 +22,7 @@ enum PostureStatus: Equatable {
     case good
     case badPending
     case warning
+    case snoozed
 }
 
 struct PostureResult: Equatable {
@@ -58,6 +59,10 @@ final class PostureGuard {
     private var warningActive = false
     private var warningKinds: [PostureKind] = []
     private var cooldownUntil: Double?
+    // Adaptive behaviour (research round 2), mirroring posture.py.
+    private var warningTimes: [Double] = []
+    private(set) var loosenFactor: Double = 1.0
+    private var snoozedUntil: Double?
 
     init(holdSeconds: Double = 10, cooldownSeconds: Double = 60, releaseSeconds: Double = 3) {
         self.holdSeconds = holdSeconds
@@ -76,8 +81,33 @@ final class PostureGuard {
         baselineSize = size
         baselineCenterY = centerY
         baselinePitch = smoothPitch
+        loosenFactor = 1.0
         resetTimers()
         return true
+    }
+
+    /// 60s, then 120s, then 300s for repeat warnings within one hour.
+    private func adaptiveCooldown(now: Double) -> Double {
+        warningTimes = warningTimes.filter { now - $0 < 3600 }
+        if warningTimes.count <= 1 { return cooldownSeconds }
+        if warningTimes.count == 2 { return max(cooldownSeconds, 120) }
+        return max(cooldownSeconds, 300)
+    }
+
+    /// Silence posture warnings for a while (default 30 minutes).
+    func snooze(now: Double, seconds: Double = 1800) {
+        snoozedUntil = now + seconds
+        resetTimers(keepCooldown: true)
+    }
+
+    /// User tapped "not bad posture": clear this warning and loosen up.
+    /// Thresholds grow 10% per tap (capped at x1.5).
+    @discardableResult
+    func dismissAsNotBad(now: Double) -> Double {
+        loosenFactor = min(1.5, loosenFactor * 1.10)
+        resetTimers()
+        cooldownUntil = now + cooldownSeconds
+        return loosenFactor
     }
 
     func reset() {
@@ -87,15 +117,18 @@ final class PostureGuard {
         smoothSize = nil
         smoothCenterY = nil
         smoothPitch = nil
+        warningTimes = []
+        loosenFactor = 1.0
+        snoozedUntil = nil
         resetTimers()
     }
 
-    func resetTimers() {
+    func resetTimers(keepCooldown: Bool = false) {
         badSince = nil
         goodSince = nil
         warningActive = false
         warningKinds = []
-        cooldownUntil = nil
+        if !keepCooldown { cooldownUntil = nil }
     }
 
     private func smoothed(_ current: Double?, _ value: Double?) -> Double? {
@@ -105,6 +138,12 @@ final class PostureGuard {
     }
 
     func update(now: Double, facePresent: Bool, faceSize: Double? = nil, centerY: Double? = nil, pitch: Double? = nil) -> PostureResult {
+        if let snoozedUntil {
+            if now < snoozedUntil {
+                return PostureResult(status: .snoozed, kinds: [], warning: false, justTriggered: false, forward: 0, drop: 0)
+            }
+            self.snoozedUntil = nil
+        }
         guard facePresent else {
             // Away / looking elsewhere is the privacy guard's job, not ours.
             badSince = nil
@@ -140,7 +179,8 @@ final class PostureGuard {
                 if cooldownUntil == nil || now >= cooldownUntil! {
                     warningActive = true
                     warningKinds = kinds
-                    cooldownUntil = now + cooldownSeconds
+                    warningTimes.append(now)
+                    cooldownUntil = now + adaptiveCooldown(now: now)
                     return PostureResult(status: .warning, kinds: kinds, warning: true, justTriggered: true, forward: forward, drop: drop)
                 }
                 return PostureResult(status: .badPending, kinds: kinds, warning: false, justTriggered: false, forward: forward, drop: drop)
@@ -170,10 +210,11 @@ final class PostureGuard {
             return []
         }
         var kinds: [PostureKind] = []
-        let turtle = forward >= forwardAlone
-            || (forward >= forwardThreshold && (drop >= supportingDrop || pitchDrop >= pitchDropThreshold))
-        let hunch = drop >= dropAlone
-            || (drop >= dropThreshold && (pitchDrop >= pitchDropThreshold || forward >= supportingForward))
+        let loosen = loosenFactor
+        let turtle = forward >= forwardAlone * loosen
+            || (forward >= forwardThreshold * loosen && (drop >= supportingDrop * loosen || pitchDrop >= pitchDropThreshold))
+        let hunch = drop >= dropAlone * loosen
+            || (drop >= dropThreshold * loosen && (pitchDrop >= pitchDropThreshold || forward >= supportingForward * loosen))
         if turtle { kinds.append(.turtleNeck) }
         if hunch { kinds.append(.hunch) }
         return kinds
