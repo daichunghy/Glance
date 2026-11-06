@@ -69,10 +69,32 @@ góc yaw hiện có) rồi so với baseline:
 
 - Chỉ cảnh báo khi tư thế xấu **liên tục ≥ 10 giây** (tham số `hold_seconds`).
 - Cảnh báo tự tắt khi ngồi đúng lại **liên tục ≥ 3 giây** (`release_seconds`).
-- Sau mỗi cảnh báo có **60 giây cooldown** (`cooldown_seconds`): không cảnh
-  báo lại trong thời gian này dù người dùng chưa sửa tư thế ngay.
+- Sau mỗi cảnh báo có **cooldown thích ứng**: 60 giây lần đầu, bị nhắc lần 2
+  trong vòng 1 giờ thì 120 giây, lần 3 trở đi 300 giây — càng bị nhắc càng
+  thưa, chống mệt mỏi vì cảnh báo (theo nghiên cứu hành vi người dùng).
+- Người dùng bấm **"Không phải tư thế xấu"** ngay trên cảnh báo: cảnh báo
+  tắt ngay và các ngưỡng tự nới **+10% mỗi lần bấm, tối đa ×1,5** — app tự
+  học độ nhạy hợp với từng người thay vì ép một ngưỡng cho tất cả.
+- **Tạm tắt nhắc 30 phút (snooze)**: trong lúc snooze không cảnh báo, hết
+  giờ tự hoạt động lại.
 - Mất mặt khỏi khung hình → bộ đếm tư thế xấu reset (người dùng có thể đang
   quay đi / rời bàn — đó là việc của tính năng che màn hình, không phải tư thế).
+- **Camera bị che / quá tối** (độ sáng khung hình trung bình < 15/255): cả
+  tính năng tư thế lẫn che màn hình đều đứng yên — không thấy được người
+  dùng không có nghĩa là người dùng đã đi khỏi hoặc đang gù.
+
+## 3b. Camera & quyền riêng tư (bổ sung theo nghiên cứu người dùng)
+
+- **Tắt Glance là camera tắt thật** (đèn camera tắt) ở cả 3 nền tảng —
+  không có trạng thái "đã tạm dừng mà camera vẫn chạy".
+- **Camera bị ứng dụng họp (Zoom/Teams/Meet) chiếm:** Windows/Linux chờ và
+  tự mở lại khi camera trống, hiện trạng thái "camera đang bận"; macOS dùng
+  cơ chế interruption có sẵn của AVCaptureSession. Không app nào được làm
+  hỏng việc bắt đầu cuộc gọi của người dùng.
+- **Hiện màn hình 2 phút (share mode):** một nút/phím tắt (macOS ⌥⇧S) để cố
+  ý cho người bên cạnh xem; hết 2 phút tự bảo vệ lại, không phải tắt Glance.
+- Glance **không phải thiết bị y tế**: tính năng tư thế chỉ nhắc ý thức tư
+  thế ngồi, không chẩn đoán, không hứa giảm đau hay chữa bệnh.
 
 ## 4. Hiển thị cảnh báo theo nền tảng
 
@@ -102,6 +124,11 @@ góc yaw hiện có) rồi so với baseline:
   - [ ] Linux (Ubuntu/X11 + Wayland): như trên; máy không có tray → panel vẫn hiện trạng thái.
   - [ ] Cả 3: tắt tính năng tư thế → hành vi che màn hình y hệt bản cũ.
   - [ ] Cả 3: không có camera → Glance vẫn mở, tư thế báo "không khả dụng" im lặng.
+  - [ ] Cả 3: bị nhắc → bấm "Không phải tư thế xấu" → hết nhắc ngay; bật snooze 30 phút → không nhắc.
+  - [ ] Cả 3: share mode 2 phút → không che; hết 2 phút → che lại bình thường.
+  - [ ] Cả 3: lấy tay che camera → không che màn hình, không nhắc tư thế, hiện trạng thái bị che/quá tối.
+  - [ ] Mac: tắt Glance bằng ⌥⇧P → đèn camera tắt ngay.
+  - [ ] Windows/Linux: đang họp Zoom (camera bận) mở Glance → không lỗi chết, họp xong camera tự chạy lại.
 
 ## 7. Ngoài phạm vi đợt này
 

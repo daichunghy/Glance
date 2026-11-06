@@ -70,7 +70,7 @@ Mở thư mục `linux`, cài thư viện bằng `python3 -m pip install -r requ
 ## 🔒 Triết lý bảo mật & Hiệu năng
 * Phiên bản Windows xử lý khung hình camera cục bộ, không lưu hoặc gửi khung hình. Tính năng nhận diện có thể sai và không xác minh danh tính.
 * Windows có tùy chọn tạm hoãn che khi có thao tác chuột hoặc bàn phím; tùy chọn này không đảm bảo tránh che nhầm.
-* Windows chưa tự phát hiện cuộc gọi hoặc tự nhả camera cho ứng dụng khác. Xem giới hạn và hướng dẫn kiểm thử trong [README Windows](windows/README.md).
+* Windows/Linux: camera đang bận (ứng dụng họp chiếm) thì Glance chờ và tự mở lại khi camera trống; macOS tự tạm dừng khi bị cuộc gọi chiếm (AVCaptureSession interruption).
 
 ## 🪑 Đang phát triển: cảnh báo gù lưng & cổ rùa (Posture Guard)
 
@@ -78,4 +78,10 @@ Trên branch `feature/posture-guard` (chưa merge, chưa phát hành, không tha
 landing page): cảnh báo tư thế dùng lại pipeline camera hiện có trên cả Mac,
 Windows và Linux, logic thuần dùng chung một đặc tả — xem
 [posture/POSTURE_SPEC.md](posture/POSTURE_SPEC.md). Tính năng mặc định tắt,
-người dùng tự bật và tự căn chỉnh tư thế chuẩn.
+người dùng tự bật và tự căn chỉnh tư thế chuẩn. Đợt cải thiện theo nghiên cứu
+hành vi người dùng (xem [posture/IMPROVEMENTS.md](posture/IMPROVEMENTS.md)):
+cooldown thích ứng chống nhắc mệt, nút "Không phải tư thế xấu" để app tự nới
+ngưỡng theo từng người, tạm tắt nhắc 30 phút, tắt Glance là camera tắt thật,
+camera bị che/quá tối thì đứng yên thay vì che nhầm, và chế độ "Hiện màn
+hình 2 phút" để cố ý cho người bên cạnh xem. Glance không phải thiết bị y
+tế — tính năng tư thế chỉ nhắc ý thức tư thế ngồi.

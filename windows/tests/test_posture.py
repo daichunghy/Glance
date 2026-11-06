@@ -1,6 +1,6 @@
 import unittest
 
-from posture import PostureGuard, TURTLE_NECK, HUNCH
+from posture import PostureGuard, TURTLE_NECK, HUNCH, frame_too_dark
 
 BASE_SIZE = 0.30   # face width / frame width while sitting correctly
 BASE_Y = 0.40      # face centre Y while sitting correctly
@@ -128,6 +128,70 @@ class PostureGuardTests(unittest.TestCase):
         self.assertTrue(guard.calibrate())
         result = guard.update(2, True, face_size=BASE_SIZE * 1.4, center_y=BASE_Y + 0.06, pitch=BASE_PITCH)
         self.assertFalse(result.warning)
+
+
+
+class AdaptiveBehaviourTests(unittest.TestCase):
+    def _warn(self, guard, t):
+        feed(guard, t, size=BASE_SIZE * 1.4, y=BASE_Y + 0.06)
+        return guard.update(t + 1, True, face_size=BASE_SIZE * 1.4,
+                            center_y=BASE_Y + 0.06, pitch=BASE_PITCH)
+
+    def _clear(self, guard, t):
+        feed(guard, t, size=BASE_SIZE, y=BASE_Y)
+        return guard.update(t + 3, True, face_size=BASE_SIZE,
+                            center_y=BASE_Y, pitch=BASE_PITCH)
+
+    def test_adaptive_cooldown_grows(self):
+        guard = calibrated_guard(hold_seconds=1)
+        self.assertTrue(self._warn(guard, 0).just_triggered)
+        self._clear(guard, 5)
+        # Second warning inside the hour: cooldown is now 120s, so a bad
+        # posture at trigger+70s is still pending.
+        self.assertTrue(self._warn(guard, 70).just_triggered)
+        self._clear(guard, 75)
+        feed(guard, 141, size=BASE_SIZE * 1.4, y=BASE_Y + 0.06)
+        result = guard.update(142, True, face_size=BASE_SIZE * 1.4,
+                              center_y=BASE_Y + 0.06, pitch=BASE_PITCH)
+        self.assertFalse(result.warning)
+        result = guard.update(191, True, face_size=BASE_SIZE * 1.4,
+                              center_y=BASE_Y + 0.06, pitch=BASE_PITCH)
+        self.assertTrue(result.warning)
+        self.assertTrue(result.just_triggered)
+
+    def test_snooze_silences_then_recovers(self):
+        guard = calibrated_guard(hold_seconds=1)
+        guard.snooze(0, seconds=1800)
+        result = guard.update(10, True, face_size=BASE_SIZE * 1.4,
+                              center_y=BASE_Y + 0.06, pitch=BASE_PITCH)
+        self.assertEqual(result.status, "snoozed")
+        self.assertFalse(result.warning)
+        feed(guard, 1801, size=BASE_SIZE * 1.4, y=BASE_Y + 0.06)
+        result = guard.update(1802, True, face_size=BASE_SIZE * 1.4,
+                              center_y=BASE_Y + 0.06, pitch=BASE_PITCH)
+        self.assertTrue(result.warning)
+
+    def test_dismiss_as_not_bad_loosens_thresholds(self):
+        guard = calibrated_guard(hold_seconds=1)
+        self.assertTrue(self._warn(guard, 0).just_triggered)
+        factor = guard.dismiss_as_not_bad(2)
+        self.assertAlmostEqual(factor, 1.10)
+        result = guard.update(3, True, face_size=BASE_SIZE, center_y=BASE_Y,
+                              pitch=BASE_PITCH)
+        self.assertFalse(result.warning)
+        # A posture that barely crossed the old forward-alone threshold
+        # (0.30) no longer classifies as bad at factor 1.10 (needs 0.33).
+        feed(guard, 70, size=BASE_SIZE * 1.30, y=BASE_Y)
+        result = guard.update(71, True, face_size=BASE_SIZE * 1.30,
+                              center_y=BASE_Y, pitch=BASE_PITCH)
+        self.assertFalse(result.warning)
+
+    def test_frame_too_dark(self):
+        self.assertTrue(frame_too_dark(3.0))
+        self.assertTrue(frame_too_dark(14.9))
+        self.assertFalse(frame_too_dark(15.0))
+        self.assertFalse(frame_too_dark(120.0))
+        self.assertFalse(frame_too_dark(None))
 
 
 if __name__ == "__main__":
