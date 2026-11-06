@@ -54,7 +54,7 @@
       }
     });
     if (!matched && noteBox) {
-      noteBox.textContent = 'Mọi sự tiếp sức từ bạn đều là nguồn động viên vô giá đối với Glance. Cảm ơn bạn rất nhiều! 💙';
+      noteBox.textContent = 'Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙';
     }
   });
 
