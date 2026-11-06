@@ -1,0 +1,17 @@
+{
+  "name": "Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình",
+  "short_name": "Glance",
+  "description": "Tự động làm mờ màn hình khi quay đầu hoặc rời bàn làm việc cho Mac & Windows.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "icons": [
+    {
+      "src": "assets/product/glance-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

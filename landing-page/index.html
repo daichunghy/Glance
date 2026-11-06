@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#08090c">
-  <title>Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình &amp; Bảo Vệ Riêng Tư Cho Mac</title>
-  <meta name="description" content="Glance là ứng dụng bảo vệ màn hình miễn phí cho macOS. Tự động làm mờ màn hình khi quay đầu hoặc rời bàn làm việc bằng Camera và AirPods. 100% On-device, an toàn tuyệt đối.">
-  <meta name="keywords" content="ứng dụng chống nhìn trộm màn hình macbook, app che màn hình mac, glance screen privacy, mac screen privacy app, làm mờ màn hình khi rời bàn, bảo vệ riêng tư macbook, airpods head tracking privacy, glance mac">
+  <title>Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình Cho Mac &amp; Windows | Screen Privacy App</title>
+  <meta name="description" content="Glance là ứng dụng chống nhìn trộm màn hình miễn phí cho macOS &amp; Windows. Tự động làm mờ khi quay đầu hoặc rời bàn bằng Camera Vision và AirPods. 100% On-device, riêng tư tuyệt đối.">
+  <meta name="keywords" content="glance screen privacy, ứng dụng chống nhìn trộm màn hình macbook, app che màn hình mac, mac screen privacy app, làm mờ màn hình khi rời bàn, bảo vệ riêng tư macbook, airpods head tracking privacy, glance mac, glance windows, anti peeping app">
   <meta name="author" content="Dai Chung Hy">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="google-site-verification" content="b75L1h9clzyzzBzq-bzgeMKUe51kHpMaMYA1DC8Uk7k">
@@ -14,32 +14,36 @@
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Glance Screen Privacy">
   <meta property="og:url" content="https://glance-privacy.vercel.app/">
-  <meta property="og:title" content="Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình &amp; Bảo Vệ Riêng Tư Cho Mac">
-  <meta property="og:description" content="Tự động làm mờ màn hình khi quay đầu hoặc rời bàn bằng Camera Vision và cảm biến AirPods. Miễn phí cho macOS Apple Silicon.">
+  <meta property="og:title" content="Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình Cho Mac &amp; Windows">
+  <meta property="og:description" content="Tự động làm mờ màn hình khi quay đầu hoặc rời bàn bằng Camera Vision và cảm biến AirPods. Miễn phí cho macOS Apple Silicon &amp; Windows.">
   <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/macbook-front.webp">
   <meta property="og:locale" content="vi_VN">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@daichunghy">
+  <meta name="twitter:creator" content="@daichunghy">
   <meta name="twitter:url" content="https://glance-privacy.vercel.app/">
-  <meta name="twitter:title" content="Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình &amp; Bảo Vệ Riêng Tư Cho Mac">
-  <meta name="twitter:description" content="Tự động làm mờ màn hình khi quay đầu hoặc rời bàn bằng Camera Vision và cảm biến AirPods. Miễn phí cho macOS Apple Silicon.">
+  <meta name="twitter:title" content="Glance — Ứng Dụng Chống Nhìn Trộm Màn Hình Cho Mac &amp; Windows">
+  <meta name="twitter:description" content="Tự động làm mờ màn hình khi quay đầu hoặc rời bàn bằng Camera Vision và cảm biến AirPods. Miễn phí cho macOS Apple Silicon &amp; Windows.">
   <meta name="twitter:image" content="https://glance-privacy.vercel.app/assets/product/macbook-front.webp">
 
-  <!-- Favicon & Icons -->
+  <!-- Favicon & Icons & Manifest -->
   <link rel="icon" href="assets/product/glance-icon.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/product/glance-icon.png">
+  <link rel="manifest" href="site.webmanifest">
 
   <!-- Preload hero asset for Core Web Vitals (LCP) -->
   <link rel="preload" as="image" href="assets/product/macbook-front.webp" type="image/webp" fetchpriority="high">
 
   <!-- Stylesheet & Scripts -->
-  <link rel="stylesheet" href="styles.css?v=1.15.0">
+  <link rel="stylesheet" href="styles.css?v=1.16.0">
   <script src="script.js?v=1.15.0" defer></script>
   <script src="download-support.js?v=2" defer></script>
 
-  <!-- Structured Data: SoftwareApplication, FAQPage, Organization, WebSite -->
+  <!-- Structured Data: SoftwareApplication, FAQPage, Organization, WebSite, BreadcrumbList -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,16 +52,35 @@
         "@type": "WebSite",
         "@id": "https://glance-privacy.vercel.app/#website",
         "url": "https://glance-privacy.vercel.app/",
-        "name": "Glance — Screen Privacy App for Mac",
-        "description": "Ứng dụng chống nhìn trộm và tự động làm mờ màn hình khi quay đầu cho macOS",
-        "inLanguage": "vi"
+        "name": "Glance — Screen Privacy App",
+        "alternateName": ["Glance Privacy", "Glance Mac", "Glance Chống Nhìn Trộm"],
+        "description": "Ứng dụng chống nhìn trộm và tự động làm mờ màn hình khi quay đầu cho macOS & Windows",
+        "inLanguage": "vi",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Glance Privacy",
+          "url": "https://glance-privacy.vercel.app/",
+          "logo": "https://glance-privacy.vercel.app/assets/product/glance-icon.png"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://glance-privacy.vercel.app/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Trang chủ",
+            "item": "https://glance-privacy.vercel.app/"
+          }
+        ]
       },
       {
         "@type": "SoftwareApplication",
         "@id": "https://glance-privacy.vercel.app/#software",
         "name": "Glance",
         "alternateName": "Glance Screen Privacy",
-        "operatingSystem": "macOS 14.0+, Windows",
+        "operatingSystem": "macOS 14.0+, Windows 10, Windows 11",
         "applicationCategory": "SecurityApplication",
         "applicationSubCategory": "Screen Privacy Utility",
         "offers": {
@@ -66,16 +89,23 @@
           "priceCurrency": "VND",
           "availability": "https://schema.org/InStock"
         },
-        "description": "Glance là ứng dụng bảo vệ quyền riêng tư màn hình cho Mac. Tự động nhận diện hướng quay đầu qua Camera Vision hoặc cảm biến chuyển động AirPods để làm mờ màn hình, chống nhìn trộm khi làm việc tại quán cafe, văn phòng hoặc nơi công cộng. Xử lý 100% on-device không lưu hình ảnh.",
+        "description": "Glance là ứng dụng bảo vệ quyền riêng tư màn hình cho Mac & Windows. Tự động nhận diện hướng quay đầu qua Camera Vision hoặc cảm biến chuyển động AirPods để làm mờ màn hình, chống nhìn trộm khi làm việc tại quán cafe, văn phòng hoặc nơi công cộng. Xử lý 100% on-device không lưu hình ảnh.",
         "downloadUrl": "https://glance-privacy.vercel.app/assets/product/Glance-macOS-1.0.0.zip",
         "softwareVersion": "1.0.0",
         "fileSize": "2.8MB",
         "image": "https://glance-privacy.vercel.app/assets/product/glance-icon.png",
-        "screenshot": "https://glance-privacy.vercel.app/assets/product/macbook-front.webp",
+        "screenshot": [
+          "https://glance-privacy.vercel.app/assets/product/macbook-front.webp",
+          "https://glance-privacy.vercel.app/assets/product/airpods-still.webp",
+          "https://glance-privacy.vercel.app/assets/product/place-cafe.webp"
+        ],
         "author": {
           "@type": "Person",
           "name": "Dai Chung Hy",
-          "email": "daichunghy@gmail.com"
+          "email": "daichunghy@gmail.com",
+          "sameAs": [
+            "https://github.com/daichunghy"
+          ]
         },
         "featureList": [
           "Tự động làm mờ một bên hoặc toàn màn hình khi quay đầu",
@@ -162,8 +192,10 @@
   <main id="overview">
     <section class="hero" id="hero">
       <div class="hero-copy">
-        <p class="product-name">Glance — Ứng dụng bảo vệ màn hình cho Mac &amp; Windows</p>
-        <h1>Làm việc riêng tư</h1>
+        <h1 class="hero-heading">
+          <span class="product-name">Glance — Ứng dụng chống nhìn trộm màn hình cho Mac &amp; Windows</span>
+          <span class="hero-title">Làm việc riêng tư</span>
+        </h1>
         <p class="intro">Tự động làm mờ màn hình khi bạn quay đầu hoặc rời bàn. Bảo vệ thông tin nhạy cảm ở quán cafe, văn phòng mở và nơi công cộng.</p>
         <div class="actions">
           <a class="button" href="#download" data-smart-download>Tải về miễn phí</a>

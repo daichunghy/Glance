@@ -1,0 +1,20 @@
+# Glance — Smart Screen Privacy
+
+> Glance là ứng dụng bảo vệ quyền riêng tư màn hình cho macOS và Windows. Tự động nhận diện hướng quay đầu hoặc khi người dùng rời bàn để làm mờ màn hình, chống nhìn trộm thông tin nhạy cảm ở nơi công cộng.
+
+## Thông tin dự án
+- Trang chủ chính thức: https://glance-privacy.vercel.app/
+- Tác giả & Phát triển: Dai Chung Hy (daichunghy@gmail.com)
+- Tương thích: macOS 14.0+ Sonoma, Sequoia (Apple Silicon M1/M2/M3/M4) & Windows 10/11
+- Phiên bản: v1.0.0 (Miễn phí hoàn toàn, không quảng cáo)
+
+## Tính năng cốt lõi
+1. Tự động làm mờ màn hình: Nhận diện khi người dùng quay đầu sang trái/phải hoặc nhìn ra xa để làm mờ nửa bên hoặc toàn màn hình.
+2. Tự động che màn hình khi rời bàn: Tự động bảo vệ ngay khi người dùng đứng dậy khỏi vị trí làm việc.
+3. On-device AI & Apple Vision: Sử dụng Apple Vision framework xử lý 100% nội bộ trên máy, hoàn toàn không ghi hình hay gửi bất kỳ dữ liệu nào ra mạng Internet.
+4. Hỗ trợ cảm biến AirPods: Theo dõi chuyển động đầu thông qua cảm biến Head Tracking trên tai nghe AirPods Pro / Max.
+5. Nhận diện thông minh: Tự động giữ màn hình khi đang gõ phím/dùng chuột và tự động tạm ngưng làm mờ khi có cuộc gọi video (FaceTime, Zoom, Teams).
+
+## Tài nguyên & Tải về
+- macOS (.zip): https://glance-privacy.vercel.app/assets/product/Glance-macOS-1.0.0.zip
+- Trang ủng hộ nhà phát triển: https://glance-privacy.vercel.app/ung-ho.html

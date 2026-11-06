@@ -31,8 +31,9 @@ nav a:hover,.text-link:hover,footer a:hover{text-decoration:underline}
 .text-link span{margin-left:4px}
 .hero{overflow:hidden;text-align:center;padding-top:clamp(44px,6vw,80px)}
 .hero-copy{position:relative;z-index:1;width:min(1080px,calc(100% - 36px));margin:auto}
-.product-name{color:#accffa;font:620 clamp(1rem,2vw,1.34rem)/1.25 var(--display);letter-spacing:-.018em;margin-bottom:16px}
-.hero h1{font-size:clamp(2.84rem,7.7vw,6.8rem)}
+.hero-heading{margin:0;font:inherit}
+.product-name{display:block;color:#accffa;font:620 clamp(1rem,2vw,1.34rem)/1.25 var(--display);letter-spacing:-.018em;margin-bottom:16px}
+.hero h1,.hero-title{font-size:clamp(2.84rem,7.7vw,6.8rem);font-family:var(--display);font-weight:650;letter-spacing:-.062em;line-height:.99;text-wrap:balance}
 .intro{color:var(--quiet);font:500 clamp(1.03rem,2.1vw,1.38rem)/1.4 var(--text);text-wrap:pretty}
 .hero .intro{color:#bfc2cd;max-width:32em;margin:24px auto 22px}
 .hero-art{position:relative;padding:42px 28px 44px;isolation:isolate}
