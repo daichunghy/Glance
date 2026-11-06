@@ -14,10 +14,11 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QObject
 from PyQt6.QtGui import QColor, QPainter, QAction
 
-from posture import PostureGuard
+from posture import PostureGuard, frame_too_dark
 
 class SignalEmitter(QObject):
     camera_error = pyqtSignal(str)
+    camera_waiting = pyqtSignal(str)  # busy / blocked / disabled — not fatal
     update_protection = pyqtSignal(str, float)  # side, alpha
     posture_status = pyqtSignal(str)   # human-readable posture state
     posture_warning = pyqtSignal(str)  # emitted once per bad-posture episode
@@ -89,6 +90,8 @@ class GlanceLinuxController(QObject):
         self.posture_guard = PostureGuard()
         self.posture_enabled = False
         self._last_posture_text = None
+        self.share_until = None
+        self._last_dark_notice = 0.0
 
         self.signals.update_protection.connect(self.apply_protection)
 
@@ -117,6 +120,20 @@ class GlanceLinuxController(QObject):
         else:
             self._emit_posture_text("Tư thế: chưa thấy khuôn mặt, hãy nhìn vào camera rồi thử lại")
 
+    def dismiss_posture(self):
+        self.posture_guard.dismiss_as_not_bad(time.monotonic())
+        self._emit_posture_text("Tư thế: đã ghi nhận — Glance bớt nhạy hơn một chút")
+
+    def snooze_posture(self):
+        self.posture_guard.snooze(time.monotonic())
+        self._emit_posture_text("Tư thế: tạm tắt nhắc 30 phút")
+
+    def start_share(self):
+        """Deliberately show the screen to someone next to you for 2 min."""
+        self.share_until = time.monotonic() + 120
+        self.is_looking_away = False
+        self.signals.update_protection.emit("none", 0.0)
+
     def _emit_posture_text(self, text):
         if text != self._last_posture_text:
             self._last_posture_text = text
@@ -141,11 +158,16 @@ class GlanceLinuxController(QObject):
                 self.signals.posture_warning.emit(text)
         elif result.status == "bad_pending":
             self._emit_posture_text("Tư thế: đang hơi sai, hãy ngồi thẳng lại")
+        elif result.status == "snoozed":
+            self._emit_posture_text("Tư thế: đang tạm tắt nhắc 30 phút")
         else:
             self._emit_posture_text("Tư thế: tốt")
 
     def process_face(self, yaw_degrees, is_present):
         if not self.is_enabled:
+            self.signals.update_protection.emit("none", 0.0)
+            return
+        if self.share_until is not None and time.monotonic() < self.share_until:
             self.signals.update_protection.emit("none", 0.0)
             return
             
@@ -175,13 +197,8 @@ class GlanceLinuxController(QObject):
 
     def camera_worker(self):
         cap = None
+        busy_announced = False
         try:
-            cap = cv2.VideoCapture(0)
-            if not cap.isOpened():
-                raise RuntimeError("Không mở được camera mặc định.")
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-
             face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
             if face_cascade.empty():
                 raise RuntimeError("Không tải được bộ nhận diện.")
@@ -189,16 +206,53 @@ class GlanceLinuxController(QObject):
             read_failures = 0
 
             while self.running:
+                # Protection off = camera truly released (LED off), not
+                # merely ignored. Re-enabled -> reopened by this loop.
+                if not self.is_enabled:
+                    if cap is not None:
+                        cap.release()
+                        cap = None
+                    time.sleep(0.4)
+                    continue
+
+                if cap is None:
+                    cap = cv2.VideoCapture(0)
+                    if not cap.isOpened():
+                        # Busy (a call app holds it) or unplugged: wait and
+                        # retry; Glance resumes by itself when it frees.
+                        cap.release()
+                        cap = None
+                        if not busy_announced:
+                            self.signals.camera_waiting.emit(
+                                "Camera đang bận hoặc chưa sẵn sàng — Glance tự thử lại.")
+                            busy_announced = True
+                        time.sleep(3)
+                        continue
+                    busy_announced = False
+                    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+                    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+
                 ret, frame = cap.read()
                 if not ret or frame is None:
                     read_failures += 1
                     if read_failures >= 5:
-                        raise RuntimeError("Mất tín hiệu camera.")
+                        cap.release()
+                        cap = None
+                        read_failures = 0
                     time.sleep(0.1)
                     continue
                 read_failures = 0
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                if frame_too_dark(float(gray.mean())):
+                    # Covered camera / pitch-black room: hold everything.
+                    now = time.monotonic()
+                    if now - self._last_dark_notice > 10:
+                        self._last_dark_notice = now
+                        self.signals.camera_waiting.emit(
+                            "Camera có vẻ bị che hoặc quá tối — Glance tạm đứng yên.")
+                    time.sleep(0.12)
+                    continue
                 faces = face_cascade.detectMultiScale(gray, 1.2, 4)
 
                 if len(faces) > 0:
@@ -276,6 +330,17 @@ def main():
 
     signals.posture_warning.connect(posture_warning)
 
+    posture_dismiss_act = QAction("Không phải tư thế xấu", triggered=controller.dismiss_posture)
+    menu.addAction(posture_dismiss_act)
+
+    posture_snooze_act = QAction("Tạm tắt nhắc tư thế 30 phút", triggered=controller.snooze_posture)
+    menu.addAction(posture_snooze_act)
+
+    share_act = QAction("Hiện màn hình 2 phút (cho người bên cạnh xem)", triggered=controller.start_share)
+    menu.addAction(share_act)
+
+    signals.camera_waiting.connect(lambda text: tray.setToolTip("Glance — " + text))
+
     menu.addSeparator()
     quit_act = QAction("Thoát Glance", triggered=app.quit)
     menu.addAction(quit_act)
@@ -289,7 +354,8 @@ def main():
         panel.setWindowTitle("Glance")
         panel.resize(320, 230)
         layout = QVBoxLayout(panel)
-        for action in (toggle_act, cal_act, posture_act, posture_cal_act, quit_act):
+        for action in (toggle_act, cal_act, posture_act, posture_cal_act,
+                       posture_dismiss_act, posture_snooze_act, share_act, quit_act):
             button = QToolButton(panel)
             button.setDefaultAction(action)
             layout.addWidget(button)

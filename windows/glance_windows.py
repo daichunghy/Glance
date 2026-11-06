@@ -11,7 +11,7 @@ from tkinter import ttk
 
 import cv2
 from guard import PresenceGuard, camera_is_stale
-from posture import PostureGuard
+from posture import PostureGuard, frame_too_dark
 
 
 if sys.platform != "win32":
@@ -108,8 +108,8 @@ class App:
         self.root = root
         root.title("Glance")
         root.configure(bg="#08090c")
-        root.geometry("510x710")
-        root.minsize(480, 660)
+        root.geometry("510x800")
+        root.minsize(480, 740)
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.cover = ScreenCover(root)
         self.events = queue.Queue(maxsize=1)
@@ -131,6 +131,7 @@ class App:
         self.posture_enabled = tk.BooleanVar(value=False)
         self.posture_status = tk.StringVar(value="Tư thế: đang tắt.")
         self.posture_guard = PostureGuard()
+        self.share_until = None
         self.make_ui()
         self.root.after(120, self.poll)
 
@@ -155,7 +156,12 @@ class App:
                                        bg="#242d39", fg=fg, activebackground="#334254",
                                        activeforeground="white", relief="flat", padx=18, pady=8,
                                        font=("Calibri", 11))
-        self.manual_button.pack(fill="x", pady=(8, 14))
+        self.manual_button.pack(fill="x", pady=(8, 0))
+        self.share_button = tk.Button(body, text="Hiện màn hình 2 phút (cho người bên cạnh xem)", command=self.start_share,
+                                      bg="#242d39", fg=fg, activebackground="#334254",
+                                      activeforeground="white", relief="flat", padx=18, pady=8,
+                                      font=("Calibri", 11))
+        self.share_button.pack(fill="x", pady=(8, 14))
         row = tk.Frame(body, bg=bg)
         row.pack(fill="x", pady=3)
         tk.Label(row, text="Camera", bg=bg, fg=fg, font=("Calibri", 11)).pack(side="left")
@@ -181,6 +187,14 @@ class App:
                                         activeforeground="white", relief="flat", padx=18, pady=6,
                                         font=("Calibri", 11))
         self.posture_button.pack(fill="x", pady=(4, 0))
+        prow = tk.Frame(body, bg=bg)
+        prow.pack(fill="x", pady=(6, 0))
+        tk.Button(prow, text="Không phải tư thế xấu", command=self.dismiss_posture,
+                  bg="#242d39", fg=fg, activebackground="#334254", activeforeground="white",
+                  relief="flat", padx=10, pady=5, font=("Calibri", 10)).pack(side="left", fill="x", expand=True)
+        tk.Button(prow, text="Tạm tắt nhắc 30 phút", command=self.snooze_posture,
+                  bg="#242d39", fg=fg, activebackground="#334254", activeforeground="white",
+                  relief="flat", padx=10, pady=5, font=("Calibri", 10)).pack(side="left", fill="x", expand=True, padx=(8, 0))
         label("Mức che", 11).pack(fill="x", pady=(8, 0))
         tk.Scale(body, variable=self.opacity, from_=60, to=95, orient="horizontal", bg=bg,
                  fg=fg, highlightthickness=0, troughcolor="#242d39", activebackground=blue,
@@ -230,14 +244,36 @@ class App:
             text = "Tư thế: hãy ngồi thẳng lại — đang " + " và ".join(names) + "."
         elif result.status == "bad_pending":
             text = "Tư thế: đang hơi sai, hãy ngồi thẳng lại."
+        elif result.status == "snoozed":
+            text = "Tư thế: đang tạm tắt nhắc 30 phút."
         else:
             text = "Tư thế: tốt."
         if self.posture_status.get() != text:
             self.posture_status.set(text)
 
+    def start_share(self):
+        """Deliberately show the screen to someone next to you for 2 min."""
+        self.share_until = time.monotonic() + 120
+        self.automatic_cover = False
+        self.refresh_cover()
+        self.status.set("Đang hiện màn hình cho người bên cạnh xem — tự bảo vệ lại sau 2 phút.")
+
+    def dismiss_posture(self):
+        self.posture_guard.dismiss_as_not_bad(time.monotonic())
+        self.posture_status.set("Tư thế: đã ghi nhận. Glance sẽ bớt nhạy hơn một chút; nhắc lại nếu cần.")
+
+    def snooze_posture(self):
+        self.posture_guard.snooze(time.monotonic())
+        self.posture_status.set("Tư thế: đã tạm tắt nhắc 30 phút.")
+
+    def _share_active(self):
+        until = getattr(self, "share_until", None)
+        return until is not None and time.monotonic() < until
+
     def refresh_cover(self):
+        sharing = self._share_active()
         try:
-            self.cover.update(self.manual or self.automatic_cover, self.opacity.get())
+            self.cover.update(not sharing and (self.manual or self.automatic_cover), self.opacity.get())
         except OSError:
             self.generation += 1
             if self.stop_event:
@@ -249,7 +285,7 @@ class App:
             self.start_button.configure(text="Bật camera")
             self.manual_button.configure(text="Che màn hình ngay")
             self.status.set("Không thể che màn hình. Tính năng tự động đã dừng; hãy thử lại.")
-        active = self.manual or self.automatic_cover
+        active = not sharing and (self.manual or self.automatic_cover)
         if active != self.controls_topmost:
             self.root.attributes("-topmost", active)
             self.controls_topmost = active
@@ -307,9 +343,18 @@ class App:
             if detector.empty():
                 self.publish(generation, "error", "Không tải được bộ nhận diện khuôn mặt.")
                 return
+            # Camera busy (Zoom/Teams holding it) is normal on Windows:
+            # wait and retry instead of dying — auto-resume when it frees.
             cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
-            if not cap.isOpened():
-                self.publish(generation, "error", "Không mở được camera. Kiểm tra số camera, quyền truy cập hoặc ứng dụng đang dùng camera.")
+            announced_busy = False
+            while not cap.isOpened() and not stop.is_set():
+                cap.release()
+                if not announced_busy:
+                    self.publish(generation, "busy", None)
+                    announced_busy = True
+                stop.wait(3)
+                cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+            if stop.is_set():
                 return
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
@@ -327,6 +372,12 @@ class App:
                     continue
                 failures = 0
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                if frame_too_dark(float(gray.mean())):
+                    # Covered camera / pitch-black room: hold everything,
+                    # never cover or nag on "no face" we cannot verify.
+                    self.publish(generation, "blocked", None)
+                    stop.wait(0.12)
+                    continue
                 faces = detector.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4, minSize=(30, 30))
                 now = time.monotonic()
                 if len(faces) > 0:
@@ -356,6 +407,13 @@ class App:
                     self.last_frame_at = None
                     self.status.set(value)
                     self.start_button.configure(text="Bật camera")
+                elif kind == "busy":
+                    self.last_frame_at = time.monotonic()
+                    self.status.set("Camera đang bận (Zoom/Teams đang dùng?). Glance tự mở lại khi camera trống.")
+                elif kind == "blocked":
+                    self.last_frame_at = time.monotonic()
+                    self.automatic_cover = False
+                    self.status.set("Camera có vẻ bị che hoặc quá tối — Glance tạm đứng yên, không che màn hình.")
                 elif kind == "face":
                     present, observed_at, guard, posture = value
                     self.last_frame_at = observed_at
