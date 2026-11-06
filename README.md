@@ -1,212 +1,154 @@
-<p align="center">
-  <img src="docs/images/glance-icon.png" alt="Glance app icon" width="120" height="120">
-</p>
+# Glance
 
-<h1 align="center">Glance</h1>
+<img src="docs/images/glance-icon.png" alt="Glance app icon" width="96">
 
-<p align="center">
-  <strong>Your screen. Only you should see it.</strong><br>
-  Glance is a Smart Screen Privacy app that blurs and covers your screen the moment you look away or leave your desk — using your webcam, processed 100% on-device.
-</p>
+Glance blurs or covers your screen when you look away or leave your desk, and clears it when you come back. It is meant for cafés, open offices and other places where someone standing behind you can read your screen. It does the job of a stick-on privacy filter in software, so your screen stays at full brightness and color while you are looking at it.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-0071e3" alt="Platforms: macOS, Windows, Linux">
-  <img src="https://img.shields.io/badge/license-MIT-78b8ff" alt="License: MIT">
-  <img src="https://img.shields.io/badge/status-in%20development-f5f5f7" alt="Status: in development">
-  <img src="https://img.shields.io/badge/privacy-100%25%20on--device-08090c" alt="Privacy: 100% on-device">
-</p>
-
-<p align="center">
-  <img src="docs/images/hero.png" alt="Glance — Your screen. Only you should see it." width="880">
-</p>
-
-<p align="center"><em>Simple. yet powerful.</em></p>
-
----
-
-## Why Glance?
-
-Your screen is open in cafes, open offices, airports, and meeting rooms.
-Anyone standing behind you can read your messages, your code, and your accounts.
-Glance covers your screen automatically — so you do not have to remember to.
-
-> **Status, honestly:** macOS is the most complete platform today. Windows and Linux are source-available and still being verified on real hardware. Posture Guard (below) is in active development and is **not yet in a stable release**. Current automated tests: **Windows — 28 passing, Linux — 19 passing** (posture / guard / screen-cover).
-
-## See it
-
-**You leave your desk at a cafe — Glance covers the screen for you.**
-
-![Leave your desk at a cafe and Glance covers your screen](docs/images/demo-cafe.png)
-
-**You look away — Glance blurs the screen.**
-
-![Look away and Glance blurs the screen](docs/images/demo-look-away.png)
-
-**The camera is on — but nobody is watching. Processing stays on your machine.**
-
-![Camera on, processed on-device: no frames saved, nothing uploaded, no face recognition](docs/images/privacy-on-device.png)
-
-*Note: the demo visuals above are from the Vietnamese product videos; the app behaviour they show is the same in every language.*
-
-## Features
-
-| Feature | macOS | Windows | Linux |
-| --- | :---: | :---: | :---: |
-| Auto blur / cover when you look away or leave | ✅ | ✅ | ✅ |
-| 100% on-device processing — nothing uploaded | ✅ | ✅ | ✅ |
-| No frames saved, no face recognition | ✅ | ✅ | ✅ |
-| Turning Glance off truly turns the camera off | ✅ | ✅ | ✅ |
-| Camera busy in a meeting? Glance waits, then resumes | ✅ | ✅ | ✅ |
-| Camera covered or too dark? Stays still, no false cover | ✅ | ✅ | ✅ |
-| “Show screen for 2 minutes” share mode | ✅ (⌥⇧S) | — | — |
-| Menu-bar app, native Swift 6 + Vision + CoreMotion | ✅ | — | — |
-| AirPods motion support | ✅ | — | — |
-| Python + OpenCV implementation | — | ✅ (Win32) | ✅ (PyQt6) |
-| Posture Guard (in development, off by default) | 🚧 | 🚧 | 🚧 |
+Glance runs on macOS, Windows and Linux. All processing happens on your own machine.
 
 ## How it works
 
-<p align="center">
-  <img src="docs/images/how-it-works.png" alt="How Glance works in three steps: Watch, Detect, Cover" width="880">
-</p>
+Each build reads frames from the webcam at low resolution and looks for a face rectangle. macOS uses the Vision framework (`VNDetectFaceRectanglesRequest`). The Windows and Linux builds use the OpenCV Haar cascade at 320 pixels wide and about 8 frames per second, slowing down when nothing in the scene changes.
 
-1. **Watch** — Glance checks for your presence through the webcam. All processing happens on your device.
-2. **Detect** — You look away, turn away, or step away from your desk.
-3. **Cover** — Your screen blurs and covers itself. When you come back, it clears.
+A face rectangle gives two things: whether you are there, and roughly where your head points. A small state machine turns that into three states: present, looking away, and away. Looking away triggers the blur overlay (on macOS you can blur one side or the whole screen). Away triggers a full cover. Coming back clears both.
 
-That is the whole idea. No account. No cloud. No extra hardware stuck on your screen.
+On Windows the decision sits in `PresenceGuard` in `windows/guard.py`. It is plain Python with no camera or UI code, so it can be unit tested on its own:
+
+```python
+    def update(self, now, face_present, idle_seconds):
+        if face_present or (self.activity_guard and idle_seconds < 2.5):
+            self.reset()
+            return False
+        if self.absent_since is None:
+            self.absent_since = now
+        return now - self.absent_since >= self.delay
+
+
+def camera_is_stale(now, last_frame_at, timeout=5):
+    return now - last_frame_at >= timeout
+```
+
+The delay defaults to 3 seconds, so a quick glance sideways does not cover the screen. Recent mouse or keyboard activity also counts as being present.
+
+On macOS you can skip the camera. AirPods with head tracking (Pro, 3, 4 and Max) report head motion through CoreMotion, and Glance can follow head turns from that instead.
 
 ## Privacy
 
-A privacy app must be private itself. Glance is built that way:
+Frames are processed in memory and thrown away. The code keeps a few geometry numbers in RAM, such as face width as a fraction of frame width, and nothing else. Face detection returns rectangles. It never works out who a face belongs to, and there is no enrollment step.
 
-- **On-device only.** Presence detection runs locally on your computer.
-- **No frames saved.** Webcam frames are processed in memory and discarded.
-- **Nothing uploaded.** There is no server receiving your images.
-- **No face recognition. No identity verification.** Glance checks *presence*, not *who you are*.
-- **Off means off.** Turning Glance off truly turns the camera off.
-- **It respects your calls.** If your camera is busy with a meeting call, Glance waits and resumes afterwards.
-- **It does not guess in the dark.** If the camera is covered or the room is too dark, Glance stays still instead of covering your screen by mistake.
+Turning Glance off stops the camera capture, and the camera light goes off with it. If another app is using the camera, for example a video call, Glance waits and tries again later instead of taking the camera over. If the camera is covered or the room is too dark, Glance does nothing: not seeing you is not treated as you being away. On macOS, the shortcut Option+Shift+S shows the screen for 2 minutes when you want to share it with the person next to you, then protection resumes on its own.
 
-## Posture Guard
-
-Posture Guard is a new feature built on the same on-device camera pipeline. It gives you a gentle reminder when you slouch or slip into “turtle neck” posture.
-
-- **Off by default.** You turn it on, and you calibrate your own good posture first.
-- **Warns after 10 seconds** of bad posture — not on every small movement.
-- **Adaptive cooldown:** 60s → 120s → 300s, so it nags less when you keep working.
-- **“Not bad posture” button:** each tap widens the threshold by +10%, up to ×1.5, so Glance learns your normal.
-- **30-minute snooze** when you need to focus.
-- **Per-camera calibration profiles**, so an external webcam keeps its own settings.
-- **Adaptive scan rate** (8 → 3 FPS) to save battery and CPU.
-- On Windows, the screen cover **pauses in fullscreen apps**.
-- The **3rd reminder within an hour** suggests standing up for a break.
-
-> ⚠️ **Posture Guard is not a medical device.** It is a friendly reminder, not a diagnosis or treatment.
-
-> 🚧 Posture Guard is in active development and is **not yet in a stable release**.
-
-## Install / Run from source
-
-There are no packaged downloads yet — please run from source.
-
-### macOS
-
-Native app: Swift 6 + AppKit + Vision + CoreMotion. It runs as a menu-bar app.
-
-```bash
-git clone https://github.com/daichunghy/Glance.git
-cd Glance
-./build_app.sh
-```
-
-Then launch the built app and grant it Camera permission when macOS asks. On macOS, press **⌥⇧S** for “Show screen for 2 minutes” share mode.
-
-### Windows
-
-Python + OpenCV + Win32.
-
-```powershell
-git clone https://github.com/daichunghy/Glance.git
-cd Glance
-pip install -r requirements.txt
-python glance_windows.py
-```
-
-Grant camera access in Windows Settings if prompted.
-
-### Linux
-
-Python + PyQt6 + OpenCV — same pattern as Windows:
-
-```bash
-git clone https://github.com/daichunghy/Glance.git
-cd Glance
-pip install -r requirements.txt
-# then run the Linux entry point from the linux/ folder
-```
-
-Make sure your user can access the webcam (for example, the `video` group) if the camera does not open.
-
-> Windows and Linux are still being verified on real hardware — bug reports from real machines are especially welcome.
-
-## Project structure
+## Repository layout
 
 ```text
 Glance/
-├── README.md
-├── LICENSE
+├── macos/          native macOS app (Swift 6, AppKit, Vision, CoreMotion)
+├── windows/        Windows app in Python (OpenCV, Win32)
+├── linux/          Linux app in Python (PyQt6, OpenCV)
+├── posture/        shared Posture Guard spec, POSTURE_SPEC.md
+├── landing-page/   source of the website at glance-privacy.vercel.app
+├── server/         donation endpoints used by the website
+├── licensing/      license key code in Swift and Python
+├── docs/           images used in this README
+├── DESIGN.md
+├── DESIGN_REFERENCES.md
 ├── CONTRIBUTING.md
 ├── SECURITY.md
-├── docs/
-│   └── images/          # README visuals
-├── macos/               # Swift 6 + AppKit + Vision + CoreMotion, menu-bar app
-│   └── build_app.sh
-├── windows/             # Python + OpenCV + Win32
-│   ├── requirements.txt
-│   └── glance_windows.py
-└── linux/               # Python + PyQt6 + OpenCV
-    └── requirements.txt
+└── LICENSE
 ```
+
+## Build and run
+
+### macOS
+
+Needs macOS 14 or later and Swift 6. The build script compiles a release build, assembles `Glance.app` in the same folder and signs it ad hoc.
+
+```bash
+cd macos
+./build_app.sh
+```
+
+Open `Glance.app` and allow camera access when macOS asks. Glance lives in the menu bar.
+
+### Windows
+
+Needs Python 3.11 or 3.12. From the `windows` folder:
+
+```powershell
+py -3 -m pip install -r requirements.txt
+py -3 glance_windows.py
+```
+
+Pick a camera in the window and press the button to turn the camera on. If the default camera does not work, try another index and check that Windows allows desktop apps to use the camera.
+
+### Linux
+
+From the `linux` folder:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 glance_linux.py
+```
+
+`./build_linux.sh` in the same folder packages a single file binary with PyInstaller and puts it in `dist/`.
+
+## Posture Guard
+
+Posture Guard watches for two habits while you work: head pushed forward toward the screen (turtle neck) and head dropped down (hunching). It reuses the same camera frames as the privacy cover and adds no new libraries.
+
+The policy lives in `posture.py`. That file is byte for byte identical in `windows/` and `linux/`, and the macOS build mirrors it in `PostureGuard.swift`. The policy takes plain geometry as input: face width divided by frame width, the vertical position of the face center, and head pitch on macOS where Vision provides it. Measurements are smoothed with an exponential moving average and compared against a baseline you set by sitting up straight and pressing the calibrate button.
+
+Calibration is stored per camera, because a laptop camera and an external webcam see you from different angles. Windows keeps profiles in `~/.glance/posture_profiles.json`, Linux in `~/.glance/posture.json`, and macOS in UserDefaults. Only the baseline numbers are stored.
+
+| Setting | Default |
+| --- | --- |
+| Time in bad posture before a warning | 10 seconds |
+| Warning clears after good posture | 3 seconds |
+| Cooldown after a warning | 60 seconds, then 120, then 300 for repeats within an hour |
+| Snooze | 30 minutes |
+| Dark frame cutoff | mean brightness below 15 of 255 counts as covered or too dark |
+
+If a warning is wrong, the "not bad posture" button clears it and widens every threshold by 10 percent, up to 1.5 times the original values, so the guard adjusts to how you actually sit. After the third warning within an hour it suggests a short break. Posture Guard is off by default, and Glance is not a medical device. It is a reminder, nothing more.
+
+Run the Python tests from inside the platform folder:
+
+```powershell
+cd windows
+py -3 -m unittest discover -s tests
+```
+
+```bash
+cd linux
+python3 -m unittest discover -s tests
+```
+
+Windows currently passes 28 tests (posture, presence guard and screen cover). Linux passes 19 (posture). The macOS test file at `macos/Tests/igfTests/PostureGuardTests.swift` uses the same cases as the Python posture tests.
+
+## Project status
+
+The macOS build is the most complete of the three. It is a native menu bar app with camera and AirPods input, side or full screen blur, and the share mode shortcut. The Windows and Linux builds run from source and have not been verified on real hardware yet, so expect rough edges there. Posture Guard code is in `main` on all three platforms but is not in a stable release. There are no packaged downloads yet.
 
 ## Roadmap
 
-- [ ] First stable release on macOS
-- [ ] Finish real-hardware verification on Windows and Linux
-- [ ] Move Posture Guard from active development into a stable release
-- [ ] Signed / notarized macOS build
-- [ ] More share-mode and pause controls on Windows and Linux
+- First stable release on macOS
+- Windows and Linux verified on real hardware
+- Posture Guard in a stable release
+- Signed and notarized macOS build
 
-This roadmap is a plan, not a promise of dates.
+## Support
 
-## Contributing
+Glance is free. There is no paid version and no account to create. If you want to chip in, the website at [glance-privacy.vercel.app](https://glance-privacy.vercel.app) accepts voluntary contributions through PayOS.
 
-Contributions are welcome — code, bug reports from real hardware, and documentation fixes all help. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+Glance miễn phí. Nếu bạn muốn ủng hộ, trang web glance-privacy.vercel.app có nhận đóng góp tự nguyện qua PayOS, cỡ một ly cà phê.
 
-For anything privacy- or security-sensitive, please read [SECURITY.md](SECURITY.md) instead of opening a public issue.
+## Contributing and security
 
-## ☕ Support Glance
-
-Glance is **free for everyone** — no ads, no account, no paywall. If it saves your screen (and your secrets) at a café, an open office, or an airport, you can support the project with a voluntary coffee via PayOS on the website:
-
-**→ [glance-privacy.vercel.app](https://glance-privacy.vercel.app)**
-
-*Ủng hộ tùy tâm: Glance miễn phí hoàn toàn, ai dùng thấy hay thì ủng hộ em ly cà phê qua PayOS trên trang web.*
+Bug reports from real machines are welcome, especially for Windows and Linux. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before sending a change. For anything security related, read [SECURITY.md](SECURITY.md) instead of opening a public issue.
 
 ## License
 
-Glance is released under the **MIT License** — see [LICENSE](LICENSE) for the full text.
+MIT. Copyright 2026 Chung Hy Dai. See [LICENSE](LICENSE).
 
-Copyright © 2026 Chung Hy Dai.
+## Tóm tắt tiếng Việt
 
----
-
-## 🇻🇳 Tóm tắt tiếng Việt
-
-**Glance — Màn hình của bạn. Chỉ bạn mới được nhìn.**
-
-Glance là app chống nhìn trộm màn hình: bạn quay đi hoặc rời bàn là màn hình tự làm mờ / che kín, bạn quay lại thì màn hình tự mở. Glance dùng webcam nhưng xử lý **100% ngay trên máy của bạn**: không lưu hình, không gửi lên mạng, không nhận diện khuôn mặt. Tắt Glance là camera tắt thật; đang họp chiếm camera thì Glance tự chờ; camera bị che hoặc phòng quá tối thì Glance đứng yên, không che nhầm.
-
-Có trên **macOS** (bản hoàn thiện nhất, Swift 6 native, app trên thanh menu), **Windows** (Python + OpenCV) và **Linux** (Python + PyQt6) — hai bản Windows / Linux đang được kiểm chứng trên máy thật. Tính năng mới **Posture Guard** nhắc khi bạn gù lưng / rùa cổ (mặc định tắt, cảnh báo sau 10 giây, tự giãn thời gian nhắc 60 → 120 → 300 giây) đang được phát triển, chưa có trong bản ổn định — và đây **không phải thiết bị y tế**, chỉ là lời nhắc thân thiện.
-
-*Simple. yet powerful.*
+Glance là phần mềm chống nhìn trộm màn hình cho macOS, Windows và Linux. Khi bạn quay mặt đi hoặc rời bàn, Glance làm mờ hoặc che màn hình, và mở lại khi bạn quay lại. Mọi xử lý đều chạy trên máy của bạn: khung hình không được lưu, không được gửi đi đâu, và camera chỉ đo vị trí khuôn mặt chứ không nhận diện danh tính. Tính năng Posture Guard dùng cùng camera để nhắc khi bạn gù lưng hoặc đưa đầu ra trước quá lâu; tính năng này mặc định tắt và cần bạn tự căn chỉnh tư thế chuẩn. Bản macOS hoàn thiện nhất, bản Windows và Linux chưa được kiểm chứng trên máy thật, và Posture Guard chưa có trong bản phát hành ổn định.
