@@ -10,150 +10,145 @@
   <link rel="canonical" href="https://glance-privacy.vercel.app/ung-ho.html">
   <link rel="icon" href="assets/product/glance-icon.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/product/glance-icon.png">
-  <link rel="manifest" href="site.webmanifest">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Glance Screen Privacy">
   <meta property="og:url" content="https://glance-privacy.vercel.app/ung-ho.html">
   <meta property="og:title" content="Anh/Chị dùng hay ủng hộ em ly cà phê ☕ — Glance">
   <meta property="og:description" content="Glance hoàn toàn miễn phí. Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙">
   <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/glance-icon.png">
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Ủng hộ phát triển Glance ☕ — Screen Privacy App">
-  <meta name="twitter:description" content="Glance hoàn toàn miễn phí. Hãy ủng hộ một ly cà phê để tiếp sức cho dự án bảo vệ riêng tư màn hình!">
-  <meta name="twitter:image" content="https://glance-privacy.vercel.app/assets/product/glance-icon.png">
-
-  <!-- Structured Data: BreadcrumbList -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Trang chủ",
-        "item": "https://glance-privacy.vercel.app/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Ủng hộ dự án",
-        "item": "https://glance-privacy.vercel.app/ung-ho.html"
-      }
-    ]
-  }
-  </script>
-
-  <!-- Reference Fonts -->
-  <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/5ac3fe7c6abd2f62067f266d89671492?family=HelveticaNowDisplay-Medium">
-  <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg">
-
-  <link rel="stylesheet" href="donation.css?v=6">
+  <!-- Apple Design System Stylesheet from Homepage -->
+  <link rel="stylesheet" href="styles.css?v=1.15.0">
+  <link rel="stylesheet" href="donation.css?v=7">
 </head>
-<body class="mainframe-layout">
+<body class="dark apple-theme">
 
-  <!-- INTERACTIVE BACKGROUND VIDEO (Flipped to Left, Color-graded to Glance Obsidian Blue) -->
-  <div class="video-container" aria-hidden="true">
-    <video
-      id="scrub-video"
-      class="bg-video"
-      muted
-      playsinline
-      preload="auto"
-      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_041744_63efcd78-bf7d-4039-99e2-2461e8a61903.mp4"
-    ></video>
-    <!-- Color grading & gradient overlay: fades to dark on right side for text legibility -->
-    <div class="video-overlay"></div>
-  </div>
-
-  <!-- FIXED NAVBAR -->
-  <header class="navbar">
-    <a class="nav-brand" href="./">
-      <img src="assets/product/glance-icon.png" width="28" height="28" alt="Glance">
-      <span class="brand-text">Glance®</span>
-      <span class="brand-asterisk">✳︎</span>
-    </a>
-    <div class="nav-right">
-      <a class="nav-link" href="./#download">Về trang Glance</a>
+  <!-- HOMEPAGE APPLE PRODUCT NAVBAR -->
+  <header class="product-nav">
+    <div class="nav-inner">
+      <a class="brand" href="./">
+        <img src="assets/product/glance-icon.png" width="26" height="26" alt="Glance Icon">
+        Glance
+      </a>
+      <nav>
+        <a href="./#features">Tính năng</a>
+        <a href="./#download">Tải ứng dụng</a>
+        <a href="./" class="text-link">Về trang chủ <span>›</span></a>
+      </nav>
     </div>
   </header>
 
-  <!-- MAIN HERO: CONTENT ON THE RIGHT -->
-  <main class="hero-wrapper">
-    <!-- Notice for ongoing automatic download -->
-    <div class="download-notice" id="download-notice" hidden>
-      <span class="pulse-dot"></span>
-      <span id="download-message">Bản cài đặt Glance đang được tải xuống...</span>
-      <a id="manual-download" download class="retry-link">Tải lại</a>
+  <!-- MAIN WRAPPER -->
+  <main class="support-page-wrap">
+    <!-- Download notice if downloading -->
+    <div class="download-notice-bar" id="download-notice" hidden>
+      <span class="live-dot"></span>
+      <span id="download-message">Bản cài đặt Glance đang được tải xuống máy bạn...</span>
+      <a id="manual-download" download class="text-link">Tải lại <span>›</span></a>
     </div>
 
-    <div class="hero-content">
-      <!-- 1. Blurred intro label -->
-      <div class="blurred-intro" aria-hidden="true">
-        Anh/Chị dùng Glance thấy hay,<br>
-        Ủng hộ em ly cà phê tiếp sức nhé ☕
-      </div>
-
-      <!-- 2. Typewriter Text -->
-      <div class="typewriter-container">
-        <p class="typewriter-text" id="typewriter-text"></p>
-      </div>
-
-      <!-- 3. Interactive Action / Donation Pills Form -->
-      <form class="support-form" id="support-form">
-        <div class="pills-container" id="pills-container">
-          <label class="pill-btn">
-            <input type="radio" name="preset" value="10000" data-note="Một ly trà đá sẻ chia. Cảm ơn bạn!">
-            <span class="pill-content">🍵 10.000đ</span>
-          </label>
-
-          <label class="pill-btn is-active">
-            <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê sáng tiếp sức coder. Rất biết ơn bạn!">
-            <span class="pill-content">☕ 20.000đ (Ly cà phê)</span>
-          </label>
-
-          <label class="pill-btn">
-            <input type="radio" name="preset" value="50000" data-note="Cà phê + Bánh mì nạp năng lượng cả ngày. Tuyệt vời!">
-            <span class="pill-content">🥐 50.000đ</span>
-          </label>
-
-          <label class="pill-btn">
-            <input type="radio" name="preset" value="100000" data-note="Sự đồng hành quý báu giúp Glance phát triển dài lâu. Trân trọng!">
-            <span class="pill-content">🚀 100.000đ</span>
-          </label>
-        </div>
-
-        <!-- Dynamic Note Box -->
-        <p class="dynamic-note" id="preset-note">
-          Một ly cà phê sáng tiếp sức coder. Rất biết ơn bạn! ☕💙
-        </p>
-
-        <!-- Custom Amount + CTA in Sleek Row -->
-        <div class="action-row">
-          <div class="custom-amount-pill">
-            <input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1000" value="20000" required placeholder="Số khác">
-            <span class="unit">VNĐ</span>
+    <div class="support-split-container">
+      <!-- LEFT COLUMN: INTERACTIVE APPLE PRO VISUAL (Mouse-Scrub Video) -->
+      <section class="visual-column" aria-label="Hình ảnh tương tác">
+        <div class="apple-art-stage">
+          <div class="ambient-glow" aria-hidden="true"></div>
+          <div class="video-display-frame">
+            <video
+              id="scrub-video"
+              class="interactive-video"
+              muted
+              playsinline
+              preload="auto"
+              src="assets/product/glance-scrub.mp4"
+            ></video>
+            <div class="frame-glass-shine"></div>
+            <div class="frame-caption">
+              <span class="caption-icon">👁️</span>
+              <span class="caption-text">Lia chuột ngang để tương tác với Glance</span>
+            </div>
           </div>
-
-          <button class="submit-pill-btn" type="submit" id="submit-btn">
-            <span class="btn-text">Ủng hộ qua PayOS ☕</span>
-          </button>
         </div>
+      </section>
 
-        <p class="status-msg" id="support-status" role="status" aria-live="polite"></p>
+      <!-- RIGHT COLUMN: APPLE PRO SUPPORT CARD -->
+      <section class="content-column">
+        <div class="support-card-apple">
+          <span class="product-name">Glance Support</span>
+          <h1 class="hero-title support-heading">
+            Anh/Chị dùng hay,<br>ủng hộ em ly cà phê
+          </h1>
+          <p class="intro support-intro">
+            Glance hoàn toàn miễn phí. Nếu app hay và thú vị, bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙
+          </p>
 
-        <!-- Skip Link -->
-        <div class="footer-links">
-          <a class="skip-link" href="./#download">Dùng Glance miễn phí →</a>
+          <form id="support-form" class="apple-form">
+            <p class="section-label">Chọn mức ủng hộ:</p>
+            <!-- Apple Segmented Preset Pills -->
+            <fieldset class="apple-pills-grid" aria-label="Chọn mức tiền ủng hộ">
+              <label class="apple-pill">
+                <input type="radio" name="preset" value="10000" data-note="Một ly trà đá sẻ chia. Cảm ơn bạn rất nhiều!">
+                <span class="pill-inner">
+                  <span class="p-amount">10.000đ</span>
+                  <span class="p-desc">Trà đá 🍵</span>
+                </span>
+              </label>
+
+              <label class="apple-pill is-selected">
+                <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê sáng tiếp sức coder. Rất biết ơn bạn!">
+                <span class="pill-inner">
+                  <span class="p-amount">20.000đ</span>
+                  <span class="p-desc">Ly cà phê ☕</span>
+                </span>
+              </label>
+
+              <label class="apple-pill">
+                <input type="radio" name="preset" value="50000" data-note="Bữa sáng nạp năng lượng duy trì dự án. Tuyệt vời!">
+                <span class="pill-inner">
+                  <span class="p-amount">50.000đ</span>
+                  <span class="p-desc">Cà phê + Bánh mì 🥐</span>
+                </span>
+              </label>
+
+              <label class="apple-pill">
+                <input type="radio" name="preset" value="100000" data-note="Sự đồng hành quý báu giúp Glance phát triển dài lâu. Trân trọng!">
+                <span class="pill-inner">
+                  <span class="p-amount">100.000đ</span>
+                  <span class="p-desc">Tiếp sức dài lâu 🚀</span>
+                </span>
+              </label>
+            </fieldset>
+
+            <!-- Dynamic Note -->
+            <div class="apple-note-box" id="preset-note">
+              Một ly cà phê sáng tiếp sức coder. Rất biết ơn bạn! ☕💙
+            </div>
+
+            <!-- Custom Amount -->
+            <div class="custom-amount-field">
+              <label for="support-amount">Hoặc nhập số tiền tùy tâm:</label>
+              <div class="apple-input-wrapper">
+                <input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1000" value="20000" required>
+                <span class="currency-label">VNĐ</span>
+              </div>
+            </div>
+
+            <!-- Main CTA Button -->
+            <button class="button apple-submit-btn" type="submit" id="submit-btn">
+              <span class="btn-text">Ủng hộ qua PayOS ☕</span>
+            </button>
+
+            <p class="support-status" id="support-status" role="status" aria-live="polite"></p>
+
+            <div class="skip-action">
+              <a href="./#download" class="text-link">Bỏ qua và dùng Glance miễn phí <span>›</span></a>
+            </div>
+          </form>
         </div>
-      </form>
+      </section>
     </div>
   </main>
 
-  <script src="donation.js?v=6" defer></script>
+  <script src="donation.js?v=7" defer></script>
 </body>
 </html>

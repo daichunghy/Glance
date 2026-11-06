@@ -1,102 +1,44 @@
 (() => {
   /* ==========================================================================
-     1. BACKGROUND VIDEO MOUSE-SCRUBBING ENGINE
+     1. BUTTERY-SMOOTH APPLE PRO MOUSE-SCRUB ENGINE (Lerp + RAF)
      ========================================================================== */
   const video = document.getElementById('scrub-video');
   if (video) {
-    let prevX = null;
-    let targetTime = 0;
-    let isSeeking = false;
-    const SENSITIVITY = 0.85;
+    let currentPos = 0.35;
+    let targetPos = 0.35;
 
-    // Wait until video metadata is loaded to calculate duration accurately
     video.addEventListener('loadedmetadata', () => {
-      targetTime = video.duration * 0.35;
-      video.currentTime = targetTime;
+      video.currentTime = video.duration * 0.35;
     });
 
-    // Horizontal mouse scrubbing
+    // Update targetPos based on normalized mouse horizontal position
     window.addEventListener('mousemove', (e) => {
-      if (prevX === null) {
-        prevX = e.clientX;
-        return;
-      }
-      const delta = e.clientX - prevX;
-      prevX = e.clientX;
-
-      if (!video.duration) return;
-
-      const timeOffset = (delta / window.innerWidth) * SENSITIVITY * video.duration;
-      targetTime = Math.max(0, Math.min(video.duration, targetTime + timeOffset));
-
-      if (!isSeeking) {
-        isSeeking = true;
-        video.currentTime = targetTime;
-      }
+      targetPos = Math.max(0, Math.min(1, e.clientX / window.innerWidth));
     });
 
-    // Seeked queueing to prevent seek-flooding
-    video.addEventListener('seeked', () => {
-      if (Math.abs(video.currentTime - targetTime) > 0.04) {
-        video.currentTime = targetTime;
-      } else {
-        isSeeking = false;
-      }
-    });
-
-    // Touch support for mobile scrubbing
-    let touchStartX = null;
-    window.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 0) touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-
+    // Mobile touch scrubbing
     window.addEventListener('touchmove', (e) => {
-      if (touchStartX === null || !video.duration || e.touches.length === 0) return;
-      const currentX = e.touches[0].clientX;
-      const delta = currentX - touchStartX;
-      touchStartX = currentX;
-
-      const timeOffset = (delta / window.innerWidth) * SENSITIVITY * video.duration;
-      targetTime = Math.max(0, Math.min(video.duration, targetTime + timeOffset));
-
-      if (!isSeeking) {
-        isSeeking = true;
-        video.currentTime = targetTime;
+      if (e.touches.length > 0) {
+        targetPos = Math.max(0, Math.min(1, e.touches[0].clientX / window.innerWidth));
       }
     }, { passive: true });
-  }
 
-  /* ==========================================================================
-     2. TYPEWRITER EFFECT WITH BLINKING CURSOR
-     ========================================================================== */
-  const typewriterEl = document.getElementById('typewriter-text');
-  if (typewriterEl) {
-    const fullText = "Glance hoàn toàn miễn phí. Nếu app hay và thú vị, bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙";
-    const speed = 32;
-    const startDelay = 500;
-
-    setTimeout(() => {
-      let index = 0;
-      typewriterEl.textContent = '';
-
-      const cursor = document.createElement('span');
-      cursor.className = 'blinking-cursor';
-      typewriterEl.after(cursor);
-
-      const interval = setInterval(() => {
-        if (index < fullText.length) {
-          typewriterEl.textContent += fullText.charAt(index);
-          index++;
-        } else {
-          clearInterval(interval);
-          setTimeout(() => cursor.remove(), 2500); // Remove cursor after done
+    // Physics-based smooth rendering loop
+    function animateScrub() {
+      if (video.readyState >= 2 && video.duration) {
+        currentPos += (targetPos - currentPos) * 0.085; // Smooth spring interpolation
+        const desiredTime = currentPos * video.duration;
+        if (!video.seeking && Math.abs(video.currentTime - desiredTime) > 0.02) {
+          video.currentTime = desiredTime;
         }
-      }, speed);
-    }, startDelay);
+      }
+      requestAnimationFrame(animateScrub);
+    }
+    requestAnimationFrame(animateScrub);
   }
 
   /* ==========================================================================
-     3. DOWNLOAD & PAYOS INTERACTION LOGIC
+     2. DOWNLOADS & PAYOS DONATION LOGIC
      ========================================================================== */
   const files = {
     mac: 'assets/product/Glance-macOS-1.0.0.zip',
@@ -127,15 +69,15 @@
   const btnText = button.querySelector('.btn-text');
   const noteBox = document.getElementById('preset-note');
   const presets = [...form.querySelectorAll('input[name="preset"]')];
-  const pillLabels = [...form.querySelectorAll('.pill-btn')];
+  const pillLabels = [...form.querySelectorAll('.apple-pill')];
 
-  // Update note & custom input when clicking presets
+  // Preset switching
   presets.forEach((preset, idx) => {
     preset.addEventListener('change', () => {
       if (preset.checked) {
         amount.value = preset.value;
-        pillLabels.forEach(p => p.classList.remove('is-active'));
-        pillLabels[idx]?.classList.add('is-active');
+        pillLabels.forEach(p => p.classList.remove('is-selected'));
+        pillLabels[idx]?.classList.add('is-selected');
 
         const note = preset.dataset.note;
         if (note && noteBox) noteBox.textContent = note;
@@ -143,14 +85,14 @@
     });
   });
 
-  // When user types custom amount, sync preset pills
+  // Custom amount syncing
   amount.addEventListener('input', () => {
     let matched = false;
     presets.forEach((preset, idx) => {
       if (preset.value === amount.value) {
         preset.checked = true;
-        pillLabels.forEach(p => p.classList.remove('is-active'));
-        pillLabels[idx]?.classList.add('is-active');
+        pillLabels.forEach(p => p.classList.remove('is-selected'));
+        pillLabels[idx]?.classList.add('is-selected');
         matched = true;
         if (noteBox && preset.dataset.note) noteBox.textContent = preset.dataset.note;
       } else {
@@ -158,14 +100,14 @@
       }
     });
     if (!matched) {
-      pillLabels.forEach(p => p.classList.remove('is-active'));
+      pillLabels.forEach(p => p.classList.remove('is-selected'));
       if (noteBox) {
-        noteBox.textContent = 'Mọi sự tiếp sức từ bạn đều là nguồn động viên vô giá đối với Glance. Cảm ơn bạn rất nhiều! 💙';
+        noteBox.textContent = 'Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙';
       }
     }
   });
 
-  // Handle return or cancel status from PayOS
+  // Status message from PayOS return
   if (params.get('support') === 'return') {
     status.style.color = '#2ed573';
     status.textContent = 'Cảm ơn tấm lòng của bạn! Món quà tiếp sức đã được ghi nhận. 💙';
@@ -174,20 +116,20 @@
     status.textContent = 'Bạn đã hủy lượt tiếp sức. Chúc bạn có trải nghiệm tuyệt vời với Glance!';
   }
 
-  // Pre-fetch config quietly in background without disabling UI or blocking user!
+  // Pre-fetch config quietly in background without blocking
   let isConfigured = null;
   fetch('/api/donation/config', { cache: 'no-store' })
     .then(res => res.ok ? res.json() : null)
     .then(cfg => { isConfigured = Boolean(cfg?.enabled); })
     .catch(() => { isConfigured = false; });
 
-  // Handle form submission
+  // Handle PayOS submit
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
 
     button.disabled = true;
-    if (btnText) btnText.textContent = 'Đang chuyển đến PayOS…';
+    if (btnText) btnText.textContent = 'Đang mở cổng PayOS…';
     status.textContent = '';
 
     try {
