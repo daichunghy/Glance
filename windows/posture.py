@@ -15,7 +15,9 @@ from collections import namedtuple
 
 PostureResult = namedtuple(
     "PostureResult",
-    ["status", "kinds", "warning", "just_triggered", "forward", "drop"],
+    ["status", "kinds", "warning", "just_triggered", "forward", "drop",
+     "suggest_break"],
+    defaults=[False],
 )
 # status: "uncalibrated" | "no_face" | "good" | "bad_pending" | "warning"
 #         | "snoozed"
@@ -69,6 +71,39 @@ class PostureGuard:
         self._warning_times = []
         self._loosen = 1.0
         self._snoozed_until = None
+        self.total_warnings = 0
+
+    # -- persistence -------------------------------------------------------
+    def export_profile(self):
+        """Calibration as plain JSON-able data, or None when uncalibrated."""
+        if not self.is_calibrated:
+            return None
+        return {"size": self.baseline_size, "center_y": self.baseline_center_y,
+                "pitch": self.baseline_pitch, "loosen": self._loosen}
+
+    def import_profile(self, data):
+        """Restore a saved calibration. Returns False on unusable data."""
+        try:
+            size = float(data["size"])
+            center_y = float(data["center_y"])
+        except (TypeError, KeyError, ValueError):
+            return False
+        if not (0.02 < size < 0.95 and 0.0 <= center_y <= 1.0):
+            return False
+        pitch = data.get("pitch")
+        self.baseline_size = size
+        self.baseline_center_y = center_y
+        self.baseline_pitch = float(pitch) if pitch is not None else None
+        try:
+            self._loosen = min(1.5, max(1.0, float(data.get("loosen", 1.0))))
+        except (TypeError, ValueError):
+            self._loosen = 1.0
+        # Seed smoothing at the baseline so the first frames compare fairly.
+        self._smooth_size = size
+        self._smooth_center_y = center_y
+        self._smooth_pitch = self.baseline_pitch
+        self.reset_timers()
+        return True
 
     # -- adaptive helpers --------------------------------------------------
     def _adaptive_cooldown(self, now):
@@ -132,6 +167,7 @@ class PostureGuard:
         self._warning_times = []
         self._loosen = 1.0
         self._snoozed_until = None
+        self.total_warnings = 0
         self.reset_timers()
 
     def reset_timers(self, keep_cooldown=False):
@@ -188,8 +224,11 @@ class PostureGuard:
                     self._warning = True
                     self._warning_kinds = kinds
                     self._warning_times.append(now)
+                    self.total_warnings += 1
                     self._cooldown_until = now + self._adaptive_cooldown(now)
-                    return PostureResult("warning", kinds, True, True, forward, drop)
+                    recent = [t for t in self._warning_times if now - t < 3600]
+                    return PostureResult("warning", kinds, True, True, forward, drop,
+                                         len(recent) >= 3)
                 return PostureResult("bad_pending", kinds, False, False, forward, drop)
             return PostureResult("bad_pending", kinds, False, False, forward, drop)
 

@@ -46,3 +46,19 @@ tắt/bỏ app. Nguồn: báo cáo nghiên cứu hành vi người dùng ngày 0
 Hồ sơ theo setup (nhiều màn hình/camera), tiết kiệm pin nâng cao, tóm tắt
 cuối ngày, gợi ý đứng dậy sau nhiều cảnh báo, check tư thế trước cuộc họp.
 Ghi lại ở đây để khỏi mất, chưa làm.
+
+## Đợt 3 (P1 từ cùng báo cáo) — đã làm
+
+- [x] **Căn chỉnh không mất khi tắt app:** baseline + độ nới ngưỡng được lưu
+  (Windows theo từng camera trong `~/.glance/posture_profiles.json`, Linux
+  `~/.glance/posture.json`, macOS UserDefaults) và tự nạp khi mở lại.
+  *Test: unit test export/import vòng tròn + từ chối dữ liệu rác.*
+- [x] **Tiết kiệm pin:** nhịp quét Windows/Linux tự giãn ~8 FPS → ~3 FPS khi
+  khung cảnh ổn định, có thay đổi là về ~8 FPS ngay.
+- [x] **Trình chiếu/toàn màn hình (Windows):** app toàn màn hình khác đang
+  chiếm màn hình thì lớp che không bật lên (thuyết trình, video, game).
+- [x] **Gợi ý đứng dậy:** bị nhắc lần thứ 3 trong 1 giờ thì dòng cảnh báo
+  thêm gợi ý đứng dậy giãn người 1 phút.
+  *Test: unit test `suggest_break` ở lần nhắc thứ 3.*
+- [x] **Dẫn dắt tuần đầu:** 3 lần nhắc đầu kèm một câu giải thích ngắn và
+  chỉ cách bấm "Không phải tư thế xấu" để app học theo.

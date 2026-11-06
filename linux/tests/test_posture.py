@@ -186,6 +186,43 @@ class AdaptiveBehaviourTests(unittest.TestCase):
                               center_y=BASE_Y, pitch=BASE_PITCH)
         self.assertFalse(result.warning)
 
+    def test_profile_export_import_roundtrip(self):
+        guard = calibrated_guard(hold_seconds=1)
+        guard.dismiss_as_not_bad(0)
+        data = guard.export_profile()
+        self.assertIsNotNone(data)
+        fresh = PostureGuard(hold_seconds=1)
+        self.assertTrue(fresh.import_profile(data))
+        self.assertTrue(fresh.is_calibrated)
+        self.assertAlmostEqual(fresh.baseline_size, BASE_SIZE)
+        self.assertAlmostEqual(fresh.loosen_factor, 1.10)
+        result = fresh.update(10, True, face_size=BASE_SIZE, center_y=BASE_Y,
+                              pitch=BASE_PITCH)
+        self.assertEqual(result.status, "good")
+
+    def test_profile_import_rejects_garbage(self):
+        fresh = PostureGuard()
+        self.assertIsNone(fresh.export_profile())
+        self.assertFalse(fresh.import_profile(None))
+        self.assertFalse(fresh.import_profile({}))
+        self.assertFalse(fresh.import_profile({"size": "x", "center_y": 0.4}))
+        self.assertFalse(fresh.import_profile({"size": 5.0, "center_y": 0.4}))
+        self.assertFalse(fresh.is_calibrated)
+
+    def test_third_warning_in_hour_suggests_break(self):
+        guard = calibrated_guard(hold_seconds=1)
+        self.assertFalse(self._warn(guard, 0).suggest_break)
+        self._clear(guard, 5)
+        self.assertFalse(self._warn(guard, 70).suggest_break)
+        self._clear(guard, 75)
+        third = None
+        feed(guard, 200, size=BASE_SIZE * 1.4, y=BASE_Y + 0.06)
+        third = guard.update(201, True, face_size=BASE_SIZE * 1.4,
+                             center_y=BASE_Y + 0.06, pitch=BASE_PITCH)
+        self.assertTrue(third.just_triggered)
+        self.assertTrue(third.suggest_break)
+        self.assertEqual(guard.total_warnings, 3)
+
     def test_frame_too_dark(self):
         self.assertTrue(frame_too_dark(3.0))
         self.assertTrue(frame_too_dark(14.9))
