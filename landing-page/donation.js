@@ -1,36 +1,92 @@
 (() => {
   /* ==========================================================================
-     1. BUTTERY-SMOOTH APPLE PRO MOUSE-SCRUB ENGINE (Lerp + RAF)
+     1. BUTTERY-SMOOTH APPLE PRO AMBIENT PLAY + 60FPS QUEUED SCRUB ENGINE
      ========================================================================== */
   const video = document.getElementById('scrub-video');
   if (video) {
-    let currentPos = 0.35;
-    let targetPos = 0.35;
+    let isInteracting = false;
+    let idleTimer = null;
+    let currentPos = 0.5;
+    let targetPos = 0.5;
+    let isSeeking = false;
+    let queuedSeekTime = null;
 
-    video.addEventListener('loadedmetadata', () => {
-      video.currentTime = video.duration * 0.35;
-    });
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
 
-    // Update targetPos based on normalized mouse horizontal position
-    window.addEventListener('mousemove', (e) => {
-      targetPos = Math.max(0, Math.min(1, e.clientX / window.innerWidth));
-    });
-
-    // Mobile touch scrubbing
-    window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) {
-        targetPos = Math.max(0, Math.min(1, e.touches[0].clientX / window.innerWidth));
+    // Fast non-blocking seek with queue to eliminate decoder stutter
+    function dispatchSeek(time) {
+      if (isSeeking) {
+        queuedSeekTime = time;
+        return;
       }
+      isSeeking = true;
+      if ('fastSeek' in video) {
+        video.fastSeek(time);
+      } else {
+        video.currentTime = time;
+      }
+    }
+
+    video.addEventListener('seeked', () => {
+      isSeeking = false;
+      if (queuedSeekTime !== null && Math.abs(video.currentTime - queuedSeekTime) > 0.015) {
+        const nextTime = queuedSeekTime;
+        queuedSeekTime = null;
+        dispatchSeek(nextTime);
+      } else {
+        queuedSeekTime = null;
+      }
+    });
+
+    // Start ambient continuous smooth loop for optimal viewing duration
+    function startAmbientPlay() {
+      if (video.paused && !isInteracting) {
+        video.play().catch(() => {});
+      }
+    }
+
+    if (video.readyState >= 2) {
+      startAmbientPlay();
+    } else {
+      video.addEventListener('canplay', startAmbientPlay, { once: true });
+    }
+
+    // Pointer movement handler: pause ambient loop, scrub smoothly with mouse
+    function onPointerMove(clientX) {
+      isInteracting = true;
+      if (!video.paused) {
+        video.pause();
+      }
+      targetPos = Math.max(0, Math.min(1, clientX / window.innerWidth));
+
+      clearTimeout(idleTimer);
+      // Auto-resume ambient playback 1.8s after cursor rests
+      idleTimer = setTimeout(() => {
+        isInteracting = false;
+        startAmbientPlay();
+      }, 1800);
+    }
+
+    window.addEventListener('mousemove', (e) => onPointerMove(e.clientX), { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) onPointerMove(e.touches[0].clientX);
+    }, { passive: true });
+    window.addEventListener('touchend', () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        isInteracting = false;
+        startAmbientPlay();
+      }, 800);
     }, { passive: true });
 
-    // Physics-based smooth rendering loop
+    // 60fps spring interpolation loop when user is actively scrubbing
     function animateScrub() {
-      if (video.readyState >= 2 && video.duration) {
-        currentPos += (targetPos - currentPos) * 0.085; // Smooth spring interpolation
+      if (isInteracting && video.readyState >= 2 && video.duration) {
+        currentPos += (targetPos - currentPos) * 0.15; // Smooth responsive spring
         const desiredTime = currentPos * video.duration;
-        if (!video.seeking && Math.abs(video.currentTime - desiredTime) > 0.02) {
-          video.currentTime = desiredTime;
-        }
+        dispatchSeek(desiredTime);
       }
       requestAnimationFrame(animateScrub);
     }
