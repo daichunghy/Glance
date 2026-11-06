@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#08090c">
-  <title>Ủng hộ Glance — Ứng dụng bảo vệ màn hình cho Mac</title>
-  <meta name="description" content="Glance miễn phí cho tất cả mọi người. Ủng hộ dự án để phát triển thêm các tính năng bảo vệ quyền riêng tư màn hình cho Mac và Windows.">
+  <title>Cảm ơn & Tiếp sức cho Glance — Smart Screen Privacy</title>
+  <meta name="description" content="Glance hoàn toàn miễn phí cho tất cả mọi người. Nếu ứng dụng mang lại sự an tâm cho bạn, bạn có thể gửi tặng một ly cà phê tiếp sức cho tác giả.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://glance-privacy.vercel.app/ung-ho.html">
   <link rel="icon" href="assets/product/glance-icon.png" type="image/png">
@@ -14,37 +14,138 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://glance-privacy.vercel.app/ung-ho.html">
-  <meta property="og:title" content="Ủng hộ Glance — Ứng dụng bảo vệ màn hình cho Mac">
-  <meta property="og:description" content="Glance miễn phí cho mọi người. Nếu ứng dụng hữu ích với bạn, bạn có thể ủng hộ dự án qua PayOS.">
+  <meta property="og:title" content="Cảm ơn & Tiếp sức cho Glance">
+  <meta property="og:description" content="Glance hoàn toàn miễn phí. Mọi sự ủng hộ và đồng hành đều là nguồn động viên vô giá đối với dự án.">
   <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/glance-icon.png">
 
-  <link rel="stylesheet" href="donation.css?v=2">
-  <script src="donation.js?v=2" defer></script>
+  <link rel="stylesheet" href="donation.css?v=3">
+  <script src="donation.js?v=3" defer></script>
 </head>
 <body>
-  <header class="nav"><a class="brand" href="./"><img src="assets/product/glance-icon.png" width="26" height="26" alt="">Glance</a><a class="back" href="./#download">Quay lại</a></header>
+  <!-- Ambient background light -->
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="brand" href="./">
+      <img src="assets/product/glance-icon.png" width="28" height="28" alt="Glance Icon">
+      <span>Glance</span>
+    </a>
+    <a class="back-link" href="./#download">← Về trang chủ</a>
+  </header>
+
   <main class="main">
-    <div class="download-notice" id="download-notice" hidden><span id="download-message">Đang bắt đầu tải Glance.</span> <a id="manual-download" download>Tải lại</a></div>
+    <!-- Notice for ongoing automatic download -->
+    <div class="download-banner" id="download-notice" hidden>
+      <span class="pulse-dot"></span>
+      <span id="download-message">Bản cài đặt Glance đang được tải xuống...</span>
+      <a id="manual-download" download class="retry-link">Bấm tải lại nếu chưa bắt đầu</a>
+    </div>
+
     <div class="layout">
-      <div class="message">
-        <img src="assets/product/glance-icon.png" width="68" height="68" alt="" class="icon">
-        <h1>Ủng hộ Glance</h1>
-        <p>Glance miễn phí cho mọi người. Nếu ứng dụng hữu ích với bạn, bạn có thể ủng hộ dự án.</p>
-      </div>
-      <form class="support-card" id="support-form">
-        <p class="support-type">Ủng hộ một lần</p>
-        <fieldset class="amounts" aria-label="Chọn mức ủng hộ">
-          <label><input type="radio" name="preset" value="10000"><span>10.000đ</span></label>
-          <label><input type="radio" name="preset" value="20000" checked><span>20.000đ</span></label>
-          <label><input type="radio" name="preset" value="50000"><span>50.000đ</span></label>
-          <label><input type="radio" name="preset" value="100000"><span>100.000đ</span></label>
-        </fieldset>
-        <label class="custom-label" for="support-amount">Hoặc nhập số tiền khác</label>
-        <div class="custom-input"><input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1" value="20000" required><span>đồng</span></div>
-        <button class="support-submit" type="submit" disabled>Ủng hộ qua PayOS</button>
-        <p class="support-status" role="status" aria-live="polite">Đang kiểm tra kết nối…</p>
-        <a class="skip" href="./#download">Về trang Glance</a>
-      </form>
+      <!-- Left column: Heartfelt Message & Sincerity -->
+      <section class="story-section">
+        <div class="badge"><span class="heart-icon">💙</span> Lời tri ân từ tác giả</div>
+        <h1>Tiếp sức cho dự án Glance</h1>
+        <p class="lead">
+          Glance được tạo ra để mang lại sự an tâm và riêng tư tuyệt đối cho bạn khi làm việc nơi công cộng. Ứng dụng <strong>hoàn toàn miễn phí</strong> và cam kết 100% On-device, không bao giờ thu thập dữ liệu cá nhân.
+        </p>
+        <p class="sub-lead">
+          Nếu Glance giúp ích cho bạn trong công việc hàng ngày, một ly cà phê hay một lời động viên đều là món quà vô giá giúp mình có thêm động lực duy trì server và phát triển thêm nhiều tính năng mới.
+        </p>
+
+        <div class="commitments">
+          <div class="commit-item">
+            <span class="commit-icon">🔒</span>
+            <div>
+              <strong>100% On-Device & Miễn phí</strong>
+              <p>Mọi người đều có quyền được bảo vệ riêng tư màn hình.</p>
+            </div>
+          </div>
+          <div class="commit-item">
+            <span class="commit-icon">🌱</span>
+            <div>
+              <strong>Duy trì bền bỉ</strong>
+              <p>Mỗi đóng góp giúp trang trải chi phí tên miền, máy chủ và thiết bị thử nghiệm.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right column: Interactive Support Card (Glassmorphism) -->
+      <section class="card-section">
+        <form class="support-card" id="support-form">
+          <div class="card-header">
+            <h2>Gửi gắm lời cảm ơn</h2>
+            <p class="card-subtitle">Chọn một mức tiếp sức bạn cảm thấy thoải mái nhất:</p>
+          </div>
+
+          <fieldset class="amounts-grid" aria-label="Chọn mức tiếp sức">
+            <label class="amount-option">
+              <input type="radio" name="preset" value="10000" data-note="Một chút ngọt ngào tiếp thêm niềm vui cho tác giả. Cảm ơn bạn!">
+              <div class="option-content">
+                <span class="option-icon">🍵</span>
+                <span class="option-name">Trà đá sẻ chia</span>
+                <span class="option-val">10.000đ</span>
+              </div>
+            </label>
+
+            <label class="amount-option is-popular">
+              <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê sáng giúp coder tỉnh táo hoàn thiện Glance tốt hơn mỗi ngày. Rất biết ơn bạn!">
+              <div class="option-content">
+                <span class="pop-tag">Phổ biến</span>
+                <span class="option-icon">☕</span>
+                <span class="option-name">Ly cà phê sáng</span>
+                <span class="option-val">20.000đ</span>
+              </div>
+            </label>
+
+            <label class="amount-option">
+              <input type="radio" name="preset" value="50000" data-note="Món quà tiếp sức quý giá giúp duy trì hệ thống và dự án dài lâu. Trân trọng vô cùng!">
+              <div class="option-content">
+                <span class="option-icon">🥐</span>
+                <span class="option-name">Bữa sáng coder</span>
+                <span class="option-val">50.000đ</span>
+              </div>
+            </label>
+
+            <label class="amount-option">
+              <input type="radio" name="preset" value="100000" data-note="Sự đồng hành to lớn giúp Glance tiếp tục ra mắt các tính năng bảo mật mới. Cảm ơn bạn rất nhiều!">
+              <div class="option-content">
+                <span class="option-icon">🚀</span>
+                <span class="option-name">Đồng hành tri kỷ</span>
+                <span class="option-val">100.000đ</span>
+              </div>
+            </label>
+          </fieldset>
+
+          <!-- Dynamic appreciation message based on selected amount -->
+          <div class="note-box" id="preset-note">
+            Một ly cà phê sáng giúp coder tỉnh táo hoàn thiện Glance tốt hơn mỗi ngày. Rất biết ơn bạn!
+          </div>
+
+          <div class="custom-field">
+            <label for="support-amount">Hoặc nhập số tiền bạn muốn:</label>
+            <div class="custom-input-wrapper">
+              <input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1000" value="20000" required>
+              <span class="currency-tag">VNĐ</span>
+            </div>
+          </div>
+
+          <button class="support-submit-btn" type="submit" id="submit-btn">
+            <span class="btn-text">Gửi lời cảm ơn qua PayOS</span>
+            <span class="btn-icon">→</span>
+          </button>
+
+          <p class="support-status" id="support-status" role="status" aria-live="polite"></p>
+
+          <div class="card-footer">
+            <p class="grateful-note">
+              Dù bạn có tiếp sức hay không, việc bạn tải và sử dụng Glance đã là niềm vinh hạnh rất lớn.
+            </p>
+            <a class="skip-btn" href="./#download">Bỏ qua và dùng Glance miễn phí →</a>
+          </div>
+        </form>
+      </section>
     </div>
   </main>
 </body>
