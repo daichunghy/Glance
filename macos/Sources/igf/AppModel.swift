@@ -48,8 +48,29 @@ final class AppModel: ObservableObject {
         didSet {
             if !isEnabled {
                 clearProtection()
+                // Off means the camera really stops (LED off) — the toggle
+                // is also the kill switch (Option+Shift+P).
+                CameraTracker.shared.stopTracking()
+                MotionTracker.shared.stopTracking()
+                isTrackingActive = false
+            } else if oldValue == false {
+                handleTrackingSourceChange()
             }
         }
+    }
+
+    // Share mode: deliberately show the screen to someone next to you for
+    // 2 minutes without switching Glance off; protection resumes by itself.
+    @Published var shareUntil: Date?
+
+    var isSharing: Bool {
+        guard let shareUntil else { return false }
+        return Date() < shareUntil
+    }
+
+    func startShareMode() {
+        shareUntil = Date().addingTimeInterval(120)
+        clearProtection()
     }
     @Published var trackingSource: TrackingSource = .camera {
         didSet {
@@ -76,7 +97,87 @@ final class AppModel: ObservableObject {
             }
         }
     }
-    
+
+    // Posture Guard (turtle neck / hunch) — opt-in, off by default.
+    // Shares the camera frames with privacy tracking; never blurs the
+    // screen and never affects protection when off. See POSTURE_SPEC.md.
+    @Published var postureEnabled: Bool = false {
+        didSet {
+            if !postureEnabled {
+                postureGuard.resetTimers()
+                postureStatus = .good
+                postureWarningKinds = []
+            }
+        }
+    }
+    @Published var postureStatus: PostureStatus = .good
+    @Published var postureWarningKinds: [PostureKind] = []
+    @Published var postureSuggestBreak: Bool = false
+    let postureGuard = PostureGuard()
+
+    var postureNeedsCalibration: Bool { postureEnabled && !postureGuard.isCalibrated }
+
+    /// Feed one camera observation into the posture guard.
+    /// `centerY` must already be normalised so larger = head dropped lower
+    /// (the Vision adapter in CameraTracker flips the y axis).
+    func processPosture(now: Double, facePresent: Bool, faceSize: Double? = nil, centerY: Double? = nil, pitch: Double? = nil) {
+        guard postureEnabled, trackingSource == .camera, !isVideoCallActive else { return }
+        let result = postureGuard.update(now: now, facePresent: facePresent, faceSize: faceSize, centerY: centerY, pitch: pitch)
+        postureStatus = result.status
+        postureWarningKinds = result.warning ? result.kinds : []
+        postureSuggestBreak = result.warning && result.suggestBreak
+        if !result.warning { postureSuggestBreak = false }
+    }
+
+    @discardableResult
+    func calibratePosture() -> Bool {
+        let ok = postureGuard.calibrate()
+        if ok { savePostureProfile() }
+        return ok
+    }
+
+    // Calibration persists across relaunches (UserDefaults, numbers only).
+    private func savePostureProfile() {
+        guard let profile = postureGuard.exportProfile() else { return }
+        let defaults = UserDefaults.standard
+        defaults.set(profile["size"] ?? nil, forKey: "postureProfileSize")
+        defaults.set(profile["centerY"] ?? nil, forKey: "postureProfileCenterY")
+        defaults.set(profile["loosen"] ?? nil, forKey: "postureProfileLoosen")
+        if let pitch = profile["pitch"] ?? nil {
+            defaults.set(pitch, forKey: "postureProfilePitch")
+            defaults.set(true, forKey: "postureProfileHasPitch")
+        } else {
+            defaults.set(false, forKey: "postureProfileHasPitch")
+        }
+    }
+
+    private func loadPostureProfile() {
+        let defaults = UserDefaults.standard
+        guard defaults.object(forKey: "postureProfileSize") != nil else { return }
+        var data: [String: Double?] = [
+            "size": defaults.double(forKey: "postureProfileSize"),
+            "centerY": defaults.double(forKey: "postureProfileCenterY"),
+            "loosen": defaults.double(forKey: "postureProfileLoosen"),
+        ]
+        if defaults.bool(forKey: "postureProfileHasPitch") {
+            data["pitch"] = defaults.double(forKey: "postureProfilePitch")
+        }
+        postureGuard.importProfile(data)
+    }
+
+    func dismissPostureAsNotBad() {
+        postureGuard.dismissAsNotBad(now: ProcessInfo.processInfo.systemUptime)
+        savePostureProfile()
+        postureStatus = .good
+        postureWarningKinds = []
+    }
+
+    func snoozePosture() {
+        postureGuard.snooze(now: ProcessInfo.processInfo.systemUptime)
+        postureStatus = .snoozed
+        postureWarningKinds = []
+    }
+
     // Smart Context Detection (Video calls, Meetings, Fullscreen Presentation)
     @Published var isVideoCallActive: Bool = false {
         didSet {
@@ -102,7 +203,9 @@ final class AppModel: ObservableObject {
     @Published var isFaceDetected: Bool = false
     @Published var isAirPodsConnected: Bool = false
     
-    private init() {}
+    private init() {
+        loadPostureProfile()
+    }
     
     func clearProtection() {
         isLookingAway = false
@@ -122,8 +225,8 @@ final class AppModel: ObservableObject {
     
     // Robust state machine with dual-direction switching, hysteresis and meeting guard
     func processFaceState(angleDegrees: Double?, isPresent: Bool) {
-        // Guard against blurring during video calls, settings tweaking or when disabled
-        guard isEnabled, !isVideoCallActive, !isPopoverOpen else {
+        // Guard against blurring during video calls, settings tweaking, share mode or when disabled
+        guard isEnabled, !isVideoCallActive, !isPopoverOpen, !isSharing else {
             if isLookingAway || activeSide != .none {
                 clearProtection()
             }
