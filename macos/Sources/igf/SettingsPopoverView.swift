@@ -214,6 +214,21 @@ struct SettingsPopoverView: View {
                         .controlSize(.mini)
                         .labelsHidden()
                 }
+                
+                Divider()
+                    .padding(.leading, 36)
+                
+                // Row 5: Launch at Login Toggle
+                SettingRow(
+                    icon: "arrow.clockwise.circle.fill",
+                    iconColor: .teal,
+                    title: "Launch at Login"
+                ) {
+                    Toggle("", isOn: $model.launchAtLogin)
+                        .toggleStyle(.switch)
+                        .controlSize(.mini)
+                        .labelsHidden()
+                }
             }
             .background(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)

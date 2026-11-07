@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import AppKit
+import ServiceManagement
 
 enum TrackingSource: String, CaseIterable, Identifiable {
     case camera = "Camera"
@@ -43,9 +44,10 @@ enum ActiveProtectionSide: Equatable {
 final class AppModel: ObservableObject {
     static let shared = AppModel()
     
-    // Preferences
+    // Preferences (automatically persisted)
     @Published var isEnabled: Bool = true {
         didSet {
+            UserDefaults.standard.set(isEnabled, forKey: "glance_isEnabled")
             if !isEnabled {
                 clearProtection()
                 // Off means the camera really stops (LED off) — the toggle
@@ -74,11 +76,13 @@ final class AppModel: ObservableObject {
     }
     @Published var trackingSource: TrackingSource = .camera {
         didSet {
+            UserDefaults.standard.set(trackingSource.rawValue, forKey: "glance_trackingSource")
             handleTrackingSourceChange()
         }
     }
     @Published var blurMode: BlurMode = .directional {
         didSet {
+            UserDefaults.standard.set(blurMode.rawValue, forKey: "glance_blurMode")
             if isLookingAway && activeSide != .none && !isAwayFromDesk {
                 if blurMode == .fullScreen {
                     activeSide = .full
@@ -88,16 +92,24 @@ final class AppModel: ObservableObject {
             }
         }
     }
-    @Published var sensitivity: Sensitivity = .medium
-    @Published var blurIntensity: Double = 0.95
+    @Published var sensitivity: Sensitivity = .medium {
+        didSet {
+            UserDefaults.standard.set(sensitivity.rawValue, forKey: "glance_sensitivity")
+        }
+    }
+    @Published var blurIntensity: Double = 0.95 {
+        didSet {
+            UserDefaults.standard.set(blurIntensity, forKey: "glance_blurIntensity")
+        }
+    }
     @Published var autoBlurWhenAway: Bool = true {
         didSet {
+            UserDefaults.standard.set(autoBlurWhenAway, forKey: "glance_autoBlurWhenAway")
             if !autoBlurWhenAway && isAwayFromDesk {
                 clearProtection()
             }
         }
     }
-
     // Posture Guard (turtle neck / hunch) — opt-in, off by default.
     // Shares the camera frames with privacy tracking; never blurs the
     // screen and never affects protection when off. See POSTURE_SPEC.md.
@@ -178,6 +190,26 @@ final class AppModel: ObservableObject {
         postureWarningKinds = []
     }
 
+    @Published var launchAtLogin: Bool = false {
+        didSet {
+            if #available(macOS 13.0, *) {
+                do {
+                    if launchAtLogin {
+                        if SMAppService.mainApp.status != .enabled {
+                            try SMAppService.mainApp.register()
+                        }
+                    } else {
+                        if SMAppService.mainApp.status == .enabled {
+                            try SMAppService.mainApp.unregister()
+                        }
+                    }
+                } catch {
+                    print("[Glance] Failed to update launchAtLogin: \(error)")
+                }
+            }
+            UserDefaults.standard.set(launchAtLogin, forKey: "glance_launchAtLogin")
+        }
+    }
     // Smart Context Detection (Video calls, Meetings, Fullscreen Presentation)
     @Published var isVideoCallActive: Bool = false {
         didSet {
@@ -205,6 +237,30 @@ final class AppModel: ObservableObject {
     
     private init() {
         loadPostureProfile()
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: "glance_isEnabled") != nil {
+            self.isEnabled = defaults.bool(forKey: "glance_isEnabled")
+        }
+        if let source = defaults.string(forKey: "glance_trackingSource"), let s = TrackingSource(rawValue: source) {
+            self.trackingSource = s
+        }
+        if let mode = defaults.string(forKey: "glance_blurMode"), let m = BlurMode(rawValue: mode) {
+            self.blurMode = m
+        }
+        if let sens = defaults.string(forKey: "glance_sensitivity"), let s = Sensitivity(rawValue: sens) {
+            self.sensitivity = s
+        }
+        if defaults.object(forKey: "glance_autoBlurWhenAway") != nil {
+            self.autoBlurWhenAway = defaults.bool(forKey: "glance_autoBlurWhenAway")
+        }
+        if defaults.object(forKey: "glance_blurIntensity") != nil {
+            self.blurIntensity = defaults.double(forKey: "glance_blurIntensity")
+        }
+        if #available(macOS 13.0, *) {
+            self.launchAtLogin = (SMAppService.mainApp.status == .enabled)
+        } else {
+            self.launchAtLogin = defaults.bool(forKey: "glance_launchAtLogin")
+        }
     }
     
     func clearProtection() {

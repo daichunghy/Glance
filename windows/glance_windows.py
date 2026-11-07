@@ -48,6 +48,79 @@ set_style.argtypes = [wintypes.HWND, ctypes.c_int, style_type]
 set_style.restype = style_type
 
 
+CONFIG_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "Glance")
+CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+
+
+def load_config():
+    defaults = {
+        "camera": 0,
+        "delay": 5,
+        "opacity": 90,
+        "activity": True,
+        "autostart": False,
+        "auto_camera": False,
+        "minimize_on_close": True,
+    }
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                defaults.update({k: v for k, v in data.items() if k in defaults})
+        except Exception:
+            pass
+    return defaults
+
+
+def save_config(cfg):
+    try:
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+    except Exception:
+        pass
+
+
+def get_launch_command():
+    if getattr(sys, "frozen", False):
+        return f'"{sys.executable}" --startup'
+    python_exe = sys.executable
+    pythonw = os.path.join(os.path.dirname(python_exe), "pythonw.exe")
+    runner = pythonw if os.path.exists(pythonw) else python_exe
+    script = os.path.abspath(__file__)
+    return f'"{runner}" "{script}" --startup'
+
+
+def set_windows_autostart(enable: bool) -> bool:
+    if sys.platform != "win32":
+        return False
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE) as key:
+            if enable:
+                winreg.SetValueEx(key, "Glance", 0, winreg.REG_SZ, get_launch_command())
+            else:
+                try:
+                    winreg.DeleteValue(key, "Glance")
+                except FileNotFoundError:
+                    pass
+        return True
+    except Exception:
+        return False
+
+
+def get_windows_autostart() -> bool:
+    if sys.platform != "win32":
+        return False
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as key:
+            val, _ = winreg.QueryValueEx(key, "Glance")
+            return bool(val)
+    except Exception:
+        return False
+
+
 class LastInputInfo(ctypes.Structure):
     _fields_ = [("cbSize", wintypes.UINT), ("dwTime", wintypes.DWORD)]
 
@@ -139,9 +212,9 @@ class App:
         self.root = root
         root.title("Glance")
         root.configure(bg="#08090c")
-        root.geometry("510x800")
-        root.minsize(480, 740)
-        root.protocol("WM_DELETE_WINDOW", self.close)
+        root.geometry("520x860")
+        root.minsize(480, 760)
+        root.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.cover = ScreenCover(root)
         self.events = queue.Queue(maxsize=1)
         self.stop_event = None
@@ -153,10 +226,18 @@ class App:
         self.last_frame_at = None
         self.controls_topmost = False
         self.status = tk.StringVar(value="Chưa bật camera. Màn hình chưa được che tự động.")
-        self.camera = tk.IntVar(value=0)
-        self.delay = tk.IntVar(value=5)
-        self.opacity = tk.IntVar(value=90)
-        self.activity = tk.BooleanVar(value=True)
+        
+        cfg = load_config()
+        self.camera = tk.IntVar(value=cfg.get("camera", 0))
+        self.delay = tk.IntVar(value=cfg.get("delay", 5))
+        self.opacity = tk.IntVar(value=cfg.get("opacity", 90))
+        self.activity = tk.BooleanVar(value=cfg.get("activity", True))
+        
+        is_registered = get_windows_autostart()
+        self.autostart = tk.BooleanVar(value=is_registered if sys.platform == "win32" else cfg.get("autostart", False))
+        self.auto_camera = tk.BooleanVar(value=cfg.get("auto_camera", False))
+        self.minimize_on_close = tk.BooleanVar(value=cfg.get("minimize_on_close", True))
+
         # Posture guard (gù lưng / cổ rùa): opt-in, off by default, shares the
         # same camera frames. It never covers the screen.
         self.posture_enabled = tk.BooleanVar(value=False)
@@ -170,23 +251,65 @@ class App:
         self.make_ui()
         self.root.after(120, self.poll)
 
+        is_startup = "--startup" in sys.argv or "--minimized" in sys.argv
+        if is_startup:
+            self.root.iconify()
+        if self.auto_camera.get() or is_startup:
+            self.root.after(400, self.toggle_camera)
+
+    def persist_settings(self):
+        try:
+            cfg = {
+                "camera": self.camera.get(),
+                "delay": self.delay.get(),
+                "opacity": self.opacity.get(),
+                "activity": self.activity.get(),
+                "autostart": self.autostart.get(),
+                "auto_camera": self.auto_camera.get(),
+                "minimize_on_close": self.minimize_on_close.get(),
+            }
+            save_config(cfg)
+        except Exception:
+            pass
+
+    def on_autostart_changed(self):
+        set_windows_autostart(self.autostart.get())
+        self.persist_settings()
+
+    def on_window_close(self):
+        self.persist_settings()
+        # Nếu cửa sổ đang mở bình thường thì thu nhỏ xuống Taskbar; nếu người dùng đóng khi đã thu nhỏ thì tắt hẳn.
+        if self.minimize_on_close.get() and self.root.state() != "iconic":
+            self.root.iconify()
+        else:
+            self.close()
+
+    def exit_app(self):
+        self.persist_settings()
+        self.close()
+
     def make_ui(self):
         bg, fg, muted, blue = "#08090c", "#f5f5f7", "#adb8c7", "#0071e3"
-        body = tk.Frame(self.root, bg=bg, padx=26, pady=22)
+        body = tk.Frame(self.root, bg=bg, padx=26, pady=20)
         body.pack(fill="both", expand=True)
+
         def label(text, size=11, color=fg, bold=False):
             return tk.Label(body, text=text, bg=bg, fg=color, anchor="w", justify="left",
-                            wraplength=440, font=("Calibri", size, "bold" if bold else "normal"))
+                            wraplength=460, font=("Calibri", size, "bold" if bold else "normal"))
+
         label("Glance", 22, bold=True).pack(fill="x")
-        label("Che màn hình khi bạn rời bàn", 12, muted).pack(fill="x", pady=(0, 18))
+        label("Che màn hình khi bạn rời bàn", 12, muted).pack(fill="x", pady=(0, 14))
+        
         tk.Label(body, textvariable=self.status, bg="#19212b", fg="#b9d9ff", anchor="w",
-                 justify="left", wraplength=420, padx=14, pady=12,
-                 font=("Calibri", 11)).pack(fill="x", pady=(0, 18))
+                 justify="left", wraplength=440, padx=14, pady=10,
+                 font=("Calibri", 11)).pack(fill="x", pady=(0, 14))
+
         self.start_button = tk.Button(body, text="Bật camera", command=self.toggle_camera,
                                       bg=blue, fg="white", activebackground="#1884ee",
                                       activeforeground="white", relief="flat", padx=18, pady=8,
                                       font=("Calibri", 11, "bold"))
         self.start_button.pack(fill="x")
+
         self.manual_button = tk.Button(body, text="Che màn hình ngay", command=self.toggle_manual,
                                        bg="#242d39", fg=fg, activebackground="#334254",
                                        activeforeground="white", relief="flat", padx=18, pady=8,
@@ -196,25 +319,46 @@ class App:
                                       bg="#242d39", fg=fg, activebackground="#334254",
                                       activeforeground="white", relief="flat", padx=18, pady=8,
                                       font=("Calibri", 11))
-        self.share_button.pack(fill="x", pady=(8, 14))
+        self.share_button.pack(fill="x", pady=(8, 12))
         row = tk.Frame(body, bg=bg)
-        row.pack(fill="x", pady=3)
+        row.pack(fill="x", pady=2)
         tk.Label(row, text="Camera", bg=bg, fg=fg, font=("Calibri", 11)).pack(side="left")
         tk.Spinbox(row, from_=0, to=9, textvariable=self.camera, width=4,
-                   font=("Calibri", 11), state="readonly").pack(side="right")
+                   font=("Calibri", 11), state="readonly", command=self.persist_settings).pack(side="right")
+
         row = tk.Frame(body, bg=bg)
-        row.pack(fill="x", pady=3)
+        row.pack(fill="x", pady=2)
         tk.Label(row, text="Thời gian chờ khi không thấy mặt", bg=bg, fg=fg,
                  font=("Calibri", 11)).pack(side="left")
-        ttk.Combobox(row, textvariable=self.delay, values=(3, 5, 10, 20, 30),
-                     state="readonly", width=4).pack(side="right")
+        cb = ttk.Combobox(row, textvariable=self.delay, values=(3, 5, 10, 20, 30),
+                          state="readonly", width=4)
+        cb.pack(side="right")
+        cb.bind("<<ComboboxSelected>>", lambda e: self.persist_settings())
+
         label("Giây. Đổi camera hoặc thời gian chờ sau khi tắt camera.", 10, muted).pack(fill="x")
+
         tk.Checkbutton(body, text="Không che khi đang dùng chuột hoặc bàn phím", variable=self.activity,
+                       command=self.persist_settings, bg=bg, fg=fg, selectcolor="#242d39",
+                       activebackground=bg, activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=(8, 2))
+
+        tk.Checkbutton(body, text="Khởi động cùng Windows (Tự động chạy khi bật máy)",
+                       variable=self.autostart, command=self.on_autostart_changed,
                        bg=bg, fg=fg, selectcolor="#242d39", activebackground=bg,
-                       activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=(10, 3))
+                       activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=2)
+
+        tk.Checkbutton(body, text="Tự động bật camera bảo vệ khi khởi động",
+                       variable=self.auto_camera, command=self.persist_settings,
+                       bg=bg, fg=fg, selectcolor="#242d39", activebackground=bg,
+                       activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=2)
+
+        tk.Checkbutton(body, text="Thu nhỏ xuống thanh Taskbar khi bấm đóng (X)",
+                       variable=self.minimize_on_close, command=self.persist_settings,
+                       bg=bg, fg=fg, selectcolor="#242d39", activebackground=bg,
+                       activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=2)
+
         tk.Checkbutton(body, text="Cảnh báo tư thế: gù lưng, cổ rùa (cần bật camera)", variable=self.posture_enabled,
                        command=self.toggle_posture, bg=bg, fg=fg, selectcolor="#242d39", activebackground=bg,
-                       activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=(3, 0))
+                       activeforeground=fg, anchor="w", font=("Calibri", 11)).pack(fill="x", pady=(6, 0))
         tk.Label(body, textvariable=self.posture_status, bg=bg, fg=muted, anchor="w",
                  justify="left", wraplength=440, font=("Calibri", 10)).pack(fill="x")
         self.posture_button = tk.Button(body, text="Căn chỉnh tư thế chuẩn", command=self.calibrate_posture,
@@ -230,14 +374,24 @@ class App:
         tk.Button(prow, text="Tạm tắt nhắc 30 phút", command=self.snooze_posture,
                   bg="#242d39", fg=fg, activebackground="#334254", activeforeground="white",
                   relief="flat", padx=10, pady=5, font=("Calibri", 10)).pack(side="left", fill="x", expand=True, padx=(8, 0))
-        label("Mức che", 11).pack(fill="x", pady=(8, 0))
-        tk.Scale(body, variable=self.opacity, from_=60, to=95, orient="horizontal", bg=bg,
-                 fg=fg, highlightthickness=0, troughcolor="#242d39", activebackground=blue,
-                 font=("Calibri", 10)).pack(fill="x")
-        label("Lớp che làm tối màn hình. Khi camera lỗi, tính năng tự động sẽ dừng.", 10, muted).pack(fill="x", pady=(8, 0))
-        tk.Button(body, text="Mở quyền camera trong Windows", command=self.open_camera_settings,
+
+        label("Mức che", 11).pack(fill="x", pady=(6, 0))
+        scale = tk.Scale(body, variable=self.opacity, from_=60, to=95, orient="horizontal", bg=bg,
+                         fg=fg, highlightthickness=0, troughcolor="#242d39", activebackground=blue,
+                         font=("Calibri", 10))
+        scale.pack(fill="x")
+        scale.bind("<ButtonRelease-1>", lambda e: self.persist_settings())
+
+        label("Lớp che làm tối màn hình. Khi camera lỗi, tính năng tự động sẽ dừng.", 10, muted).pack(fill="x", pady=(4, 0))
+
+        footer = tk.Frame(body, bg=bg)
+        footer.pack(fill="x", pady=(12, 0))
+        tk.Button(footer, text="Mở quyền camera trong Windows", command=self.open_camera_settings,
                   bg=bg, fg="#78b8ff", activebackground=bg, activeforeground="white",
-                  relief="flat", anchor="w", padx=0, font=("Calibri", 10)).pack(fill="x", pady=(8, 0))
+                  relief="flat", anchor="w", padx=0, font=("Calibri", 10)).pack(side="left")
+        tk.Button(footer, text="Thoát Glance", command=self.exit_app,
+                  bg=bg, fg="#adb8c7", activebackground=bg, activeforeground="#ff6b6b",
+                  relief="flat", anchor="e", padx=0, font=("Calibri", 10)).pack(side="right")
 
     def open_camera_settings(self):
         os.startfile("ms-settings:privacy-webcam")
@@ -530,6 +684,7 @@ class App:
         self.root.after(120, self.poll)
 
     def close(self):
+        self.persist_settings()
         if self.stop_event:
             self.stop_event.set()
         self.cover.window.destroy()
