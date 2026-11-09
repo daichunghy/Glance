@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/assets/product/Glance-Windows.zip",
+      "destination": "https://github.com/daichunghy/Glance/releases/download/v1.0.0/Glance-Windows.zip",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

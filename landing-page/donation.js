@@ -98,7 +98,7 @@
      ========================================================================== */
   const files = {
     mac: 'assets/product/Glance-macOS-1.0.0.zip',
-    windows: 'assets/product/Glance-Windows.zip'
+    windows: 'https://github.com/daichunghy/Glance/releases/download/v1.0.0/Glance-Windows.zip'
   };
   const params = new URLSearchParams(location.search);
   const file = Object.hasOwn(files, params.get('file')) ? params.get('file') : null;
