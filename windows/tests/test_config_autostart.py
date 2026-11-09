@@ -69,6 +69,7 @@ class ConfigAndAutostartTests(unittest.TestCase):
         with zipfile.ZipFile(zip_path, 'r') as zf:
             names = set(zf.namelist())
             required = {
+                'Glance-Windows/Glance.exe',
                 'Glance-Windows/glance_windows.py',
                 'Glance-Windows/guard.py',
                 'Glance-Windows/posture.py',
