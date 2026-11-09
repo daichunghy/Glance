@@ -108,11 +108,16 @@
     manual.href = files[file];
     const notice = document.getElementById('download-notice');
     if (notice) notice.hidden = false;
+    const target = new URL(manual.href, location.href);
+    const msg = document.getElementById('download-message');
+    if (target.origin !== location.origin) {
+      if (msg) msg.textContent = 'Bấm Tải lại nếu file Glance chưa xuất hiện trong thư mục Tải về.';
+      return;
+    }
     if (!params.has('support')) {
       manual.click();
-    } else {
-      const msg = document.getElementById('download-message');
-      if (msg) msg.textContent = 'Bạn đã chọn bản cài đặt Glance.';
+    } else if (msg) {
+      msg.textContent = 'Bạn đã chọn bản cài đặt Glance.';
     }
   }
 
