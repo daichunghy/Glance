@@ -20,7 +20,7 @@
 
   if (isWindows) {
     windowsDownload.classList.add('preferred-download');
-    requirements.textContent = 'Windows 10 hoặc 11 · Cần Python 3.11 hoặc 3.12';
+    requirements.textContent = 'Windows 10 hoặc 11 · Kèm Glance.exe, không cần Python';
     document.querySelectorAll('[data-smart-download]').forEach(link => {
       link.href = windowsDownload.href;
       link.setAttribute('download', '');
