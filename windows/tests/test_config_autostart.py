@@ -60,6 +60,24 @@ class ConfigAndAutostartTests(unittest.TestCase):
         cmd_frozen = get_launch_command()
         self.assertEqual(cmd_frozen, '"C:\\Program Files\\Glance\\Glance.exe" --startup')
 
+    def test_landing_page_windows_zip_contains_required_files(self):
+        import zipfile
+        repo_root = Path(__file__).resolve().parents[2]
+        zip_path = repo_root / 'landing-page' / 'assets' / 'product' / 'Glance-Windows.zip'
+        if not zip_path.exists():
+            self.skipTest('Glance-Windows.zip not present')
+        with zipfile.ZipFile(zip_path, 'r') as zf:
+            names = set(zf.namelist())
+            required = {
+                'Glance-Windows/glance_windows.py',
+                'Glance-Windows/guard.py',
+                'Glance-Windows/posture.py',
+                'Glance-Windows/requirements.txt',
+                'Glance-Windows/start_windows.bat',
+                'Glance-Windows/build_exe.bat',
+            }
+            self.assertTrue(required.issubset(names), f'Missing files in zip: {required - names}')
+
 
 if __name__ == '__main__':
     unittest.main()

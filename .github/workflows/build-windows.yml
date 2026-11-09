@@ -1,0 +1,59 @@
+name: build-windows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "windows/**"
+      - ".github/workflows/build-windows.yml"
+  workflow_dispatch:
+
+jobs:
+  build-windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: windows
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run Windows unit tests
+        working-directory: windows
+        run: python -m unittest discover -s tests
+
+      - name: Build Glance.exe with PyInstaller
+        working-directory: windows
+        run: |
+          python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 glance_windows.py
+
+      - name: Assemble Glance-Windows.zip
+        shell: pwsh
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP "Glance-Windows"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item "windows/dist/Glance.exe" $stage
+          Copy-Item "windows/glance_windows.py" $stage
+          Copy-Item "windows/guard.py" $stage
+          Copy-Item "windows/posture.py" $stage
+          Copy-Item "windows/requirements.txt" $stage
+          Copy-Item "windows/start_windows.bat" $stage
+          Copy-Item "windows/build_exe.bat" $stage
+          Copy-Item "windows/README.md" $stage
+          $zipPath = Join-Path $env:GITHUB_WORKSPACE "Glance-Windows.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+          Compress-Archive -Path $stage -DestinationPath $zipPath -Force
+
+      - name: Upload Glance-Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Glance-Windows
+          path: |
+            Glance-Windows.zip
+            windows/dist/Glance.exe

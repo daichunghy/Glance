@@ -572,14 +572,31 @@ class App:
     def camera_loop(self, generation, stop, index, delay):
         cap = None
         try:
-            detector = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades,
-                                             "haarcascade_frontalface_default.xml"))
+            cascade_name = "haarcascade_frontalface_default.xml"
+            cascade_candidates = []
+            if hasattr(cv2, "data") and getattr(cv2.data, "haarcascades", None):
+                cascade_candidates.append(os.path.join(cv2.data.haarcascades, cascade_name))
+            if getattr(sys, "_MEIPASS", None):
+                cascade_candidates.append(os.path.join(sys._MEIPASS, "cv2", "data", cascade_name))
+                cascade_candidates.append(os.path.join(sys._MEIPASS, cascade_name))
+            cascade_candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), cascade_name))
+            cascade_path = next((p for p in cascade_candidates if os.path.exists(p)), cascade_candidates[0])
+            detector = cv2.CascadeClassifier(cascade_path)
             if detector.empty():
                 self.publish(generation, "error", "Không tải được bộ nhận diện khuôn mặt.")
                 return
             # Camera busy (Zoom/Teams holding it) is normal on Windows:
             # wait and retry instead of dying — auto-resume when it frees.
-            cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+            def open_camera(cam_idx):
+                c = cv2.VideoCapture(cam_idx, cv2.CAP_DSHOW)
+                if c is not None and c.isOpened():
+                    return c
+                if c is not None:
+                    c.release()
+                c = cv2.VideoCapture(cam_idx)
+                return c
+
+            cap = open_camera(index)
             announced_busy = False
             while not cap.isOpened() and not stop.is_set():
                 cap.release()
@@ -587,7 +604,7 @@ class App:
                     self.publish(generation, "busy", None)
                     announced_busy = True
                 stop.wait(3)
-                cap = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+                cap = open_camera(index)
             if stop.is_set():
                 return
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
