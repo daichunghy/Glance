@@ -62,6 +62,24 @@ jobs:
             throw "Packaged camera pipeline self-test failed: $($process.ExitCode)"
           }
 
+      - name: Check packaged detector under a Vietnamese user path
+        shell: pwsh
+        run: |
+          $tempFolder = Join-Path $env:RUNNER_TEMP "Người-dùng-đặng"
+          New-Item -ItemType Directory -Force -Path $tempFolder | Out-Null
+          $env:TEMP = $tempFolder
+          $env:TMP = $tempFolder
+          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test" -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "Vietnamese path self-test timed out"
+          }
+          if ($process.ExitCode -ne 0) {
+            $log = Join-Path $env:APPDATA "Glance/camera-error.log"
+            if (Test-Path $log) { Get-Content $log }
+            throw "Vietnamese path self-test failed: $($process.ExitCode)"
+          }
+
       - name: Assemble Glance-Windows.zip
         shell: pwsh
         run: |
