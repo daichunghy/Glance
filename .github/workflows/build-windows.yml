@@ -48,6 +48,20 @@ jobs:
             throw "Packaged detector self-test failed: $($process.ExitCode)"
           }
 
+      - name: Check packaged camera pipeline and overlay
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test-camera" -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "Packaged camera pipeline self-test timed out"
+          }
+          if ($process.ExitCode -ne 0) {
+            $log = Join-Path $env:APPDATA "Glance/camera-error.log"
+            if (Test-Path $log) { Get-Content $log }
+            throw "Packaged camera pipeline self-test failed: $($process.ExitCode)"
+          }
+
       - name: Assemble Glance-Windows.zip
         shell: pwsh
         run: |

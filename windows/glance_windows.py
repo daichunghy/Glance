@@ -734,11 +734,55 @@ class App:
         self.root.destroy()
 
 
+def run_camera_pipeline_self_test():
+    """Exercise the packaged camera pipeline and overlay with synthetic frames."""
+    import numpy as np
+
+    class TestCamera:
+        def read(self):
+            return True, np.full((240, 320, 3), 128, dtype=np.uint8)
+
+        def set(self, *args):
+            return True
+
+        def release(self):
+            pass
+
+    global open_camera, foreground_is_fullscreen, idle_seconds
+    open_camera = lambda index: TestCamera()
+    foreground_is_fullscreen = lambda: False
+    idle_seconds = lambda: 10
+    root = tk.Tk()
+    app = App(root)
+    try:
+        root.withdraw()
+        app.activity.set(False)
+        app.delay.set(0)
+        app.toggle_camera()
+        end = time.monotonic() + 15
+        while time.monotonic() < end:
+            root.update()
+            if app.automatic_cover and app.cover.visible:
+                break
+            time.sleep(0.05)
+        else:
+            raise RuntimeError("Camera pipeline or screen cover did not activate: " + app.status.get())
+        app.stop_camera()
+        root.update()
+        if app.cover.visible:
+            raise RuntimeError("Screen cover did not close after stopping the camera")
+    finally:
+        app.close()
+
+
 if __name__ == "__main__":
-    if "--self-test" in sys.argv:
+    if "--self-test" in sys.argv or "--self-test-camera" in sys.argv:
         try:
             import numpy as np
-            load_face_detector().detectMultiScale(np.zeros((64, 64), dtype=np.uint8))
+            if "--self-test-camera" in sys.argv:
+                run_camera_pipeline_self_test()
+            else:
+                load_face_detector().detectMultiScale(np.zeros((64, 64), dtype=np.uint8))
         except Exception:
             record_camera_error()
             sys.exit(1)
