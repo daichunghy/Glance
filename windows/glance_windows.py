@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+import traceback
 from tkinter import ttk
 
 import cv2
@@ -50,6 +51,50 @@ set_style.restype = style_type
 
 CONFIG_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "Glance")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+CAMERA_ERROR_PATH = os.path.join(CONFIG_DIR, "camera-error.log")
+
+
+def record_camera_error():
+    """Save diagnostic details locally without recording camera frames."""
+    try:
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        with open(CAMERA_ERROR_PATH, "w", encoding="utf-8") as log:
+            traceback.print_exc(file=log)
+    except OSError:
+        pass
+
+
+def open_camera(index):
+    """Try Windows camera backends independently when one cannot open a device."""
+    for backend in (cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY):
+        capture = None
+        try:
+            capture = cv2.VideoCapture(index, backend)
+            if capture is not None and capture.isOpened():
+                return capture
+        except cv2.error:
+            pass
+        if capture is not None:
+            capture.release()
+    return None
+
+
+def load_face_detector():
+    cascade_name = "haarcascade_frontalface_default.xml"
+    candidates = []
+    if hasattr(cv2, "data") and getattr(cv2.data, "haarcascades", None):
+        candidates.append(os.path.join(cv2.data.haarcascades, cascade_name))
+    if getattr(sys, "_MEIPASS", None):
+        candidates.append(os.path.join(sys._MEIPASS, "cv2", "data", cascade_name))
+        candidates.append(os.path.join(sys._MEIPASS, cascade_name))
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), cascade_name))
+    path = next((candidate for candidate in candidates if os.path.exists(candidate)), None)
+    if path is None:
+        raise FileNotFoundError("Face detection model is missing")
+    detector = cv2.CascadeClassifier(path)
+    if detector.empty():
+        raise RuntimeError("Face detection model could not be loaded")
+    return detector
 
 
 def load_config():
@@ -572,38 +617,13 @@ class App:
     def camera_loop(self, generation, stop, index, delay):
         cap = None
         try:
-            cascade_name = "haarcascade_frontalface_default.xml"
-            cascade_candidates = []
-            if hasattr(cv2, "data") and getattr(cv2.data, "haarcascades", None):
-                cascade_candidates.append(os.path.join(cv2.data.haarcascades, cascade_name))
-            if getattr(sys, "_MEIPASS", None):
-                cascade_candidates.append(os.path.join(sys._MEIPASS, "cv2", "data", cascade_name))
-                cascade_candidates.append(os.path.join(sys._MEIPASS, cascade_name))
-            cascade_candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), cascade_name))
-            cascade_path = next((p for p in cascade_candidates if os.path.exists(p)), cascade_candidates[0])
-            detector = cv2.CascadeClassifier(cascade_path)
-            if detector.empty():
-                self.publish(generation, "error", "Không tải được bộ nhận diện khuôn mặt.")
-                return
-            # Camera busy (Zoom/Teams holding it) is normal on Windows:
-            # wait and retry instead of dying — auto-resume when it frees.
-            def open_camera(cam_idx):
-                c = cv2.VideoCapture(cam_idx, cv2.CAP_DSHOW)
-                if c is not None and c.isOpened():
-                    return c
-                if c is not None:
-                    c.release()
-                c = cv2.VideoCapture(cam_idx)
-                return c
-
+            detector = load_face_detector()
             cap = open_camera(index)
-            announced_busy = False
-            while not cap.isOpened() and not stop.is_set():
-                cap.release()
-                if not announced_busy:
-                    self.publish(generation, "busy", None)
-                    announced_busy = True
-                stop.wait(3)
+            while cap is None and not stop.is_set():
+                # Each retry refreshes the watchdog while waiting for a device.
+                self.publish(generation, "busy", index)
+                if stop.wait(3):
+                    return
                 cap = open_camera(index)
             if stop.is_set():
                 return
@@ -652,7 +672,9 @@ class App:
                     last_state = state
                 stop.wait(wait_seconds)
         except Exception:
-            self.publish(generation, "error", "Camera gặp lỗi. Tính năng tự động đã dừng; hãy thử bật lại.")
+            record_camera_error()
+            self.publish(generation, "error", "Camera gặp lỗi. Tính năng tự động đã dừng. "
+                         "Thông tin lỗi được lưu tại %APPDATA%\\Glance\\camera-error.log.")
         finally:
             if cap is not None:
                 cap.release()
@@ -671,7 +693,8 @@ class App:
                     self.start_button.configure(text="Bật camera")
                 elif kind == "busy":
                     self.last_frame_at = time.monotonic()
-                    self.status.set("Camera đang bận (Zoom/Teams đang dùng?). Glance tự mở lại khi camera trống.")
+                    self.status.set(f"Không mở được camera {value}. Kiểm tra quyền camera, "
+                                    "đóng ứng dụng đang dùng camera hoặc thử camera 0. Glance đang thử lại.")
                 elif kind == "blocked":
                     self.last_frame_at = time.monotonic()
                     self.automatic_cover = False
@@ -709,4 +732,8 @@ class App:
 
 
 if __name__ == "__main__":
-    App(tk.Tk()).root.mainloop()
+    if "--self-test" in sys.argv:
+        import numpy as np
+        load_face_detector().detectMultiScale(np.zeros((64, 64), dtype=np.uint8))
+    else:
+        App(tk.Tk()).root.mainloop()

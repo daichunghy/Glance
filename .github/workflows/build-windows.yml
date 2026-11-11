@@ -33,6 +33,12 @@ jobs:
         run: |
           python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 glance_windows.py
 
+      - name: Check packaged face detector
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test" -PassThru -Wait
+          if ($process.ExitCode -ne 0) { throw "Packaged detector self-test failed: $($process.ExitCode)" }
+
       - name: Assemble Glance-Windows.zip
         shell: pwsh
         run: |
