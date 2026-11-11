@@ -36,8 +36,16 @@ jobs:
       - name: Check packaged face detector
         shell: pwsh
         run: |
-          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test" -PassThru -Wait
-          if ($process.ExitCode -ne 0) { throw "Packaged detector self-test failed: $($process.ExitCode)" }
+          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test" -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "Packaged detector self-test timed out"
+          }
+          if ($process.ExitCode -ne 0) {
+            $log = Join-Path $env:APPDATA "Glance/camera-error.log"
+            if (Test-Path $log) { Get-Content $log }
+            throw "Packaged detector self-test failed: $($process.ExitCode)"
+          }
 
       - name: Assemble Glance-Windows.zip
         shell: pwsh

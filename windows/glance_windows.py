@@ -733,7 +733,11 @@ class App:
 
 if __name__ == "__main__":
     if "--self-test" in sys.argv:
-        import numpy as np
-        load_face_detector().detectMultiScale(np.zeros((64, 64), dtype=np.uint8))
+        try:
+            import numpy as np
+            load_face_detector().detectMultiScale(np.zeros((64, 64), dtype=np.uint8))
+        except Exception:
+            record_camera_error()
+            sys.exit(1)
     else:
         App(tk.Tk()).root.mainloop()
