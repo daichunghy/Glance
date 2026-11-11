@@ -1,4 +1,5 @@
 import ast
+import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -16,6 +17,7 @@ def load_nodes(names, namespace):
 
 
 class CameraCompatibilityTests(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec("cv2"), "OpenCV is not installed")
     def test_bundled_model_loads_and_processes_an_image(self):
         import os
         import cv2
