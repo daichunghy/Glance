@@ -94,9 +94,20 @@ def load_face_detector():
     path = next((candidate for candidate in candidates if os.path.exists(candidate)), None)
     if path is None:
         raise FileNotFoundError("Face detection model is missing")
-    detector = cv2.CascadeClassifier(path)
-    if detector.empty():
-        raise RuntimeError("Face detection model could not be loaded")
+    # OpenCV's Windows filename handling can fail for paths with Vietnamese
+    # characters. Python opens the file with Unicode support; OpenCV parses
+    # the model from memory instead of opening the path itself.
+    with open(path, "r", encoding="utf-8") as model:
+        contents = model.read()
+    storage = cv2.FileStorage(contents, cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY)
+    try:
+        if not storage.isOpened():
+            raise RuntimeError("Face detection model could not be opened")
+        detector = cv2.CascadeClassifier()
+        if not detector.read(storage.getFirstTopLevelNode()) or detector.empty():
+            raise RuntimeError("Face detection model could not be loaded")
+    finally:
+        storage.release()
     return detector
 
 

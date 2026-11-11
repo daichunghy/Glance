@@ -1,5 +1,7 @@
 import ast
 import importlib.util
+import shutil
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -27,6 +29,13 @@ class CameraCompatibilityTests(unittest.TestCase):
         detector = load_nodes({"load_face_detector"}, ns)["load_face_detector"]()
         self.assertFalse(detector.empty())
         self.assertEqual(len(detector.detectMultiScale(np.zeros((64, 64), dtype=np.uint8))), 0)
+
+        with tempfile.TemporaryDirectory(prefix="Glance-người-dùng-") as folder:
+            model_dir = Path(folder) / "models"
+            model_dir.mkdir()
+            shutil.copy(SOURCE.parent / "models" / "haarcascade_frontalface_default.xml", model_dir)
+            ns["__file__"] = str(Path(folder) / "glance_windows.py")
+            self.assertFalse(ns["load_face_detector"]().empty())
 
     def test_falls_back_when_directshow_raises_and_releases_failed_device(self):
         class CameraError(Exception):
