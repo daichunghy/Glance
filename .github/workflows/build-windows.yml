@@ -32,9 +32,7 @@ jobs:
         working-directory: windows
         shell: pwsh
         run: |
-          $cascade = python -c "import cv2, os; print(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))"
-          if (-not (Test-Path $cascade)) { throw "Face detector model is missing from OpenCV" }
-          python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 --add-data "$cascade;cv2/data" glance_windows.py
+          python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 --add-data "models/haarcascade_frontalface_default.xml;models" glance_windows.py
 
       - name: Check packaged face detector
         shell: pwsh
@@ -59,6 +57,7 @@ jobs:
           Copy-Item "windows/glance_windows.py" $stage
           Copy-Item "windows/guard.py" $stage
           Copy-Item "windows/posture.py" $stage
+          Copy-Item "windows/models" $stage -Recurse
           Copy-Item "windows/requirements.txt" $stage
           Copy-Item "windows/start_windows.bat" $stage
           Copy-Item "windows/build_exe.bat" $stage

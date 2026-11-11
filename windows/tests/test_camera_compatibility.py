@@ -16,6 +16,16 @@ def load_nodes(names, namespace):
 
 
 class CameraCompatibilityTests(unittest.TestCase):
+    def test_bundled_model_loads_and_processes_an_image(self):
+        import os
+        import cv2
+        import numpy as np
+
+        ns = {"os": os, "sys": SimpleNamespace(), "cv2": cv2, "__file__": str(SOURCE)}
+        detector = load_nodes({"load_face_detector"}, ns)["load_face_detector"]()
+        self.assertFalse(detector.empty())
+        self.assertEqual(len(detector.detectMultiScale(np.zeros((64, 64), dtype=np.uint8))), 0)
+
     def test_falls_back_when_directshow_raises_and_releases_failed_device(self):
         class CameraError(Exception):
             pass

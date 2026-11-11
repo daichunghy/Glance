@@ -82,6 +82,9 @@ def open_camera(index):
 def load_face_detector():
     cascade_name = "haarcascade_frontalface_default.xml"
     candidates = []
+    if getattr(sys, "_MEIPASS", None):
+        candidates.append(os.path.join(sys._MEIPASS, "models", cascade_name))
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", cascade_name))
     if hasattr(cv2, "data") and getattr(cv2.data, "haarcascades", None):
         candidates.append(os.path.join(cv2.data.haarcascades, cascade_name))
     if getattr(sys, "_MEIPASS", None):
