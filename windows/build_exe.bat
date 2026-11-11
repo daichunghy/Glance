@@ -56,7 +56,8 @@ if errorlevel 1 (
 )
 
 echo [Glance] Dang tien hanh dong goi Glance.exe bang PyInstaller...
-!BUILD_PY! -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 glance_windows.py
+if not exist "models\haarcascade_frontalface_default.xml" goto :failed
+!BUILD_PY! -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 --add-data "models\haarcascade_frontalface_default.xml;models" glance_windows.py
 if errorlevel 1 goto :failed
 
 echo.

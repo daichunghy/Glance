@@ -30,8 +30,55 @@ jobs:
 
       - name: Build Glance.exe with PyInstaller
         working-directory: windows
+        shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 glance_windows.py
+          python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 --add-data "models/haarcascade_frontalface_default.xml;models" glance_windows.py
+
+      - name: Check packaged face detector
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test" -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "Packaged detector self-test timed out"
+          }
+          if ($process.ExitCode -ne 0) {
+            $log = Join-Path $env:APPDATA "Glance/camera-error.log"
+            if (Test-Path $log) { Get-Content $log }
+            throw "Packaged detector self-test failed: $($process.ExitCode)"
+          }
+
+      - name: Check packaged camera pipeline and overlay
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test-camera" -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "Packaged camera pipeline self-test timed out"
+          }
+          if ($process.ExitCode -ne 0) {
+            $log = Join-Path $env:APPDATA "Glance/camera-error.log"
+            if (Test-Path $log) { Get-Content $log }
+            throw "Packaged camera pipeline self-test failed: $($process.ExitCode)"
+          }
+
+      - name: Check packaged detector under a Vietnamese user path
+        shell: pwsh
+        run: |
+          $tempFolder = Join-Path $env:RUNNER_TEMP "Người-dùng-đặng"
+          New-Item -ItemType Directory -Force -Path $tempFolder | Out-Null
+          $env:TEMP = $tempFolder
+          $env:TMP = $tempFolder
+          $process = Start-Process -FilePath "windows/dist/Glance.exe" -ArgumentList "--self-test" -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "Vietnamese path self-test timed out"
+          }
+          if ($process.ExitCode -ne 0) {
+            $log = Join-Path $env:APPDATA "Glance/camera-error.log"
+            if (Test-Path $log) { Get-Content $log }
+            throw "Vietnamese path self-test failed: $($process.ExitCode)"
+          }
 
       - name: Assemble Glance-Windows.zip
         shell: pwsh
@@ -42,6 +89,7 @@ jobs:
           Copy-Item "windows/glance_windows.py" $stage
           Copy-Item "windows/guard.py" $stage
           Copy-Item "windows/posture.py" $stage
+          Copy-Item "windows/models" $stage -Recurse
           Copy-Item "windows/requirements.txt" $stage
           Copy-Item "windows/start_windows.bat" $stage
           Copy-Item "windows/build_exe.bat" $stage
