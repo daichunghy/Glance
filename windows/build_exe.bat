@@ -56,7 +56,10 @@ if errorlevel 1 (
 )
 
 echo [Glance] Dang tien hanh dong goi Glance.exe bang PyInstaller...
-!BUILD_PY! -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 glance_windows.py
+set "CASCADE_FILE="
+for /f "usebackq delims=" %%p in (`!BUILD_PY! -c "import cv2, os; print(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))"`) do set "CASCADE_FILE=%%p"
+if not exist "!CASCADE_FILE!" goto :failed
+!BUILD_PY! -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 --add-data "!CASCADE_FILE!;cv2/data" glance_windows.py
 if errorlevel 1 goto :failed
 
 echo.

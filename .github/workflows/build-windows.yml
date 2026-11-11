@@ -30,8 +30,11 @@ jobs:
 
       - name: Build Glance.exe with PyInstaller
         working-directory: windows
+        shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 glance_windows.py
+          $cascade = python -c "import cv2, os; print(os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'))"
+          if (-not (Test-Path $cascade)) { throw "Face detector model is missing from OpenCV" }
+          python -m PyInstaller --noconfirm --clean --windowed --onefile --name Glance --collect-data cv2 --add-data "$cascade;cv2/data" glance_windows.py
 
       - name: Check packaged face detector
         shell: pwsh
