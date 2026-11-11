@@ -1,2 +1,3 @@
-opencv-python>=4.8.0
+# OpenCV 5 removed APIs used by the current camera detector.
+opencv-python==4.13.0.92
 pyinstaller>=6.0.0
