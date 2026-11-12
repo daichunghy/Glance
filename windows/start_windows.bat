@@ -73,11 +73,15 @@ if not errorlevel 1 (
 
 :: 4. Tim python trong PATH (bo qua stub WindowsApps cua Microsoft Store)
 if "!GLANCE_PYTHON_CMD!"=="" (
-  where python >nul 2>&1
-  if not errorlevel 1 (
-    python -c "import sys, tkinter; assert sys.version_info >= (3, 8)" >nul 2>&1
-    if not errorlevel 1 (
-      set "GLANCE_PYTHON_CMD=python"
+  for /f "delims=" %%p in ('where python 2^>nul') do (
+    if "!GLANCE_PYTHON_CMD!"=="" (
+      echo "%%~p" | findstr /i "WindowsApps" >nul
+      if errorlevel 1 (
+        "%%~p" -c "import sys, tkinter; assert sys.version_info >= (3, 8)" >nul 2>&1
+        if not errorlevel 1 (
+          set "GLANCE_PYTHON_CMD="%%~p""
+        )
+      )
     )
   )
 )
@@ -141,7 +145,13 @@ if "!GLANCE_PYTHON_CMD!"=="" (
   if "!GLANCE_PYTHON_CMD!"=="" (
     echo [Glance] Dang tai bo cai Python 3.12 chinh thuc tu python.org...
     set "PY_INSTALLER=%TEMP%\glance_python_3.12_setup.exe"
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.12.8/python-3.12.8-amd64.exe' -OutFile '!PY_INSTALLER!' -UseBasicParsing"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.12.8/python-3.12.8-amd64.exe' -OutFile $env:PY_INSTALLER -UseBasicParsing"
+    if not exist "!PY_INSTALLER!" (
+      where curl.exe >nul 2>&1
+      if not errorlevel 1 (
+        curl.exe -fsSL -o "!PY_INSTALLER!" "https://www.python.org/ftp/python/3.12.8/python-3.12.8-amd64.exe" >nul 2>&1
+      )
+    )
     if exist "!PY_INSTALLER!" (
       echo [Glance] Dang cai dat Python 3.12 ^(che do tu dong, khong can quyen Admin^)...
       "!PY_INSTALLER!" /quiet InstallAllUsers=0 PrependPath=1 Include_test=0 Include_tcltk=1 Include_pip=1 Include_launcher=1
@@ -161,7 +171,7 @@ echo [Glance] Su dung moi truong Python: !GLANCE_PYTHON_CMD!
 :: 7. Khoi tao Virtual Environment (.venv) va cai dat thu vien
 :: ============================================================================
 if exist ".venv\Scripts\python.exe" (
-  ".venv\Scripts\python.exe" -c "import sys" >nul 2>&1
+  ".venv\Scripts\python.exe" -c "import sys, tkinter; assert sys.version_info >= (3, 8)" >nul 2>&1
   if errorlevel 1 (
     echo [Glance] Phat hien .venv cu khong hop le, dang tao lai...
     rmdir /s /q .venv >nul 2>&1

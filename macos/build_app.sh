@@ -4,12 +4,23 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
-echo "===> Building igf (Release)..."
-swift build -c release
-
 APP_NAME="Glance"
 APP_BUNDLE="$DIR/$APP_NAME.app"
-BIN_SRC="$DIR/.build/release/igf"
+ZIP_OUT="$DIR/Glance-macOS.zip"
+
+echo "===> Building igf (Release Universal arm64 + x86_64)..."
+if [ "${1:-}" = "--host-only" ]; then
+    swift build -c release
+    BIN_SRC="$DIR/.build/release/igf"
+else
+    if swift build -c release --arch arm64 --arch x86_64; then
+        BIN_SRC="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/igf"
+    else
+        echo "[Warning] Universal build failed, falling back to host architecture..."
+        swift build -c release
+        BIN_SRC="$DIR/.build/release/igf"
+    fi
+fi
 
 echo "===> Creating $APP_NAME.app bundle..."
 rm -rf "$APP_BUNDLE"
@@ -19,10 +30,14 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 # Copy binary
 cp "$BIN_SRC" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 chmod +x "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+lipo -info "$APP_BUNDLE/Contents/MacOS/$APP_NAME" || true
 
-# Copy Icon
+# Copy Icon & Resources
 if [ -f "$DIR/AppIcon.icns" ]; then
     cp "$DIR/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
+fi
+if [ -d "$DIR/Resources" ]; then
+    cp -R "$DIR/Resources/"* "$APP_BUNDLE/Contents/Resources/" 2>/dev/null || true
 fi
 
 # Create Info.plist
@@ -44,11 +59,11 @@ cat << 'EOF' > "$APP_BUNDLE/Contents/Info.plist"
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.1</string>
+    <string>1.0.2</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>LSMinimumSystemVersion</key>
-    <string>14.0</string>
+    <string>13.0</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHighResolutionCapable</key>
@@ -63,5 +78,11 @@ EOF
 
 echo "===> Ad-hoc Code Signing..."
 codesign -s - --force --deep "$APP_BUNDLE"
+codesign --verify --deep --strict "$APP_BUNDLE" || true
+
+echo "===> Packaging clean Glance-macOS.zip (without ._ resource fork files)..."
+rm -f "$ZIP_OUT"
+ditto -c -k --norsrc --keepParent "$APP_BUNDLE" "$ZIP_OUT"
 
 echo "===> Done! App created at: $APP_BUNDLE"
+echo "===> Clean archive created at: $ZIP_OUT"

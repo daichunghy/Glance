@@ -1,2 +1,3 @@
-opencv-python>=4.8.0
+# OpenCV 5 removed CascadeClassifier APIs used by Glance.
+opencv-python==4.13.0.92
 pyinstaller>=6.0.0

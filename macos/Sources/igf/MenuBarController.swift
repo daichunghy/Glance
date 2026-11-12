@@ -31,32 +31,39 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     
     private func setupPopover() {
         popover = NSPopover()
-        popover.contentSize = NSSize(width: 270, height: 320)
         popover.behavior = .transient
         popover.delegate = self
-        popover.contentViewController = NSHostingController(rootView: SettingsPopoverView())
+        let hosting = NSHostingController(rootView: SettingsPopoverView())
+        if #available(macOS 13.0, *) {
+            hosting.sizingOptions = .preferredContentSize
+        } else {
+            popover.contentSize = NSSize(width: 270, height: 380)
+        }
+        popover.contentViewController = hosting
     }
     
     private func setupObservers() {
         Publishers.CombineLatest3(AppModel.shared.$isLookingAway, AppModel.shared.$isEnabled, AppModel.shared.$isVideoCallActive)
             .receive(on: RunLoop.main)
             .sink { [weak self] isLookingAway, isEnabled, isVideoCall in
-                guard let button = self?.statusItem.button else { return }
-                
-                let iconName: String
-                if !isEnabled {
-                    iconName = "shield.slash"
-                } else if isVideoCall {
-                    iconName = "video.slash.fill"
-                } else if isLookingAway {
-                    iconName = "shield.fill"
-                } else {
-                    iconName = "shield.lefthalf.filled"
+                MainActor.assumeIsolated {
+                    guard let button = self?.statusItem.button else { return }
+                    
+                    let iconName: String
+                    if !isEnabled {
+                        iconName = "shield.slash"
+                    } else if isVideoCall {
+                        iconName = "video.slash.fill"
+                    } else if isLookingAway {
+                        iconName = "shield.fill"
+                    } else {
+                        iconName = "shield.lefthalf.filled"
+                    }
+                    
+                    let image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Glance")
+                    image?.isTemplate = true
+                    button.image = image
                 }
-                
-                let image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Glance")
-                image?.isTemplate = true
-                button.image = image
             }
             .store(in: &cancellables)
     }

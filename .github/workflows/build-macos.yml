@@ -1,0 +1,48 @@
+name: build-macos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "macos/**"
+      - ".github/workflows/build-macos.yml"
+  pull_request:
+    paths:
+      - "macos/**"
+      - ".github/workflows/build-macos.yml"
+  workflow_dispatch:
+
+jobs:
+  build-macos-app:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Swift toolchain
+        run: swift --version
+
+      - name: Run macOS Swift tests
+        working-directory: macos
+        run: swift test
+
+      - name: Build Universal Glance.app (arm64 + x86_64)
+        working-directory: macos
+        run: |
+          chmod +x build_app.sh
+          ./build_app.sh
+
+      - name: Verify Universal binary and clean zip
+        working-directory: macos
+        run: |
+          lipo -archs Glance.app/Contents/MacOS/Glance
+          lipo -verify_arch arm64 x86_64 Glance.app/Contents/MacOS/Glance
+          if unzip -l Glance-macOS.zip | grep -q '/\._'; then
+            echo "Found unexpected AppleDouble files in Glance-macOS.zip"
+            exit 1
+          fi
+
+      - name: Upload Glance-macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Glance-macOS
+          path: macos/Glance-macOS.zip

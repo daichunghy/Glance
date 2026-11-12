@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import AppKit
+import QuartzCore
 import ServiceManagement
 
 enum TrackingSource: String, CaseIterable, Identifiable {
@@ -55,6 +56,7 @@ final class AppModel: ObservableObject {
                 CameraTracker.shared.stopTracking()
                 MotionTracker.shared.stopTracking()
                 isTrackingActive = false
+                isCameraCoveredOrDark = false
             } else if oldValue == false {
                 handleTrackingSourceChange()
             }
@@ -64,6 +66,7 @@ final class AppModel: ObservableObject {
     // Share mode: deliberately show the screen to someone next to you for
     // 2 minutes without switching Glance off; protection resumes by itself.
     @Published var shareUntil: Date?
+    private var shareExpiryTask: Task<Void, Never>?
 
     var isSharing: Bool {
         guard let shareUntil else { return false }
@@ -71,8 +74,14 @@ final class AppModel: ObservableObject {
     }
 
     func startShareMode() {
+        shareExpiryTask?.cancel()
         shareUntil = Date().addingTimeInterval(120)
         clearProtection()
+        shareExpiryTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 120_000_000_000)
+            guard !Task.isCancelled else { return }
+            self?.shareUntil = nil
+        }
     }
     @Published var trackingSource: TrackingSource = .camera {
         didSet {
@@ -178,20 +187,22 @@ final class AppModel: ObservableObject {
     }
 
     func dismissPostureAsNotBad() {
-        postureGuard.dismissAsNotBad(now: ProcessInfo.processInfo.systemUptime)
+        postureGuard.dismissAsNotBad(now: CACurrentMediaTime())
         savePostureProfile()
         postureStatus = .good
         postureWarningKinds = []
     }
 
     func snoozePosture() {
-        postureGuard.snooze(now: ProcessInfo.processInfo.systemUptime)
+        postureGuard.snooze(now: CACurrentMediaTime())
         postureStatus = .snoozed
         postureWarningKinds = []
     }
 
+    private var isSyncingLaunchAtLogin = false
     @Published var launchAtLogin: Bool = false {
         didSet {
+            guard !isSyncingLaunchAtLogin else { return }
             if #available(macOS 13.0, *) {
                 do {
                     if launchAtLogin {
@@ -205,6 +216,9 @@ final class AppModel: ObservableObject {
                     }
                 } catch {
                     print("[Glance] Failed to update launchAtLogin: \(error)")
+                    isSyncingLaunchAtLogin = true
+                    launchAtLogin = (SMAppService.mainApp.status == .enabled)
+                    isSyncingLaunchAtLogin = false
                 }
             }
             UserDefaults.standard.set(launchAtLogin, forKey: "glance_launchAtLogin")
@@ -234,6 +248,13 @@ final class AppModel: ObservableObject {
     @Published var isTrackingActive: Bool = false
     @Published var isFaceDetected: Bool = false
     @Published var isAirPodsConnected: Bool = false
+    @Published var cameraPermissionDenied: Bool = false
+    @Published var cameraUnavailableMessage: String? = nil
+    @Published var isCameraCoveredOrDark: Bool = false
+
+    var isAirPodsSupportedOnOS: Bool {
+        MotionTracker.shared.isSupportedOnCurrentOS
+    }
     
     private init() {
         loadPostureProfile()
@@ -242,7 +263,7 @@ final class AppModel: ObservableObject {
             self.isEnabled = defaults.bool(forKey: "glance_isEnabled")
         }
         if let source = defaults.string(forKey: "glance_trackingSource"), let s = TrackingSource(rawValue: source) {
-            self.trackingSource = s
+            self.trackingSource = (s == .airpods && !MotionTracker.shared.isSupportedOnCurrentOS) ? .camera : s
         }
         if let mode = defaults.string(forKey: "glance_blurMode"), let m = BlurMode(rawValue: mode) {
             self.blurMode = m
@@ -256,11 +277,13 @@ final class AppModel: ObservableObject {
         if defaults.object(forKey: "glance_blurIntensity") != nil {
             self.blurIntensity = defaults.double(forKey: "glance_blurIntensity")
         }
+        isSyncingLaunchAtLogin = true
         if #available(macOS 13.0, *) {
             self.launchAtLogin = (SMAppService.mainApp.status == .enabled)
         } else {
             self.launchAtLogin = defaults.bool(forKey: "glance_launchAtLogin")
         }
+        isSyncingLaunchAtLogin = false
     }
     
     func clearProtection() {
@@ -268,19 +291,35 @@ final class AppModel: ObservableObject {
         isAwayFromDesk = false
         activeSide = .none
     }
+
+    func handleDarkCameraFrame() {
+        isCameraCoveredOrDark = true
+        isFaceDetected = false
+        clearProtection()
+    }
     
     private func handleTrackingSourceChange() {
+        isCameraCoveredOrDark = false
+        guard isEnabled else {
+            CameraTracker.shared.stopTracking()
+            MotionTracker.shared.stopTracking()
+            isTrackingActive = false
+            return
+        }
+        cameraUnavailableMessage = nil
         if trackingSource == .camera {
             MotionTracker.shared.stopTracking()
             CameraTracker.shared.startTracking()
         } else {
             CameraTracker.shared.stopTracking()
+            cameraPermissionDenied = false
             MotionTracker.shared.startTracking()
         }
     }
     
     // Robust state machine with dual-direction switching, hysteresis and meeting guard
     func processFaceState(angleDegrees: Double?, isPresent: Bool) {
+        isCameraCoveredOrDark = false
         // Guard against blurring during video calls, settings tweaking, share mode or when disabled
         guard isEnabled, !isVideoCallActive, !isPopoverOpen, !isSharing else {
             if isLookingAway || activeSide != .none {

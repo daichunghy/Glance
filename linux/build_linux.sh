@@ -19,7 +19,12 @@ fi
 echo "[Glance] Đang cài đặt thư viện phụ thuộc..."
 .venv/bin/pip install -r requirements.txt
 
+if [ ! -f "models/haarcascade_frontalface_default.xml" ]; then
+    echo "[Lỗi] Thiếu models/haarcascade_frontalface_default.xml"
+    exit 1
+fi
+
 echo "[Glance] Đang đóng gói binary độc lập..."
-.venv/bin/python -m PyInstaller --noconfirm --clean --collect-data cv2 --onefile --name Glance glance_linux.py
+.venv/bin/python -m PyInstaller --noconfirm --clean --collect-data cv2 --add-data "models/haarcascade_frontalface_default.xml:models" --onefile --name Glance glance_linux.py
 
 echo "Build complete! Binary at: dist/Glance"

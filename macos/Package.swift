@@ -4,11 +4,15 @@ import PackageDescription
 let package = Package(
     name: "igf",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v13)
     ],
     targets: [
         .executableTarget(
             name: "igf"
+        ),
+        .testTarget(
+            name: "igfTests",
+            dependencies: ["igf"]
         ),
     ]
 )

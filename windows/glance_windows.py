@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+import traceback
 from tkinter import ttk
 
 import cv2
@@ -32,7 +33,15 @@ user32.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int, ctyp
 user32.SetWindowPos.restype = wintypes.BOOL
 user32.GetSystemMetrics.argtypes = [ctypes.c_int]
 user32.GetSystemMetrics.restype = ctypes.c_int
+user32.FindWindowW.argtypes = [wintypes.LPCWSTR, wintypes.LPCWSTR]
+user32.FindWindowW.restype = wintypes.HWND
+user32.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
+user32.ShowWindow.restype = wintypes.BOOL
+user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+user32.SetForegroundWindow.restype = wintypes.BOOL
 kernel32.GetTickCount.restype = wintypes.DWORD
+kernel32.CreateMutexW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.LPCWSTR]
+kernel32.CreateMutexW.restype = wintypes.HANDLE
 
 if ctypes.sizeof(ctypes.c_void_p) == 8:
     get_style = user32.GetWindowLongPtrW
@@ -50,6 +59,92 @@ set_style.restype = style_type
 
 CONFIG_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "Glance")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+CAMERA_ERROR_PATH = os.path.join(CONFIG_DIR, "camera-error.log")
+_INSTANCE_MUTEX = None
+
+
+def record_camera_error():
+    """Save diagnostic details locally without recording camera frames."""
+    try:
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        with open(CAMERA_ERROR_PATH, "w", encoding="utf-8") as log:
+            traceback.print_exc(file=log)
+    except OSError:
+        pass
+
+
+def acquire_single_instance_mutex():
+    """Prevent multiple Glance instances from competing for the same webcam."""
+    global _INSTANCE_MUTEX
+    try:
+        ctypes.set_last_error(0)
+        handle = kernel32.CreateMutexW(None, False, "Local\\GlanceWindowsSingleton")
+        if handle and ctypes.get_last_error() == 183:  # ERROR_ALREADY_EXISTS
+            hwnd = user32.FindWindowW(None, "Glance")
+            if hwnd:
+                user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+                user32.SetForegroundWindow(hwnd)
+            return False
+        _INSTANCE_MUTEX = handle
+    except (OSError, AttributeError):
+        pass
+    return True
+
+
+def open_camera(index):
+    """Try Windows camera backends independently when one cannot open a device."""
+    for backend in (cv2.CAP_DSHOW, cv2.CAP_MSMF, cv2.CAP_ANY):
+        capture = None
+        try:
+            capture = cv2.VideoCapture(index, backend)
+            if capture is not None and capture.isOpened():
+                return capture
+        except cv2.error:
+            pass
+        if capture is not None:
+            capture.release()
+    return None
+
+
+def load_face_detector():
+    cascade_name = "haarcascade_frontalface_default.xml"
+    candidates = []
+    if getattr(sys, "_MEIPASS", None):
+        candidates.append(os.path.join(sys._MEIPASS, "models", cascade_name))
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", cascade_name))
+    if hasattr(cv2, "data") and getattr(cv2.data, "haarcascades", None):
+        candidates.append(os.path.join(cv2.data.haarcascades, cascade_name))
+    if getattr(sys, "_MEIPASS", None):
+        candidates.append(os.path.join(sys._MEIPASS, "cv2", "data", cascade_name))
+        candidates.append(os.path.join(sys._MEIPASS, cascade_name))
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), cascade_name))
+    path = next((candidate for candidate in candidates if os.path.exists(candidate)), None)
+    if path is None:
+        raise FileNotFoundError("Face detection model is missing")
+    # OpenCV's Windows filename handling can fail for paths with Vietnamese
+    # characters. Python opens the file with Unicode support; OpenCV parses
+    # the model from memory instead of opening the path itself.
+    with open(path, "r", encoding="utf-8") as model:
+        contents = model.read()
+    storage = cv2.FileStorage(contents, cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY)
+    try:
+        if not storage.isOpened():
+            raise RuntimeError("Face detection model could not be opened")
+        detector = cv2.CascadeClassifier()
+        if not detector.read(storage.getFirstTopLevelNode()) or detector.empty():
+            raise RuntimeError("Face detection model could not be loaded")
+    finally:
+        storage.release()
+    return detector
+
+
+def compute_window_geometry(screen_width, screen_height):
+    """Fit the control window cleanly on 1366x768 and high-DPI laptops."""
+    width = min(520, max(420, screen_width - 40))
+    height = min(860, max(480, screen_height - 90))
+    min_w = min(460, width)
+    min_h = min(600, height)
+    return width, height, min_w, min_h
 
 
 def load_config():
@@ -137,6 +232,15 @@ class _Rect(ctypes.Structure):
                 ("right", ctypes.c_long), ("bottom", ctypes.c_long)]
 
 
+class _MonitorInfo(ctypes.Structure):
+    _fields_ = [
+        ("cbSize", wintypes.DWORD),
+        ("rcMonitor", _Rect),
+        ("rcWork", _Rect),
+        ("dwFlags", wintypes.DWORD),
+    ]
+
+
 def foreground_is_fullscreen():
     """True when another app fills the screen (slideshow, video, game).
 
@@ -154,6 +258,14 @@ def foreground_is_fullscreen():
         rect = _Rect()
         if not user32.GetWindowRect(hwnd, ctypes.byref(rect)):
             return False
+        monitor = user32.MonitorFromWindow(hwnd, 2)  # MONITOR_DEFAULTTONEAREST
+        if monitor:
+            info = _MonitorInfo()
+            info.cbSize = ctypes.sizeof(_MonitorInfo)
+            if user32.GetMonitorInfoW(monitor, ctypes.byref(info)):
+                m = info.rcMonitor
+                return (rect.left <= m.left and rect.top <= m.top
+                        and rect.right >= m.right and rect.bottom >= m.bottom)
         width = user32.GetSystemMetrics(0)
         height = user32.GetSystemMetrics(1)
         return (rect.left <= 0 and rect.top <= 0
@@ -212,8 +324,14 @@ class App:
         self.root = root
         root.title("Glance")
         root.configure(bg="#08090c")
-        root.geometry("520x860")
-        root.minsize(480, 760)
+        geo_fn = globals().get("compute_window_geometry")
+        if geo_fn:
+            w, h, min_w, min_h = geo_fn(root.winfo_screenwidth(), root.winfo_screenheight())
+            root.geometry(f"{w}x{h}")
+            root.minsize(min_w, min_h)
+        else:
+            root.geometry("520x860")
+            root.minsize(480, 760)
         root.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.cover = ScreenCover(root)
         self.events = queue.Queue(maxsize=1)
@@ -254,7 +372,7 @@ class App:
         is_startup = "--startup" in sys.argv or "--minimized" in sys.argv
         if is_startup:
             self.root.iconify()
-        if self.auto_camera.get() or is_startup:
+        if self.auto_camera.get():
             self.root.after(400, self.toggle_camera)
 
     def persist_settings(self):
@@ -290,12 +408,41 @@ class App:
 
     def make_ui(self):
         bg, fg, muted, blue = "#08090c", "#f5f5f7", "#adb8c7", "#0071e3"
-        body = tk.Frame(self.root, bg=bg, padx=26, pady=20)
-        body.pack(fill="both", expand=True)
+        container = tk.Frame(self.root, bg=bg)
+        container.pack(fill="both", expand=True)
+        canvas = tk.Canvas(container, bg=bg, highlightthickness=0, borderwidth=0)
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+
+        body = tk.Frame(canvas, bg=bg, padx=26, pady=20)
+        window_id = canvas.create_window((0, 0), window=body, anchor="nw")
+
+        def sync_scroll_region(_event=None):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+            req_h = body.winfo_reqheight()
+            vis_h = canvas.winfo_height()
+            if vis_h > 1 and req_h > vis_h:
+                if not scrollbar.winfo_ismapped():
+                    scrollbar.pack(side="right", fill="y")
+            elif scrollbar.winfo_ismapped():
+                scrollbar.pack_forget()
+
+        def sync_canvas_width(event):
+            canvas.itemconfigure(window_id, width=event.width)
+            sync_scroll_region()
+
+        body.bind("<Configure>", sync_scroll_region)
+        canvas.bind("<Configure>", sync_canvas_width)
+        canvas.bind_all(
+            "<MouseWheel>",
+            lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
+            if scrollbar.winfo_ismapped() and e.delta else None,
+        )
 
         def label(text, size=11, color=fg, bold=False):
             return tk.Label(body, text=text, bg=bg, fg=color, anchor="w", justify="left",
-                            wraplength=460, font=("Calibri", size, "bold" if bold else "normal"))
+                            wraplength=440, font=("Calibri", size, "bold" if bold else "normal"))
 
         label("Glance", 22, bold=True).pack(fill="x")
         label("Che màn hình khi bạn rời bàn", 12, muted).pack(fill="x", pady=(0, 14))
@@ -394,7 +541,10 @@ class App:
                   relief="flat", anchor="e", padx=0, font=("Calibri", 10)).pack(side="right")
 
     def open_camera_settings(self):
-        os.startfile("ms-settings:privacy-webcam")
+        try:
+            os.startfile("ms-settings:privacy-webcam")
+        except OSError:
+            self.status.set("Không mở được Cài đặt Windows. Hãy vào Settings → Privacy & security → Camera.")
 
     def toggle_manual(self):
         self.manual = not self.manual
@@ -428,8 +578,8 @@ class App:
 
     def _apply_profile_for_camera(self, index):
         saved = self._profiles.get("cameras", {}).get(str(index))
-        if saved:
-            self.posture_guard.import_profile(saved)
+        if not saved or not self.posture_guard.import_profile(saved):
+            self.posture_guard.reset()
 
     def _save_profile_for_camera(self):
         profile = self.posture_guard.export_profile()
@@ -515,6 +665,7 @@ class App:
             self.automatic_cover = False
             self.camera_started_at = None
             self.last_frame_at = None
+            self.camera_busy = False
             self.start_button.configure(text="Bật camera")
             self.manual_button.configure(text="Che màn hình ngay")
             self.status.set("Không thể che màn hình. Tính năng tự động đã dừng; hãy thử lại.")
@@ -538,6 +689,7 @@ class App:
         self.stop_event = threading.Event()
         self.camera_started_at = time.monotonic()
         self.last_frame_at = None
+        self.camera_busy = False
         self.status.set("Đang mở camera…")
         self.start_button.configure(text="Tắt camera")
         self.worker = threading.Thread(target=self.camera_loop,
@@ -553,6 +705,7 @@ class App:
         self.automatic_cover = False
         self.camera_started_at = None
         self.last_frame_at = None
+        self.camera_busy = False
         self.refresh_cover()
         self.status.set("Đã tắt camera. Màn hình chưa được che tự động.")
         self.start_button.configure(text="Bật camera")
@@ -572,38 +725,13 @@ class App:
     def camera_loop(self, generation, stop, index, delay):
         cap = None
         try:
-            cascade_name = "haarcascade_frontalface_default.xml"
-            cascade_candidates = []
-            if hasattr(cv2, "data") and getattr(cv2.data, "haarcascades", None):
-                cascade_candidates.append(os.path.join(cv2.data.haarcascades, cascade_name))
-            if getattr(sys, "_MEIPASS", None):
-                cascade_candidates.append(os.path.join(sys._MEIPASS, "cv2", "data", cascade_name))
-                cascade_candidates.append(os.path.join(sys._MEIPASS, cascade_name))
-            cascade_candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), cascade_name))
-            cascade_path = next((p for p in cascade_candidates if os.path.exists(p)), cascade_candidates[0])
-            detector = cv2.CascadeClassifier(cascade_path)
-            if detector.empty():
-                self.publish(generation, "error", "Không tải được bộ nhận diện khuôn mặt.")
-                return
-            # Camera busy (Zoom/Teams holding it) is normal on Windows:
-            # wait and retry instead of dying — auto-resume when it frees.
-            def open_camera(cam_idx):
-                c = cv2.VideoCapture(cam_idx, cv2.CAP_DSHOW)
-                if c is not None and c.isOpened():
-                    return c
-                if c is not None:
-                    c.release()
-                c = cv2.VideoCapture(cam_idx)
-                return c
-
+            detector = load_face_detector()
             cap = open_camera(index)
-            announced_busy = False
-            while not cap.isOpened() and not stop.is_set():
-                cap.release()
-                if not announced_busy:
-                    self.publish(generation, "busy", None)
-                    announced_busy = True
-                stop.wait(3)
+            while cap is None and not stop.is_set():
+                # Each retry refreshes the watchdog while waiting for a device.
+                self.publish(generation, "busy", index)
+                if stop.wait(3):
+                    return
                 cap = open_camera(index)
             if stop.is_set():
                 return
@@ -612,6 +740,8 @@ class App:
             guard = PresenceGuard(delay=delay)
             posture_guard = self.posture_guard
             failures = 0
+            reopened = False
+            good_frames = 0
             last_state = None
             wait_seconds = 0.12
             while not stop.is_set():
@@ -619,11 +749,39 @@ class App:
                 if not ok or frame is None:
                     failures += 1
                     if failures >= 5:
-                        self.publish(generation, "error", "Mất tín hiệu camera. Tính năng tự động đã dừng.")
+                        if not reopened:
+                            reopened = True
+                            failures = 0
+                            cap.release()
+                            cap = None
+                            if good_frames == 0:
+                                for fallback_backend in (cv2.CAP_MSMF, cv2.CAP_ANY):
+                                    try:
+                                        candidate = cv2.VideoCapture(index, fallback_backend)
+                                        if candidate is not None and candidate.isOpened():
+                                            cap = candidate
+                                            break
+                                        if candidate is not None:
+                                            candidate.release()
+                                    except cv2.error:
+                                        pass
+                            if cap is None:
+                                cap = open_camera(index)
+                            if cap is not None:
+                                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+                                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+                                continue
+                        self.publish(
+                            generation,
+                            "error",
+                            "Mất tín hiệu camera. Hãy kiểm tra quyền camera trong Windows hoặc thử chọn camera khác.",
+                        )
                         return
                     stop.wait(0.2)
                     continue
                 failures = 0
+                reopened = False
+                good_frames += 1
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 if frame_too_dark(float(gray.mean())):
                     # Covered camera / pitch-black room: hold everything,
@@ -652,7 +810,9 @@ class App:
                     last_state = state
                 stop.wait(wait_seconds)
         except Exception:
-            self.publish(generation, "error", "Camera gặp lỗi. Tính năng tự động đã dừng; hãy thử bật lại.")
+            record_camera_error()
+            self.publish(generation, "error", "Camera gặp lỗi. Tính năng tự động đã dừng. "
+                         "Thông tin lỗi được lưu tại %APPDATA%\\Glance\\camera-error.log.")
         finally:
             if cap is not None:
                 cap.release()
@@ -667,16 +827,21 @@ class App:
                     self.automatic_cover = False
                     self.camera_started_at = None
                     self.last_frame_at = None
+                    self.camera_busy = False
                     self.status.set(value)
                     self.start_button.configure(text="Bật camera")
                 elif kind == "busy":
+                    self.camera_busy = True
                     self.last_frame_at = time.monotonic()
-                    self.status.set("Camera đang bận (Zoom/Teams đang dùng?). Glance tự mở lại khi camera trống.")
+                    self.status.set(f"Không mở được camera {value}. Kiểm tra quyền camera, "
+                                    "đóng ứng dụng đang dùng camera hoặc thử camera 0. Glance đang thử lại.")
                 elif kind == "blocked":
+                    self.camera_busy = False
                     self.last_frame_at = time.monotonic()
                     self.automatic_cover = False
                     self.status.set("Camera có vẻ bị che hoặc quá tối — Glance tạm đứng yên, không che màn hình.")
                 elif kind == "face":
+                    self.camera_busy = False
                     present, observed_at, guard, posture = value
                     self.last_frame_at = observed_at
                     guard.activity_guard = self.activity.get()
@@ -693,7 +858,7 @@ class App:
         if self.camera_started_at is not None:
             now = time.monotonic()
             last = self.last_frame_at if self.last_frame_at is not None else self.camera_started_at
-            timeout = 5 if self.last_frame_at is not None else 15
+            timeout = 15 if (self.last_frame_at is None or getattr(self, "camera_busy", False)) else 5
             if camera_is_stale(now, last, timeout):
                 self.stop_camera()
                 self.status.set("Camera không phản hồi. Tính năng tự động đã dừng; hãy kiểm tra camera rồi bật lại.")
@@ -708,5 +873,57 @@ class App:
         self.root.destroy()
 
 
+def run_camera_pipeline_self_test():
+    """Exercise the packaged camera pipeline and overlay with synthetic frames."""
+    import numpy as np
+
+    class TestCamera:
+        def read(self):
+            return True, np.full((240, 320, 3), 128, dtype=np.uint8)
+
+        def set(self, *args):
+            return True
+
+        def release(self):
+            pass
+
+    global open_camera, foreground_is_fullscreen, idle_seconds
+    open_camera = lambda index: TestCamera()
+    foreground_is_fullscreen = lambda: False
+    idle_seconds = lambda: 10
+    root = tk.Tk()
+    app = App(root)
+    try:
+        root.withdraw()
+        app.activity.set(False)
+        app.delay.set(0)
+        app.toggle_camera()
+        end = time.monotonic() + 15
+        while time.monotonic() < end:
+            root.update()
+            if app.automatic_cover and app.cover.visible:
+                break
+            time.sleep(0.05)
+        else:
+            raise RuntimeError("Camera pipeline or screen cover did not activate: " + app.status.get())
+        app.stop_camera()
+        root.update()
+        if app.cover.visible:
+            raise RuntimeError("Screen cover did not close after stopping the camera")
+    finally:
+        app.close()
+
+
 if __name__ == "__main__":
-    App(tk.Tk()).root.mainloop()
+    if "--self-test" in sys.argv or "--self-test-camera" in sys.argv:
+        try:
+            import numpy as np
+            if "--self-test-camera" in sys.argv:
+                run_camera_pipeline_self_test()
+            else:
+                load_face_detector().detectMultiScale(np.zeros((64, 64), dtype=np.uint8))
+        except Exception:
+            record_camera_error()
+            sys.exit(1)
+    elif acquire_single_instance_mutex():
+        App(tk.Tk()).root.mainloop()

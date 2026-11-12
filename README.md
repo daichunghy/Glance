@@ -61,7 +61,7 @@ Glance/
 
 ### macOS
 
-Needs macOS 14 or later and Swift 6. The build script compiles a release build, assembles `Glance.app` in the same folder and signs it ad hoc.
+Needs macOS 13 or later (Universal binary: Apple silicon & Intel; AirPods head tracking requires macOS 14 or later) and Swift 6. The build script compiles a release Universal build, assembles `Glance.app` and `Glance-macOS.zip` in the same folder, and signs it ad hoc.
 
 ```bash
 cd macos

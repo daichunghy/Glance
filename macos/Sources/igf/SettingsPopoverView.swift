@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct SettingRow<Content: View>: View {
     let icon: String
@@ -137,6 +138,30 @@ struct SettingsPopoverView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+
+                if model.cameraPermissionDenied && model.trackingSource == .camera {
+                    Button(action: {
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }) {
+                        HStack(spacing: 5) {
+                            Image(systemName: "gear")
+                                .font(.system(size: 10, weight: .semibold))
+                            Text("Open Camera Settings")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 3)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                } else if let unavailable = model.cameraUnavailableMessage {
+                    Text(unavailable)
+                        .font(.system(size: 10.5))
+                        .foregroundColor(.orange)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
             .padding(9)
             .background(
@@ -158,7 +183,7 @@ struct SettingsPopoverView: View {
                 ) {
                     Picker("", selection: $model.trackingSource) {
                         Text("Camera").tag(TrackingSource.camera)
-                        Text("AirPods").tag(TrackingSource.airpods)
+                        Text(model.isAirPodsSupportedOnOS ? "AirPods" : "AirPods (14+)").tag(TrackingSource.airpods)
                     }
                     .pickerStyle(.segmented)
                     .frame(width: 130)
@@ -359,6 +384,10 @@ struct SettingsPopoverView: View {
     
     private var statusIndicatorColor: Color {
         if !model.isEnabled { return .secondary }
+        if model.trackingSource == .camera {
+            if model.cameraPermissionDenied || model.cameraUnavailableMessage != nil { return .red }
+            if model.isCameraCoveredOrDark { return .yellow }
+        }
         if model.isVideoCallActive { return .yellow }
         if model.isAwayFromDesk || model.isLookingAway { return .orange }
         if model.trackingSource == .camera {
@@ -370,6 +399,11 @@ struct SettingsPopoverView: View {
     
     private var statusTitle: String {
         if !model.isEnabled { return "Disabled" }
+        if model.trackingSource == .camera {
+            if model.cameraPermissionDenied { return "Camera Denied" }
+            if model.cameraUnavailableMessage != nil { return "No Camera" }
+            if model.isCameraCoveredOrDark { return "Camera Covered" }
+        }
         if model.isVideoCallActive { return "In Video Call" }
         if model.isAwayFromDesk { return "Desk Empty" }
         if model.isLookingAway {

@@ -26,6 +26,7 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
     private var baselineAngle: Double = 0.0
     private var smoothedAngle: Double = 0.0
     private var noFaceFramesCount: Int = 0
+    private var hasConfiguredInput: Bool = false
     
     override init() {
         super.init()
@@ -35,51 +36,75 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
     
     private func setupSession() {
         sessionQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            self.captureSession.beginConfiguration()
-            
-            // Using .low preset drastically minimizes buffer allocations and RAM footprint (~75% reduction)
-            if self.captureSession.canSetSessionPreset(.low) {
-                self.captureSession.sessionPreset = .low
-            } else {
-                self.captureSession.sessionPreset = .vga640x480
-            }
-            
-            guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) ?? AVCaptureDevice.default(for: .video),
-                  let input = try? AVCaptureDeviceInput(device: device),
-                  self.captureSession.canAddInput(input) else {
-                self.captureSession.commitConfiguration()
-                return
-            }
-            
-            self.captureSession.addInput(input)
-            
-            // Limit hardware camera sensor frame rate to supported range (15 FPS)
-            do {
-                try device.lockForConfiguration()
-                if let range = device.activeFormat.videoSupportedFrameRateRanges.first {
-                    let minRate = range.minFrameRate
-                    device.activeVideoMinFrameDuration = CMTime(value: 1000, timescale: CMTimeScale(minRate * 1000))
-                    device.activeVideoMaxFrameDuration = CMTime(value: 1000, timescale: CMTimeScale(minRate * 1000))
-                }
-                device.unlockForConfiguration()
-            } catch {
-                print("[Glance] Camera frame rate config skipped: \(error)")
-            }
-            
-            self.videoOutput.alwaysDiscardsLateVideoFrames = true
-            self.videoOutput.videoSettings = [
-                kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
-            ]
-            self.videoOutput.setSampleBufferDelegate(self, queue: self.sessionQueue)
-            
-            if self.captureSession.canAddOutput(self.videoOutput) {
-                self.captureSession.addOutput(self.videoOutput)
-            }
-            
-            self.captureSession.commitConfiguration()
+            _ = self?.configureSessionLocked()
         }
+    }
+
+    private func configureSessionLocked() -> Bool {
+        if hasConfiguredInput {
+            return true
+        }
+
+        captureSession.beginConfiguration()
+
+        // Remove any previous inputs/outputs before reconfiguring
+        for input in captureSession.inputs {
+            captureSession.removeInput(input)
+        }
+        for output in captureSession.outputs {
+            captureSession.removeOutput(output)
+        }
+
+        // Using .low preset drastically minimizes buffer allocations and RAM footprint (~75% reduction)
+        if captureSession.canSetSessionPreset(.low) {
+            captureSession.sessionPreset = .low
+        } else if captureSession.canSetSessionPreset(.vga640x480) {
+            captureSession.sessionPreset = .vga640x480
+        }
+
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) ?? AVCaptureDevice.default(for: .video),
+              let input = try? AVCaptureDeviceInput(device: device),
+              captureSession.canAddInput(input) else {
+            hasConfiguredInput = false
+            captureSession.commitConfiguration()
+            Task { @MainActor in
+                AppModel.shared.cameraUnavailableMessage = "No camera found"
+                AppModel.shared.isTrackingActive = false
+            }
+            return false
+        }
+
+        captureSession.addInput(input)
+
+        // Limit hardware camera sensor frame rate safely within supported range
+        do {
+            try device.lockForConfiguration()
+            if let range = device.activeFormat.videoSupportedFrameRateRanges.first,
+               range.minFrameRate > 0 {
+                let targetRate = min(max(15.0, range.minFrameRate), range.maxFrameRate)
+                let timescale = CMTimeScale(max(1, Int32((targetRate * 1000).rounded())))
+                let duration = CMTime(value: 1000, timescale: timescale)
+                device.activeVideoMinFrameDuration = duration
+                device.activeVideoMaxFrameDuration = duration
+            }
+            device.unlockForConfiguration()
+        } catch {
+            print("[Glance] Camera frame rate config skipped: \(error)")
+        }
+
+        videoOutput.alwaysDiscardsLateVideoFrames = true
+        videoOutput.videoSettings = [
+            kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
+        ]
+        videoOutput.setSampleBufferDelegate(self, queue: sessionQueue)
+
+        if captureSession.canAddOutput(videoOutput) {
+            captureSession.addOutput(videoOutput)
+        }
+
+        captureSession.commitConfiguration()
+        hasConfiguredInput = true
+        return true
     }
     
     private func setupInterruptionAndSleepObservers() {
@@ -90,7 +115,9 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
             queue: .main
         ) { [weak self] notif in
             print("[Glance] Camera interrupted by another app (e.g. Video Call). Pausing privacy blur.")
-            self?.noFaceFramesCount = 0
+            self?.sessionQueue.async {
+                self?.noFaceFramesCount = 0
+            }
             Task { @MainActor in
                 AppModel.shared.isVideoCallActive = true
                 AppModel.shared.clearProtection()
@@ -107,8 +134,59 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
                 AppModel.shared.isVideoCallActive = false
             }
         }
+
+        // 2. Camera hot-plug (external webcams, Studio Display, Continuity Camera)
+        NotificationCenter.default.addObserver(
+            forName: AVCaptureDevice.wasConnectedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.sessionQueue.async {
+                let configured = self.configureSessionLocked()
+                guard configured && !self.isRunning else { return }
+                Task { @MainActor in
+                    if AppModel.shared.isEnabled && AppModel.shared.trackingSource == .camera {
+                        self.startTracking()
+                    }
+                }
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: AVCaptureDevice.wasDisconnectedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.sessionQueue.async {
+                let stillConnected = self.captureSession.inputs
+                    .compactMap { ($0 as? AVCaptureDeviceInput)?.device }
+                    .contains { $0.isConnected }
+                guard !stillConnected else { return }
+                if self.captureSession.isRunning {
+                    self.captureSession.stopRunning()
+                }
+                self.isRunning = false
+                self.hasConfiguredInput = false
+                self.noFaceFramesCount = 0
+                if !self.configureSessionLocked() {
+                    Task { @MainActor in
+                        AppModel.shared.isTrackingActive = false
+                        AppModel.shared.isFaceDetected = false
+                        AppModel.shared.clearProtection()
+                    }
+                } else {
+                    Task { @MainActor in
+                        if AppModel.shared.isEnabled && AppModel.shared.trackingSource == .camera {
+                            self.startTracking()
+                        }
+                    }
+                }
+            }
+        }
         
-        // 2. System Sleep & Wake Lifecycle
+        // 3. System Sleep & Wake Lifecycle
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification,
             object: nil,
@@ -132,21 +210,69 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         }
         return false
     }
+
+    private func meanLuma(of pixelBuffer: CVPixelBuffer) -> Double? {
+        guard CVPixelBufferGetPlaneCount(pixelBuffer) > 0 else { return nil }
+        let width = CVPixelBufferGetWidthOfPlane(pixelBuffer, 0)
+        let height = CVPixelBufferGetHeightOfPlane(pixelBuffer, 0)
+        guard width > 0, height > 0 else { return nil }
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+        guard let baseAddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0) else { return nil }
+        let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)
+        let buffer = baseAddress.assumingMemoryBound(to: UInt8.self)
+
+        let stepX = max(1, width / 16)
+        let stepY = max(1, height / 12)
+        var total = 0
+        var count = 0
+        var y = 0
+        while y < height {
+            let rowOffset = y * bytesPerRow
+            var x = 0
+            while x < width {
+                total += Int(buffer[rowOffset + x])
+                count += 1
+                x += stepX
+            }
+            y += stepY
+        }
+        return count > 0 ? Double(total) / Double(count) : nil
+    }
     
     func startTracking() {
         sessionQueue.async { [weak self] in
             guard let self = self, !self.isRunning else { return }
-            
+            guard self.configureSessionLocked() else {
+                Task { @MainActor in
+                    AppModel.shared.isTrackingActive = false
+                    AppModel.shared.cameraUnavailableMessage = "No camera found"
+                }
+                return
+            }
+
             let status = AVCaptureDevice.authorizationStatus(for: .video)
             if status == .notDetermined {
                 AVCaptureDevice.requestAccess(for: .video) { granted in
                     if granted {
-                        self.sessionQueue.async {
-                            self.captureSession.startRunning()
-                            self.isRunning = true
-                            Task { @MainActor in
-                                AppModel.shared.isTrackingActive = true
+                        Task { @MainActor in
+                            guard AppModel.shared.isEnabled, AppModel.shared.trackingSource == .camera else { return }
+                            self.sessionQueue.async {
+                                guard !self.isRunning, self.configureSessionLocked() else { return }
+                                self.captureSession.startRunning()
+                                self.isRunning = true
+                                Task { @MainActor in
+                                    AppModel.shared.cameraPermissionDenied = false
+                                    AppModel.shared.cameraUnavailableMessage = nil
+                                    AppModel.shared.isTrackingActive = true
+                                }
                             }
+                        }
+                    } else {
+                        Task { @MainActor in
+                            AppModel.shared.cameraPermissionDenied = true
+                            AppModel.shared.cameraUnavailableMessage = "Camera access denied"
+                            AppModel.shared.isTrackingActive = false
                         }
                     }
                 }
@@ -154,7 +280,15 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
                 self.captureSession.startRunning()
                 self.isRunning = true
                 Task { @MainActor in
+                    AppModel.shared.cameraPermissionDenied = false
+                    AppModel.shared.cameraUnavailableMessage = nil
                     AppModel.shared.isTrackingActive = true
+                }
+            } else {
+                Task { @MainActor in
+                    AppModel.shared.cameraPermissionDenied = true
+                    AppModel.shared.cameraUnavailableMessage = "Camera access denied"
+                    AppModel.shared.isTrackingActive = false
                 }
             }
         }
@@ -165,19 +299,24 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
             guard let self = self, self.isRunning else { return }
             self.captureSession.stopRunning()
             self.isRunning = false
+            self.noFaceFramesCount = 0
             Task { @MainActor in
                 AppModel.shared.isTrackingActive = false
                 AppModel.shared.isFaceDetected = false
+                AppModel.shared.isCameraCoveredOrDark = false
                 AppModel.shared.clearProtection()
             }
         }
     }
     
     func calibrateCenter() {
-        baselineAngle = smoothedAngle + baselineAngle
-        smoothedAngle = 0.0
-        Task { @MainActor in
-            AppModel.shared.processFaceState(angleDegrees: 0.0, isPresent: true)
+        sessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.baselineAngle = self.smoothedAngle + self.baselineAngle
+            self.smoothedAngle = 0.0
+            Task { @MainActor in
+                AppModel.shared.processFaceState(angleDegrees: 0.0, isPresent: true)
+            }
         }
     }
     
@@ -190,14 +329,20 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
             lastProcessTime = currentTime
             
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+            if let luma = meanLuma(of: pixelBuffer), luma < 15.0 {
+                self.noFaceFramesCount = 0
+                Task { @MainActor in
+                    AppModel.shared.handleDarkCameraFrame()
+                }
+                return
+            }
             
             do {
                 // Orientation .up is the true native orientation on macOS FaceTime HD cameras
                 try sequenceHandler.perform([faceRequest], on: pixelBuffer, orientation: .up)
                 
-                if let observation = faceRequest.results?.first,
-                   let rawYaw = observation.yaw?.floatValue {
-
+                if let observation = faceRequest.results?.first {
                     self.noFaceFramesCount = 0
 
                     // Posture Guard shares this observation (no extra camera
@@ -213,9 +358,16 @@ final class CameraTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
                             centerY: 1.0 - Double(bbox.midY),
                             pitch: posturePitch)
                     }
-                    
-                    // Convert to degrees: positive = looking right, negative = looking left
-                    let degrees = -Double(rawYaw) * (180.0 / .pi)
+
+                    // Convert to degrees: positive = looking right, negative = looking left.
+                    // If Vision omits yaw (Intel Macs or extreme angles), fall back to horizontal bbox position
+                    // so a visible face never falsely triggers "Desk Empty".
+                    let degrees: Double
+                    if let rawYaw = observation.yaw?.floatValue {
+                        degrees = -Double(rawYaw) * (180.0 / .pi)
+                    } else {
+                        degrees = -(Double(bbox.midX) - 0.5) * 70.0
+                    }
                     
                     // If user is tilting head down to look at keyboard/desk, ignore small yaw jitters
                     if let rawPitch = observation.pitch?.floatValue {

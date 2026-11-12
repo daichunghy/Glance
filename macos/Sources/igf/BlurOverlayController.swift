@@ -108,6 +108,12 @@ final class BlurOverlayController {
             let window = ScreenOverlayWindow(screen: screen)
             windows.append(window)
         }
+
+        let side = AppModel.shared.activeSide
+        let intensity = AppModel.shared.blurIntensity
+        if side != .none {
+            windows.forEach { $0.updateProtection(side: side, intensity: intensity) }
+        }
     }
     
     private func setupObservers() {
@@ -115,7 +121,9 @@ final class BlurOverlayController {
         NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.setupWindows()
+                MainActor.assumeIsolated {
+                    self?.setupWindows()
+                }
             }
             .store(in: &cancellables)
             
@@ -126,7 +134,9 @@ final class BlurOverlayController {
             }
             .receive(on: RunLoop.main)
             .sink { [weak self] side, intensity in
-                self?.windows.forEach { $0.updateProtection(side: side, intensity: intensity) }
+                MainActor.assumeIsolated {
+                    self?.windows.forEach { $0.updateProtection(side: side, intensity: intensity) }
+                }
             }
             .store(in: &cancellables)
     }

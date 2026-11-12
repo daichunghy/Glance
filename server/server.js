@@ -88,7 +88,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const url = new URL(req.url, `http://${req.headers.host}`);
+  const hostHeader = req.headers.host || `localhost:${PORT}`;
+  const url = new URL(req.url, `http://${hostHeader}`);
   const pathname = url.pathname;
 
   function sendJson(status, data) {
@@ -178,9 +179,20 @@ const server = http.createServer((req, res) => {
 
   // Read JSON body for POST
   if (req.method === 'POST') {
+    const MAX_BODY_BYTES = 1024 * 1024;
     let bodyData = '';
-    req.on('data', chunk => { bodyData += chunk; });
+    let bodyTooLarge = false;
+    req.on('data', chunk => {
+      if (bodyTooLarge) return;
+      bodyData += chunk;
+      if (Buffer.byteLength(bodyData, 'utf8') > MAX_BODY_BYTES) {
+        bodyTooLarge = true;
+        sendJson(413, { success: false, error: 'Payload quá lớn.' });
+        req.destroy();
+      }
+    });
     req.on('end', () => {
+      if (bodyTooLarge) return;
       let body = {};
       if (bodyData && bodyData.trim()) {
         try {
