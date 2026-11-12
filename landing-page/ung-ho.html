@@ -18,9 +18,12 @@
   <meta property="og:description" content="Glance hoàn toàn miễn phí. Nếu app hay và thú vị bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙">
   <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/glance-icon.png">
 
+  <!-- Preload Mascot Sprite -->
+  <link rel="preload" as="image" href="assets/product/glance-scrub-sprite.webp" type="image/webp">
+
   <!-- Apple Design System Stylesheet from Homepage -->
-  <link rel="stylesheet" href="styles.css?v=1.15.0">
-  <link rel="stylesheet" href="donation.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=1.18.0">
+  <link rel="stylesheet" href="donation.css?v=9">
 </head>
 <body class="dark apple-theme">
 
@@ -32,7 +35,8 @@
         Glance
       </a>
       <nav>
-        <a href="./#features">Tính năng</a>
+        <a href="./#explore">Tính năng</a>
+        <a href="./#updates">Cập nhật</a>
         <a href="./#download">Tải ứng dụng</a>
         <a href="./" class="text-link">Về trang chủ <span>›</span></a>
       </nav>
@@ -49,20 +53,23 @@
     </div>
 
     <div class="support-split-container">
-      <!-- LEFT COLUMN: INTERACTIVE APPLE PRO VISUAL (Mouse-Scrub Video) -->
+      <!-- LEFT COLUMN: INTERACTIVE APPLE PRO VISUAL (60fps Reactive Mascot Canvas) -->
       <section class="visual-column" aria-label="Hình ảnh tương tác">
-        <div class="apple-art-stage">
+        <div class="apple-art-stage" id="apple-art-stage">
           <div class="ambient-glow" aria-hidden="true"></div>
-          <div class="video-display-frame">
-            <video
-              id="scrub-video"
+          <div class="video-display-frame" id="mascot-stage">
+            <canvas
+              id="mascot-canvas"
               class="interactive-video"
-              muted
-              playsinline
-              preload="auto"
-              src="assets/product/glance-scrub.mp4"
-            ></video>
-            <div class="frame-glass-shine"></div>
+              width="560"
+              height="315"
+              aria-label="Nhân vật Glance phản ứng theo tương tác của bạn"
+            ></canvas>
+            <div class="frame-glass-shine" aria-hidden="true"></div>
+            <div class="mascot-mood-pill" id="mascot-mood" aria-live="polite">
+              <span class="mood-emoji" aria-hidden="true">☕</span>
+              <span class="mood-text">Chọn ly cà phê bạn thích nha!</span>
+            </div>
           </div>
         </div>
       </section>
@@ -78,38 +85,38 @@
             Glance hoàn toàn miễn phí. Nếu app hay và thú vị, bạn có thể ủng hộ mình để tiếp tục phát triển nha ☕💙
           </p>
 
-          <form id="support-form" class="apple-form">
+          <form id="support-form" class="apple-form" novalidate>
             <p class="section-label">Chọn mức ủng hộ:</p>
             <!-- Apple Segmented Preset Pills -->
             <fieldset class="apple-pills-grid" aria-label="Chọn mức tiền ủng hộ">
-              <label class="apple-pill">
+              <label class="apple-pill" data-mood="cool">
                 <input type="radio" name="preset" value="10000" data-note="Một ly trà đá sẻ chia. Cảm ơn bạn rất nhiều!">
                 <span class="pill-inner">
-                  <span class="p-amount">10.000đ</span>
+                  <span class="p-amount">10,000đ</span>
                   <span class="p-desc">Trà đá 🍵</span>
                 </span>
               </label>
 
-              <label class="apple-pill is-selected">
+              <label class="apple-pill is-selected" data-mood="cozy">
                 <input type="radio" name="preset" value="20000" checked data-note="Một ly cà phê sáng tiếp sức coder. Rất biết ơn bạn!">
                 <span class="pill-inner">
-                  <span class="p-amount">20.000đ</span>
+                  <span class="p-amount">20,000đ</span>
                   <span class="p-desc">Ly cà phê ☕</span>
                 </span>
               </label>
 
-              <label class="apple-pill">
+              <label class="apple-pill" data-mood="happy">
                 <input type="radio" name="preset" value="50000" data-note="Bữa sáng nạp năng lượng duy trì dự án. Tuyệt vời!">
                 <span class="pill-inner">
-                  <span class="p-amount">50.000đ</span>
+                  <span class="p-amount">50,000đ</span>
                   <span class="p-desc">Cà phê + Bánh mì 🥐</span>
                 </span>
               </label>
 
-              <label class="apple-pill">
+              <label class="apple-pill" data-mood="overjoyed">
                 <input type="radio" name="preset" value="100000" data-note="Sự đồng hành quý báu giúp Glance phát triển dài lâu. Trân trọng!">
                 <span class="pill-inner">
-                  <span class="p-amount">100.000đ</span>
+                  <span class="p-amount">100,000đ</span>
                   <span class="p-desc">Tiếp sức dài lâu 🚀</span>
                 </span>
               </label>
@@ -124,20 +131,20 @@
             <div class="custom-amount-field">
               <label for="support-amount">Hoặc nhập số tiền tùy tâm:</label>
               <div class="apple-input-wrapper">
-                <input id="support-amount" name="amount" type="number" inputmode="numeric" min="1000" max="100000000" step="1000" value="20000" required>
+                <input id="support-amount" name="amount" type="text" inputmode="numeric" autocomplete="off" value="20,000" placeholder="20,000" required>
                 <span class="currency-label">VNĐ</span>
               </div>
             </div>
 
             <!-- Main CTA Button -->
             <button class="button apple-submit-btn" type="submit" id="submit-btn">
-              <span class="btn-text">Ủng hộ qua PayOS ☕</span>
+              <span class="btn-text">Ủng hộ 20,000đ qua PayOS ☕</span>
             </button>
 
             <p class="support-status" id="support-status" role="status" aria-live="polite"></p>
 
             <div class="skip-action">
-              <a href="./#download" class="text-link">Bỏ qua và dùng Glance miễn phí <span>›</span></a>
+              <a href="./#download" class="text-link" id="skip-link">Bỏ qua và dùng Glance miễn phí <span>›</span></a>
             </div>
           </form>
         </div>
@@ -145,6 +152,6 @@
     </div>
   </main>
 
-  <script src="donation.js?v=9" defer></script>
+  <script src="donation.js?v=10" defer></script>
 </body>
 </html>
