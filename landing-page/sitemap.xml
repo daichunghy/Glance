@@ -25,8 +25,14 @@
     </image:image>
   </url>
   <url>
+    <loc>https://glance-privacy.vercel.app/cap-nhat.html</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://glance-privacy.vercel.app/ung-ho.html</loc>
-    <lastmod>2026-11-06</lastmod>
+    <lastmod>2026-11-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

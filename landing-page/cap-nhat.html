@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090c">
+  <title>Nhật ký cập nhật — Glance Screen Privacy</title>
+  <meta name="description" content="Theo dõi các phiên bản mới, cải tiến độ ổn định và tính năng mới của ứng dụng chống nhìn trộm Glance trên Mac, Windows và Linux.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://glance-privacy.vercel.app/cap-nhat.html">
+  <link rel="icon" href="assets/product/glance-icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/product/glance-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://glance-privacy.vercel.app/cap-nhat.html">
+  <meta property="og:title" content="Nhật ký cập nhật — Glance Screen Privacy">
+  <meta property="og:description" content="Các bản cập nhật mới nhất của Glance cho Mac, Windows và Linux.">
+  <meta property="og:image" content="https://glance-privacy.vercel.app/assets/product/macbook-front.webp">
+
+  <link rel="stylesheet" href="styles.css?v=1.19.0">
+  <link rel="stylesheet" href="cap-nhat.css?v=1">
+  <script src="cap-nhat.js?v=1" defer></script>
+</head>
+<body class="dark changelog-page">
+
+  <header class="product-nav">
+    <div class="nav-inner">
+      <a class="brand" href="./">
+        <img src="assets/product/glance-icon.png" width="25" height="25" alt="Logo Glance">
+        Glance
+      </a>
+      <nav aria-label="Glance">
+        <a href="./#explore">Tính năng</a>
+        <a href="cap-nhat.html" class="is-active" aria-current="page">Cập nhật</a>
+        <a href="./#faq">Hỏi đáp</a>
+        <a href="ung-ho.html">Ủng hộ</a>
+      </nav>
+      <a class="button small" href="./#download">Tải về</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="changelog-hero">
+      <div class="wrap">
+        <span class="product-name">Glance Release Notes</span>
+        <h1>Nhật ký cập nhật</h1>
+        <p class="intro changelog-intro">Theo dõi các phiên bản mới, tính năng vừa thêm và những tinh chỉnh giúp Glance chạy êm mượt trên nhiều thiết bị hơn.</p>
+
+        <div class="changelog-toolbar">
+          <div class="filter-bar" role="group" aria-label="Lọc theo nền tảng">
+            <button type="button" class="filter-pill is-active" data-filter="all" aria-pressed="true">Tất cả</button>
+            <button type="button" class="filter-pill" data-filter="mac" aria-pressed="false">Mac</button>
+            <button type="button" class="filter-pill" data-filter="windows" aria-pressed="false">Windows</button>
+            <button type="button" class="filter-pill" data-filter="linux" aria-pressed="false">Linux</button>
+            <button type="button" class="filter-pill" data-filter="web" aria-pressed="false">Trang web</button>
+          </div>
+
+          <nav class="version-jump" aria-label="Chuyển nhanh đến phiên bản">
+            <a href="#v1-0-2">1.0.2</a>
+            <a href="#v1-0-0">1.0.0</a>
+            <a href="#update-2026-11-08">08/11</a>
+            <a href="#launch-2026-11-06">06/11</a>
+          </nav>
+        </div>
+
+        <p class="filter-status" id="filter-status" aria-live="polite">Đang hiển thị toàn bộ 4 mốc cập nhật</p>
+      </div>
+    </section>
+
+    <section class="changelog-feed" aria-label="Danh sách các phiên bản">
+      <div class="wrap">
+
+        <!-- Release 1.0.2 -->
+        <article class="release-row" id="v1-0-2">
+          <aside class="release-meta">
+            <div class="release-sticky">
+              <time class="release-date" datetime="2026-11-12">12 tháng 11, 2026</time>
+              <h2 class="release-version">Phiên bản 1.0.2</h2>
+              <span class="release-badge is-latest">Mới nhất</span>
+            </div>
+          </aside>
+          <div class="release-body">
+            <h3 class="release-headline">Mở máy ổn định hơn, tương thích nhiều dòng Mac và Windows hơn</h3>
+            <p class="release-summary">Bản nâng cấp tập trung xử lý các lỗi người dùng hay gặp khi mở ứng dụng lần đầu, chuyển đổi camera hoặc dùng nhiều màn hình.</p>
+            <ul class="release-items">
+              <li data-platforms="mac">
+                <span class="release-tag">Mac</span>
+                <div>
+                  <strong>Hỗ trợ thêm máy Mac chip Intel &amp; macOS 13 trở lên</strong>
+                  <p>Mở rộng khả năng tương thích ngoài Apple Silicon; khung cài đặt tự điều chỉnh kích thước gọn gàng, không còn bị cắt chữ khi mở thêm tùy chọn.</p>
+                </div>
+              </li>
+              <li data-platforms="windows">
+                <span class="release-tag">Windows</span>
+                <div>
+                  <strong>Khởi động mượt trên nhiều loại webcam &amp; màn hình</strong>
+                  <p>Tự thử các chế độ camera phù hợp khi máy có nhiều camera hoặc webcam phản hồi chậm; ngăn mở trùng nhiều cửa sổ ứng dụng cùng lúc.</p>
+                </div>
+              </li>
+              <li data-platforms="mac windows linux">
+                <span class="release-tag">Camera</span>
+                <div>
+                  <strong>Tự nhận khi cắm rút camera rời &amp; chống mờ nhầm khi tối</strong>
+                  <p>Khi camera đang bận gọi video hoặc bị che tối, màn hình không bị hiểu nhầm là bạn rời bàn làm việc.</p>
+                </div>
+              </li>
+              <li data-platforms="mac">
+                <span class="release-tag">Tiện ích</span>
+                <div>
+                  <strong>Tạm hiện rõ màn hình 2 phút bằng phím tắt</strong>
+                  <p>Nhấn <strong>Option + Shift + S</strong> trên Mac để chia sẻ nhanh màn hình với người bên cạnh, sau 2 phút Glance tự bật bảo vệ lại.</p>
+                </div>
+              </li>
+              <li data-platforms="linux">
+                <span class="release-tag">Linux</span>
+                <div>
+                  <strong>Cải thiện đa màn hình &amp; đóng ứng dụng sạch sẽ</strong>
+                  <p>Sửa lỗi vùng làm mờ trên màn hình phụ và giúp ứng dụng tắt gọn ngay khi bấm thoát.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Release 1.0.0 -->
+        <article class="release-row" id="v1-0-0">
+          <aside class="release-meta">
+            <div class="release-sticky">
+              <time class="release-date" datetime="2026-11-09">9 tháng 11, 2026</time>
+              <h2 class="release-version">Phiên bản 1.0.0</h2>
+              <span class="release-badge">Phát hành</span>
+            </div>
+          </aside>
+          <div class="release-body">
+            <h3 class="release-headline">Bản chạy độc lập Glance.exe cho Windows</h3>
+            <p class="release-summary">Giúp người dùng Windows tải về và mở lên dùng ngay mà không cần thao tác cài đặt kỹ thuật phức tạp.</p>
+            <ul class="release-items">
+              <li data-platforms="windows">
+                <span class="release-tag">Windows</span>
+                <div>
+                  <strong>Mở ngay không cần cài thêm Python</strong>
+                  <p>Đóng gói sẵn tệp chạy độc lập <strong>Glance.exe</strong> bên trong gói tải về; chỉ cần giải nén và bấm đúp là dùng được ngay.</p>
+                </div>
+              </li>
+              <li data-platforms="windows web">
+                <span class="release-tag">Tải xuống</span>
+                <div>
+                  <strong>Tải thẳng từ lần bấm đầu tiên</strong>
+                  <p>Rút gọn luồng tải về để trình duyệt tải gói cài đặt Windows ngay lập tức khi bấm nút.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Update 08/11/2026 -->
+        <article class="release-row" id="update-2026-11-08">
+          <aside class="release-meta">
+            <div class="release-sticky">
+              <time class="release-date" datetime="2026-11-08">8 tháng 11, 2026</time>
+              <h2 class="release-version">Cải thiện thói quen dùng</h2>
+              <span class="release-badge">Nâng cấp</span>
+            </div>
+          </aside>
+          <div class="release-body">
+            <h3 class="release-headline">Ghi nhớ thiết lập, tự mở cùng máy &amp; nâng cấp trang ủng hộ</h3>
+            <p class="release-summary">Tối ưu trải nghiệm sử dụng hằng ngày để bạn không phải chỉnh lại cài đặt mỗi lần mở máy.</p>
+            <ul class="release-items">
+              <li data-platforms="mac windows linux">
+                <span class="release-tag">Cài đặt</span>
+                <div>
+                  <strong>Lưu lựa chọn &amp; tự khởi động cùng hệ thống</strong>
+                  <p>Ghi nhớ chế độ làm mờ, mức độ nhạy và tùy chọn mở sẵn Glance khi bạn khởi động máy tính.</p>
+                </div>
+              </li>
+              <li data-platforms="web">
+                <span class="release-tag">Trang web</span>
+                <div>
+                  <strong>Trang ủng hộ sinh động &amp; định dạng số tiền rõ ràng</strong>
+                  <p>Nâng cấp nhân vật 3D phản ứng theo cảm xúc khi chọn mức cà phê, thêm dấu phẩy dễ đọc cho số tiền.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Launch 06/11/2026 -->
+        <article class="release-row" id="launch-2026-11-06">
+          <aside class="release-meta">
+            <div class="release-sticky">
+              <time class="release-date" datetime="2026-11-06">6 tháng 11, 2026</time>
+              <h2 class="release-version">Ra mắt Glance</h2>
+              <span class="release-badge">Bản đầu tiên</span>
+            </div>
+          </aside>
+          <div class="release-body">
+            <h3 class="release-headline">Chống nhìn trộm màn hình miễn phí cho Mac, Windows &amp; Linux</h3>
+            <p class="release-summary">Giới thiệu giải pháp phần mềm thay thế miếng dán chống nhìn trộm vật lý, giữ nguyên 100% độ sáng đẹp của màn hình.</p>
+            <ul class="release-items">
+              <li data-platforms="mac windows linux">
+                <span class="release-tag">Làm mờ</span>
+                <div>
+                  <strong>Tự làm mờ khi quay đầu hoặc rời bàn</strong>
+                  <p>Che một bên hoặc toàn bộ màn hình ngay khi bạn ngoảnh đi hay đứng dậy rời khỏi bàn làm việc.</p>
+                </div>
+              </li>
+              <li data-platforms="mac">
+                <span class="release-tag">AirPods</span>
+                <div>
+                  <strong>Nhận diện chuyển động đầu qua tai nghe AirPods</strong>
+                  <p>Có thể theo dõi góc quay đầu bằng cảm biến trên AirPods tương thích mà không cần bật camera.</p>
+                </div>
+              </li>
+              <li data-platforms="mac windows linux">
+                <span class="release-tag">Riêng tư</span>
+                <div>
+                  <strong>Xử lý 100% trên thiết bị, an toàn khi gọi video</strong>
+                  <p>Không lưu ảnh hay gửi dữ liệu lên mạng; tự tạm dừng làm mờ khi bạn gọi FaceTime, Zoom, Teams hoặc đang gõ phím.</p>
+                </div>
+              </li>
+              <li data-platforms="mac windows linux">
+                <span class="release-tag">Sức khỏe</span>
+                <div>
+                  <strong>Nhắc giữ tư thế ngồi thẳng (Posture Guard)</strong>
+                  <p>Nhắc nhẹ khi bạn ngồi gù lưng hoặc cúi sát màn hình quá lâu để bảo vệ cổ và cột sống.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="changelog-cta">
+      <div class="wrap">
+        <div class="cta-card">
+          <h2>Sẵn sàng trải nghiệm Glance?</h2>
+          <p>Miễn phí hoàn toàn, không quảng cáo và cài đặt chỉ trong một phút.</p>
+          <div class="actions">
+            <a class="button" href="./#download">Tải Glance miễn phí</a>
+            <a class="text-link" href="ung-ho.html">Ủng hộ ly cà phê <span>›</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <strong>Glance</strong> — Ứng dụng bảo vệ màn hình &amp; chống nhìn trộm
+      </div>
+      <div class="footer-contact">
+        <a href="./">Trang chủ</a>
+        <a href="ung-ho.html">Ủng hộ dự án</a>
+        <a href="mailto:daichunghy@gmail.com">daichunghy@gmail.com</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
