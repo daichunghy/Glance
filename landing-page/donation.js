@@ -482,8 +482,8 @@
      2. DOWNLOADS & PAYOS DONATION LOGIC (WITH COMMA FORMATTING)
      ========================================================================== */
   const files = {
-    mac: 'assets/product/Glance-macOS-1.0.0.zip',
-    windows: 'https://github.com/daichunghy/Glance/releases/download/v1.0.0/Glance-Windows.zip'
+    mac: 'assets/product/Glance-macOS-1.0.2.zip',
+    windows: 'https://github.com/daichunghy/Glance/releases/download/v1.0.2/Glance-Windows.zip'
   };
   const params = new URLSearchParams(location.search);
   const file = Object.hasOwn(files, params.get('file')) ? params.get('file') : null;

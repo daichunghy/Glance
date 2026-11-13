@@ -31,7 +31,7 @@
     document.querySelectorAll('[data-smart-download]').forEach(link => {
       link.href = macDownloads[0].href;
       link.setAttribute('download', '');
-      link.textContent = 'Tải cho Mac Apple silicon';
+      link.textContent = 'Tải cho Mac (Apple Silicon & Intel)';
     });
   } else {
     requirements.textContent = 'Chọn phiên bản phù hợp với máy của bạn.';

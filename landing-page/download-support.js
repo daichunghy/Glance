@@ -1,6 +1,6 @@
 (() => {
   const downloads = new Map([
-    ['Glance-macOS-1.0.0.zip', 'mac'],
+    ['Glance-macOS-1.0.2.zip', 'mac'],
     ['Glance-Windows.zip', 'windows']
   ]);
   document.addEventListener('click', event => {
