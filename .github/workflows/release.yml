@@ -1,0 +1,55 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.0.2)"
+        required: true
+        default: "v1.0.2"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download latest Windows build artifact from main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          WIN_RUN_ID=$(gh run list --workflow=build-windows.yml --branch=main --status=success --limit 1 --json databaseId --jq '.[0].databaseId')
+          if [ -z "$WIN_RUN_ID" ]; then
+            echo "No successful build-windows run found on main"
+            exit 1
+          fi
+          mkdir -p /tmp/release-assets
+          gh run download "$WIN_RUN_ID" --name Glance-Windows --dir /tmp/release-assets
+          ls -lh /tmp/release-assets/Glance-Windows.zip
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          MAC_ZIP="landing-page/assets/product/Glance-macOS-${TAG#v}.zip"
+          if [ ! -f "$MAC_ZIP" ]; then
+            MAC_ZIP=$(ls landing-page/assets/product/Glance-macOS-*.zip | sort -V | tail -n 1)
+          fi
+          NOTES="Phiên bản ${TAG#v}:
+          - Mac: Hỗ trợ Universal (Apple Silicon & Intel) và macOS 13 trở lên; sửa kích thước khung cài đặt và chế độ tạm hiện màn hình 2 phút (Option + Shift + S).
+          - Windows: Cải thiện mở camera trên nhiều loại webcam, tránh mở trùng cửa sổ và tối ưu hiển thị trên màn hình nhỏ/DPI cao.
+          - Camera: Tự nhận camera cắm rời và không làm mờ nhầm khi camera bận hoặc bị che tối."
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$MAC_ZIP" /tmp/release-assets/Glance-Windows.zip --clobber
+          else
+            gh release create "$TAG" "$MAC_ZIP" /tmp/release-assets/Glance-Windows.zip \
+              --target main \
+              --title "Glance $TAG (macOS Universal & Windows)" \
+              --notes "$NOTES" \
+              --latest
+          fi
