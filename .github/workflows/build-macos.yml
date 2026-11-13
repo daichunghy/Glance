@@ -35,7 +35,7 @@ jobs:
         working-directory: macos
         run: |
           lipo -archs Glance.app/Contents/MacOS/Glance
-          lipo -verify_arch arm64 x86_64 Glance.app/Contents/MacOS/Glance
+          lipo Glance.app/Contents/MacOS/Glance -verify_arch arm64 x86_64
           if unzip -l Glance-macOS.zip | grep -q '/\._'; then
             echo "Found unexpected AppleDouble files in Glance-macOS.zip"
             exit 1
